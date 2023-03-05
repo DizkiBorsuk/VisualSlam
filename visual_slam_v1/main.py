@@ -1,6 +1,6 @@
 import cv2 
 import numpy as np 
-import g2o
+#import g2o
 from Extractor import extractFeatures, matchFrames, Frame
 
 
