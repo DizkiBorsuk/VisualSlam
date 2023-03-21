@@ -16,7 +16,7 @@ transformation_matrix[:,:3] = np.eye(3)
 
 
 frames = []
-def readVideo(img): 
+def main(img): 
     img = cv2.resize(img,(W,H)) 
 
     frame = Frame(img,K)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     while cap.isOpened():
         ret, frame = cap.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
         if ret == True: 
-            readVideo(frame)
+            main(frame)
         else: 
             break
     cap.release()
