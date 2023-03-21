@@ -1,0 +1,486 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "MinSizeRel/project_template.exe"
+		},
+		{
+			"path" : "MinSizeRel/project_template.pdb"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"link_directories",
+			"find_package",
+			"target_link_libraries",
+			"include_directories"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt",
+			"D:/opencv_gpu/build/install/x64/vc16/lib/OpenCVConfig.cmake"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 14,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 10,
+				"parent" : 0
+			},
+			{
+				"file" : 1,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 151,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 15,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 11,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 16,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O1 /Ob1 /DNDEBUG"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 6,
+					"isSystem" : true,
+					"path" : "D:/opencv_gpu/build/install/include"
+				},
+				{
+					"backtrace" : 7,
+					"isSystem" : true,
+					"path" : "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/include/eigen3"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "project_template::@6890427a1f51a3e7e1df",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O1 /Ob1 /DNDEBUG",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "-LIBPATH:\"C:\\PROGRA~1\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8\\lib\\x64\"",
+				"role" : "libraryPath"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_img_hash460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "D:\\opencv_gpu\\build\\install\\x64\\vc16\\lib\\opencv_world460.lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "project_template",
+	"nameOnDisk" : "project_template.exe",
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "main.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "EXECUTABLE"
+}

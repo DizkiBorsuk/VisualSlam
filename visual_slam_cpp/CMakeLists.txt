@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.0)
+project(project_template VERSION 0.1.0)
+
+include(CTest)
+enable_testing()
+
+#set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
+
+find_package(OpenCV REQUIRED)
+include_directories( ${OpenCV_INCLUDE_DIRS})
+find_package(Eigen3  REQUIRED NO_MODULE)
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries (${PROJECT_NAME} Eigen3::Eigen)
+
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
