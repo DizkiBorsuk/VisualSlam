@@ -318,6 +318,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\main.cpp" />
+    <ClCompile Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\readDataset.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\build\ZERO_CHECK.vcxproj">

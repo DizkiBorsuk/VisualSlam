@@ -4,6 +4,9 @@
     <ClCompile Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\readDataset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\Maciek\Desktop\dev_workspace\Projects\VisualSlam\visual_slam_cpp\CMakeLists.txt" />

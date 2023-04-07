@@ -8,15 +8,13 @@
 using std::cout;
 using std::endl;
 
-
+std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
 
 int main(int argc, char** argv)
 {
     std::cout << "Visual Slam start \n";  
 
     cv::Mat left_frame, right_frame;  
-
-    std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
 
     cv::VideoCapture sequence; 
     sequence.open(path, cv::CAP_IMAGES);
@@ -27,9 +25,7 @@ int main(int argc, char** argv)
       return 1;
     }
     
-    cv::namedWindow("Sequence of Images", cv::WINDOW_NORMAL); 
-
-
+    cv::namedWindow("Camera Img", cv::WINDOW_NORMAL); 
 
     while(true)
     {
@@ -37,16 +33,15 @@ int main(int argc, char** argv)
         
         if(left_frame.empty())
         {
-            cout << "End \n"; 
+            cout << "End of sequance \n"; 
             break;
         }
              
-        cv::imshow("Sequence of Images", left_frame);
-        char key = (char)cv::waitKey(35);
+        cv::imshow("Camera Img", left_frame);
+        char key = (char)cv::waitKey(66);
         if(key == 'q' || key == 'Q' || key == 27)
             break;
     }
-    cv::destroyWindow("Sequence of Images");
-
+    cv::destroyWindow("Camera Img");
     return 0; 
 }
