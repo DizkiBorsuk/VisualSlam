@@ -1,10 +1,10 @@
 import cv2 as cv 
 import numpy as np
-from DatasetRead import Dataset_Handler 
+from DatasetRead import ImportKittyDataset 
 
 
 def main():
-    kitty_data = Dataset_Handler() 
+    kitty_data = ImportKittyDataset() 
    
     kitty_data.readImgs('mono')
 

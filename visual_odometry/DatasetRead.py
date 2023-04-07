@@ -5,7 +5,7 @@ import os
 
 
 
-class Dataset_Handler(): 
+class ImportKittyDataset(): 
     def __init__(self, img_sequance = '00'):
         
         self.img_sequance = img_sequance
@@ -26,13 +26,6 @@ class Dataset_Handler():
         self.P3 = np.array(calib.loc['P3:']).reshape((3,4))
         
     def readImgs(self, camera_type):
-        
-        num_frames = 4541 
-        calib = pd.read_csv('../KITTY_dataset/sequences/{}/calib.txt'.format(self.img_sequance), delimiter=' ',header=None, index_col=0)
-        self.P0 = np.array(calib.loc['P0:']).reshape((3,4))
-        self.P1 = np.array(calib.loc['P1:']).reshape((3,4))
-        self.P2 = np.array(calib.loc['P2:']).reshape((3,4))
-        self.P3 = np.array(calib.loc['P3:']).reshape((3,4))
         
         if camera_type == 'mono':
             self.L_images_dir = os.listdir(self.img_dir + 'image_0')
