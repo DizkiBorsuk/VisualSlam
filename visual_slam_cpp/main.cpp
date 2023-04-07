@@ -1,5 +1,6 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
+#include <string>
+#include "opencv2/core/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
@@ -8,25 +9,48 @@ using std::cout;
 using std::endl;
 
 
-int main()
+
+int main(int argc, char** argv)
 {
     std::cout << "Visual Slam start \n";  
-    cv::RNG rng(12345);
-    cv::Mat img, img2; 
-    img = cv::imread("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/000000.png"); 
-    cv::cvtColor(img,img2,cv::COLOR_BGR2GRAY); 
-    std::vector<cv::Point2f> corners; 
-    cv::goodFeaturesToTrack( img2, corners, 1000, 0.01, 10, cv::Mat(), 3,3,false, 0.04);
 
-    for(auto i : corners)
+    cv::Mat left_frame, right_frame;  
+
+    std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%4d.png"; 
+
+    cv::VideoCapture sequence; 
+    sequence.open(path);
+    
+    if (!sequence.isOpened())
     {
-        cv::circle(img,i,4,cv::Scalar(rng.uniform(0,255), rng.uniform(0, 256), rng.uniform(0, 256)),3); 
+      std::cerr << "Failed to open Image Sequence!\n" << endl;
+      return 1;
+    }
+    
+    cv::namedWindow("Sequence of Images", cv::WINDOW_NORMAL); 
+
+
+
+    while(true)
+    {
+        sequence >> left_frame; 
+        
+        if(left_frame.empty())
+        {
+            cout << "End \n"; 
+            break;
+        }
+             
+
+        cv::imshow("Sequence of Images", left_frame);
+        char key = (char)cv::waitKey(5000);
+        if(key == 'q' || key == 'Q' || key == 27)
+            break;
 
     }
 
-    cv::imshow("img",img);
-    cv::waitKey(0);
-    cv::destroyWindow("img");
+
+    cv::destroyWindow("Sequence of Images");
 
 
     return 0; 
