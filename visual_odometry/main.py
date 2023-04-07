@@ -1,16 +1,28 @@
 import cv2 as cv 
 import numpy as np
 from DatasetRead import ImportKittyDataset 
+from ComputeStereo import computeStereoCorrespondance
+import matplotlib.pyplot as plt
+
+
+
+kitty_data = ImportKittyDataset() 
+kitty_data.getGTposes()
+
 
 
 def main():
-    kitty_data = ImportKittyDataset() 
-   
-    kitty_data.readImgs('mono')
 
-    cv.imshow('left_camera_img', kitty_data.left_images[4000])
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    left_images, right_images = kitty_data.readImgs('stereo')
+    left_img = cv.cvtColor(left_images[0], cv.COLOR_BGR2GRAY)
+    right_img = cv.cvtColor(right_images[0], cv.COLOR_BGR2GRAY)
+    
+    
+    depth_img = computeStereoCorrespondance(left_img, right_img, matcher_type='bm')
+    
+    plt.figure(figsize=(11,7))
+    plt.imshow(depth_img)
+    plt.show()
 
 
 
