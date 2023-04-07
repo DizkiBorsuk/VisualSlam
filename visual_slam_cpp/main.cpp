@@ -16,10 +16,10 @@ int main(int argc, char** argv)
 
     cv::Mat left_frame, right_frame;  
 
-    std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%4d.png"; 
+    std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
 
     cv::VideoCapture sequence; 
-    sequence.open(path);
+    sequence.open(path, cv::CAP_IMAGES);
     
     if (!sequence.isOpened())
     {
@@ -41,17 +41,12 @@ int main(int argc, char** argv)
             break;
         }
              
-
         cv::imshow("Sequence of Images", left_frame);
-        char key = (char)cv::waitKey(5000);
+        char key = (char)cv::waitKey(35);
         if(key == 'q' || key == 'Q' || key == 27)
             break;
-
     }
-
-
     cv::destroyWindow("Sequence of Images");
-
 
     return 0; 
 }
