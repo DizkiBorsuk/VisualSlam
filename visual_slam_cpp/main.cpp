@@ -8,7 +8,7 @@
 using std::cout;
 using std::endl;
 
-std::string path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
+std::string img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
 
 int main(int argc, char** argv)
 {

@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <fstream>
+#include <string>
 
 using namespace Eigen;
 
@@ -25,17 +26,29 @@ M load_csv (const std::string & path) {
 
 class readDataset
 {
-private:
-    /* data */
 public:
-    readDataset(/* args */);
+    std::string sequence_dir; 
+    std::string gt_poses_dir; 
+    std::string left_imgs_path; 
+    std::string right_imgs_path; 
+    std::string cam_valib_path;
+    readDataset(std::string sequence = '00');
     ~readDataset();
+
+    Eigen::MatrixXd getGTposes(readDataset::sequence_dir); 
 };
 
-readDataset::readDataset(/* args */)
+readDataset::readDataset(std::string sequence = '00')
 {
+    std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
+    std::string gt_poses_dir = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
+    std::string left_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_0/00%04d.png"; 
+    std::string right_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_1/00%04d.png"; 
+    std::string cam_valib_path = "'../KITTY_dataset/sequences/" + sequence + "/calib.txt";
+
 }
 
 readDataset::~readDataset()
 {
 }
+
