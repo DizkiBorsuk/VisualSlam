@@ -5,10 +5,11 @@ from DatasetRead import ImportKittyDataset
 
 def main():
     kitty_data = ImportKittyDataset() 
+    kitty_data.getGTposes()
 
-    left_images = kitty_data.readImgs('mono')
+    left_images, right_images = kitty_data.readImgs('stereo')
 
-    cv.imshow('left_camera_img', left_images[1])
+    cv.imshow('left_camera_img', right_images[1])
     cv.waitKey(0)
     cv.destroyAllWindows()
 

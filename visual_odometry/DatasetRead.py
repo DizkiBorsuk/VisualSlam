@@ -30,7 +30,7 @@ class ImportKittyDataset():
         
         
     def getGTposes(self): 
-        ground_truth_poses = pd.read_csv(self.gt_dir, delimiter=' ', header=None) #read ground truth poses
+        ground_truth_poses = pd.read_csv(self.ground_truth_poses_dir, delimiter=' ', header=None) #read ground truth poses
         gt =np.zeros((len(ground_truth_poses), 3, 4))
         
         for i in ground_truth_poses: 
@@ -56,10 +56,10 @@ class ImportKittyDataset():
                 
         elif camera_type == 'stereo':
  
-            for i,img_name in enumerate(self.L_camera_imgs_dir): 
+            for j,img_name in enumerate(self.L_camera_imgs_dir): 
                 left_images.append(cv.imread(self.sequance_dir +'image_0/' + img_name))
                 
-            for i,img_name in enumerate(self.R_camera_imgs_dir): 
+            for k,img_name in enumerate(self.R_camera_imgs_dir): 
                 right_images.append(cv.imread(self.sequance_dir +'image_1/' + img_name))
             
             self.imheight = left_images[0].shape[0]
