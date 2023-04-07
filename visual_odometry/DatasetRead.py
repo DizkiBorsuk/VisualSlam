@@ -9,8 +9,8 @@ class ImportKittyDataset():
     def __init__(self, img_sequance = '00'):
         
         self.img_sequance = img_sequance
-        self.img_dir = '../KITTY_dataset/sequences/{}/'.format(img_sequance) # directory of images
-        self.gt_dir = '../KITTY_dataset/ground_truth_poses/{}.txt'.format(img_sequance) # directory with ground truth poses for n sequance
+        self.img_dir = 'KITTY_dataset/sequences/{}/'.format(img_sequance) # directory of images
+        self.gt_dir = 'KITTY_dataset/ground_truth_poses/{}.txt'.format(img_sequance) # directory with ground truth poses for n sequance
         
         ground_truth_poses = pd.read_csv(self.gt_dir, delimiter=' ', header=None) #read ground truth poses
         self.gt =np.zeros((len(ground_truth_poses), 3, 4))
@@ -18,8 +18,8 @@ class ImportKittyDataset():
         for i in ground_truth_poses: 
             self.gt[i] = np.array(ground_truth_poses.iloc[i]).reshape((3,4))
             
-        self.times = np.array(pd.read_csv('../KITTY_dataset/sequences/{}/times.txt'.format(img_sequance), delimiter=' ', header=None))
-        calib = pd.read_csv('../KITTY_dataset/sequences/{}/calib.txt'.format(self.img_sequance), delimiter=' ',header=None, index_col=0)
+        self.times = np.array(pd.read_csv('KITTY_dataset/sequences/{}/times.txt'.format(img_sequance), delimiter=' ', header=None))
+        calib = pd.read_csv('KITTY_dataset/sequences/{}/calib.txt'.format(self.img_sequance), delimiter=' ',header=None, index_col=0)
         self.P0 = np.array(calib.loc['P0:']).reshape((3,4))
         self.P1 = np.array(calib.loc['P1:']).reshape((3,4))
         self.P2 = np.array(calib.loc['P2:']).reshape((3,4))
