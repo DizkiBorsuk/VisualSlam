@@ -69,7 +69,7 @@ int main(int argc, char** argv)
         std::cout << "Frame num: " << counter++ << "\n"; 
 
         char key = (char)cv::waitKey(66); 
-        if(key == 'q' || key == 'Q' || key == 27)
+        if(key == 'q' || key == 27)
             break;
     }
     cv::destroyAllWindows(); 
