@@ -1,47 +1,77 @@
 #include <iostream>
 #include <string>
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/cuda.hpp>
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudacodec.hpp>
+#include <opencv2/cudaarithm.hpp>
+#include <opencv2/cudafilters.hpp>
+#include <opencv2/cudastereo.hpp>
+#include <opencv2/cudafeatures2d.hpp>
 
-using std::cout;
-using std::endl;
 
-std::string img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; 
+std::string img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; // path to img sequence 
+int counter = 0; 
 
 int main(int argc, char** argv)
 {
     std::cout << "Visual Slam start \n";  
+    cv::cuda::printCudaDeviceInfo(0); 
 
+    ///// ------ Read Calibration data and Ground Truth Poses ---- //////
+
+
+
+
+    ////// ---------- /////////////
     cv::Mat left_frame, right_frame;  
+    cv::cuda::GpuMat l_frame, r_frame; 
+
+    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
     cv::VideoCapture sequence; 
-    sequence.open(path, cv::CAP_IMAGES);
+    sequence.open(img_path, cv::CAP_IMAGES);
     
     if (!sequence.isOpened())
     {
-      std::cerr << "Failed to open Image Sequence!\n" << endl;
+      std::cerr << "Failed to open Image Sequence!\n"; 
       return 1;
     }
     
-    cv::namedWindow("Camera Img", cv::WINDOW_NORMAL); 
-
     while(true)
     {
-        sequence >> left_frame; 
-        
+        auto start = cv::getTickCount(); 
+
+        sequence.read(left_frame);
         if(left_frame.empty())
         {
-            cout << "End of sequance \n"; 
+            std::cout << "End of sequance \n"; 
             break;
         }
-             
+
+        l_frame.upload(left_frame); 
+
+        //////// ----- Algorithm body ------ /////////
+
+
+
+
+
+        //////// ----- Algorithm End ----- //////////
+
+        l_frame.upload(left_frame); 
+
+        auto end = cv::getTickCount(); 
+        int framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
+
+        cv::putText(left_frame, "fps :" + std::to_string(framesPerSecond), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(255,0,255),2);
         cv::imshow("Camera Img", left_frame);
-        char key = (char)cv::waitKey(66);
+        std::cout << "Frame num: " << counter++ << "\n"; 
+
+        char key = (char)cv::waitKey(66); 
         if(key == 'q' || key == 'Q' || key == 27)
             break;
     }
-    cv::destroyWindow("Camera Img");
+    cv::destroyAllWindows(); 
     return 0; 
 }

@@ -11,7 +11,7 @@ find_package(OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS})
 find_package(Eigen3  REQUIRED NO_MODULE)
 
-add_executable(${PROJECT_NAME} main.cpp readDataset.cpp)
+add_executable(${PROJECT_NAME} main.cpp )
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_link_libraries (${PROJECT_NAME} Eigen3::Eigen)
 
