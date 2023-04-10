@@ -62,9 +62,9 @@ int main(int argc, char** argv)
         l_frame.upload(left_frame); 
 
         auto end = cv::getTickCount(); 
-        int framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
+        auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
-        cv::putText(left_frame, "fps :" + std::to_string(framesPerSecond), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(255,0,255),2);
+        cv::putText(left_frame, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(255,0,255),2);
         cv::imshow("Camera Img", left_frame);
         std::cout << "Frame num: " << counter++ << "\n"; 
 
