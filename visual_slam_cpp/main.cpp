@@ -48,7 +48,7 @@ int main(int argc, char** argv)
             std::cout << "End of sequance \n"; 
             break;
         }
-
+        
         l_frame.upload(left_frame); 
 
         //////// ----- Algorithm body ------ /////////
