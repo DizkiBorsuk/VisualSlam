@@ -2,5 +2,5 @@ visual_slam_v1/g2o/
 
 KITTY_dataset/sequences/00/image_1
 KITTY_dataset/sequences/01/
-visual_slam_cpp/build/
+visual_slam_cpp/build
 visual_odometry/__pycache__/ 
