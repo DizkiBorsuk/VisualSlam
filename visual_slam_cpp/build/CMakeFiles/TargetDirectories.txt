@@ -1,9 +1,0 @@
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/Experimental.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/Nightly.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/Continuous.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/NightlyMemoryCheck.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/project_template.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/PACKAGE.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/RUN_TESTS.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/visual_slam_cpp/build/CMakeFiles/ZERO_CHECK.dir
