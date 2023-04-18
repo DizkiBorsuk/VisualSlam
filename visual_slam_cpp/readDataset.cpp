@@ -26,6 +26,7 @@ M load_csv (const std::string & path) {
 
 class readDataset
 {
+private: 
 public:
     std::string sequence_dir; 
     std::string gt_poses_dir; 
@@ -35,7 +36,7 @@ public:
     readDataset(std::string sequence = '00');
     ~readDataset();
 
-    Eigen::MatrixXd getGTposes(readDataset::sequence_dir); 
+     
 };
 
 readDataset::readDataset(std::string sequence = '00')

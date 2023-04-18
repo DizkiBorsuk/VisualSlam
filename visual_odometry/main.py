@@ -10,18 +10,18 @@ kitty_data = ImportKittyDataset()
 kitty_data.getGTposes()
 
 
-
 def main():
 
-    left_images, right_images = kitty_data.readImgs('stereo')
+    left_images, right_images = kitty_data.readImgs('mono')
     left_img = cv.cvtColor(left_images[0], cv.COLOR_BGR2GRAY)
-    right_img = cv.cvtColor(right_images[0], cv.COLOR_BGR2GRAY)
+    #right_img = cv.cvtColor(right_images[0], cv.COLOR_BGR2GRAY)
     
     
-    depth_img = computeStereoCorrespondance(left_img, right_img, matcher_type='bm')
+    #depth_img = computeStereoCorrespondance(left_img, right_img, matcher_type='bm')
     
     plt.figure(figsize=(11,7))
-    plt.imshow(depth_img)
+    plt.imshow()
+    #plt.imshow(depth_img)
     plt.show()
 
 

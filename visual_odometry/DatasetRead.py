@@ -71,10 +71,6 @@ class ImportKittyDataset():
         else: 
             print('wrong camera format')
             return 1 
-        
-        
-
-    def readLidar(self): 
-        pass           
+      
       
         
