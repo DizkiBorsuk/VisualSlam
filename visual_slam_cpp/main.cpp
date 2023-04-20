@@ -10,7 +10,7 @@
 #include <opencv2/cudafeatures2d.hpp>
 
 
-std::string left_img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/00/image_0/00%04d.png"; // path to img sequence 
+std::string left_img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/image_0/00%04d.png"; // path to img sequence 
 int counter = 0; 
 
 int main(int argc, char** argv)
