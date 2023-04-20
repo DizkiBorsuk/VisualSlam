@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 
-kitty_data = ImportKittyDataset() 
+kitty_data = ImportKittyDataset('06') 
 kitty_data.getGTposes()
 
 
@@ -23,7 +23,6 @@ def main():
     plt.imshow()
     #plt.imshow(depth_img)
     plt.show()
-
 
 
 if __name__ == "__main__": 

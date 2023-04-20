@@ -1,7 +1,6 @@
 /visual_slam_py/g2o/
 
-/KITTY_dataset/sequences/00/image_1
-/KITTY_dataset/sequences/01/
+/KITTY_dataset/sequences/00/
 /visual_slam_cpp/build
 /visual_odometry/__pycache__/ 
 *.log
