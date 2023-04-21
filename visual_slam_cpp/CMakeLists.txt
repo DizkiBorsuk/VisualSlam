@@ -8,12 +8,13 @@ set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/bu
 set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
 
 find_package(OpenCV REQUIRED)
-include_directories( ${OpenCV_INCLUDE_DIRS})
+find_package(Pangolin REQUIRED)
+include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS})
 find_package(Eigen3  REQUIRED NO_MODULE)
 
-add_executable(${PROJECT_NAME} main.cpp )
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-target_link_libraries (${PROJECT_NAME} Eigen3::Eigen)
+add_executable(${PROJECT_NAME} main.cpp visulaize_data.cpp readDataset.cpp)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} Eigen3::Eigen ${Pangolin_LIBRARIES})
+
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

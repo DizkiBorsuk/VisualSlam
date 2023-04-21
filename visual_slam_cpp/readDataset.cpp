@@ -33,13 +33,13 @@ public:
     std::string left_imgs_path; 
     std::string right_imgs_path; 
     std::string cam_valib_path;
-    readDataset(std::string sequence = '00');
+    readDataset(std::string sequence = "00");
     ~readDataset();
 
      
 };
 
-readDataset::readDataset(std::string sequence = '00')
+readDataset::readDataset(std::string sequence = "00")
 {
     std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
     std::string gt_poses_dir = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
