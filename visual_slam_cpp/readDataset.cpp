@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 
+/*
 using namespace Eigen;
 
 template<typename M>
@@ -39,7 +40,7 @@ public:
      
 };
 
-readDataset::readDataset(std::string sequence = "00")
+readDataset::readDataset(seqe)
 {
     std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
     std::string gt_poses_dir = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
@@ -53,3 +54,4 @@ readDataset::~readDataset()
 {
 }
 
+*/
