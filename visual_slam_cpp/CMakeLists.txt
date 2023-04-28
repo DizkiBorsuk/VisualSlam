@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(visual_slam_cpp VERSION 0.1.0)
+project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
 enable_testing()
@@ -12,8 +12,12 @@ find_package(Pangolin REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS})
 find_package(Eigen3  REQUIRED NO_MODULE)
 
-add_executable(${PROJECT_NAME} main.cpp visulaize_data.cpp readDataset.cpp)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} Eigen3::Eigen ${Pangolin_LIBRARIES})
+add_executable(${PROJECT_NAME} src/main.cpp src/visulaize_data.cpp src/readDataset.cpp)
+target_link_libraries(${PROJECT_NAME} 
+                      ${OpenCV_LIBS} 
+                      Eigen3::Eigen 
+                      ${Pangolin_LIBRARIES}
+                      )
 
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
