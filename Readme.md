@@ -1,15 +1,15 @@
 ## Visual SLAM project 
-This is project i did as a part of my master thesis my intrest in SLAM. 
+This is project i did as a part of my master thesis and my intrest in SLAM. 
 
 ## Libraries that i used or are useful in SLAM project or just needed  
-# C++ 
+### C++ 
 1. Eigen - matrix operation library, similar to matlab, it's a must 
 2. OpenCV - can't you computer vision without opencv
 3. Pangolin - library for SLAM visualization based on OpneGL 
 4. Ceres / G2O - optimization libraries
 5. CMake - kind of obvoius 
 
-# Python 
+### Python 
 1. OpenCV 
 2. Numpy, Pandas 
 3. Scikit / Scikit-image
