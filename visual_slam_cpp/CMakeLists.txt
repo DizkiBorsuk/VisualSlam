@@ -12,7 +12,7 @@ find_package(Pangolin REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS})
 find_package(Eigen3  REQUIRED NO_MODULE)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/visulaize_data.cpp src/readDataset.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp)
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 

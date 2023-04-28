@@ -1,64 +1,52 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include "Eigen/Dense"
+#include "../include/readDataset.hpp"
 
-class KITTI_Dataset
+
+
+
+void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
 {
-public: 
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P0; 
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1;
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P2;
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P3;
+    std::ifstream calib_file; 
+    calib_file.open(file_path); 
 
-    void readCalibData(std::string file_path)
+    if(calib_file.fail())
     {
+        std::cerr << "Fail to open calib file \n";  
+    }
 
-        std::ifstream calib_file; 
-        calib_file.open(file_path); 
+    std::string string_row;
+    std::string row_entries;  
+    std::vector<double> calib_data_vec; 
 
 
-        if(calib_file.fail())
+    while(std::getline(calib_file, string_row))
+    {
+        std::stringstream row_data_stream(string_row);
+        while(std::getline(row_data_stream, row_entries, ' '))
         {
-            std::cerr << "Fail to open calib file \n";  
-        }
-
-        std::string string_row;
-        std::string row_entries;  
-        std::vector<double> calib_data_vec; 
-
-
-        while(std::getline(calib_file, string_row))
-        {
-            std::stringstream row_data_stream(string_row);
-            while(std::getline(row_data_stream, row_entries, ' '))
+            try
             {
-                try
-                {
-                    calib_data_vec.push_back(std::stod(row_entries)); 
-                }
-                catch(...)
-                {
-                    continue;
-                }
-                
+                calib_data_vec.push_back(std::stod(row_entries)); 
+            }
+            catch(...)
+            {
+                continue;
             }
         }
+    }
 
-        Eigen::Map<Eigen::Matrix<double,4,12, Eigen::RowMajor>> calib_data_matrix(calib_data_vec.data());
-        P0 = calib_data_matrix.row(0); 
-        P0.resize(3,4); 
-        P1 = calib_data_matrix.row(0); 
-        P1.resize(3,4); 
-        P2 = calib_data_matrix.row(0); 
-        P2.resize(3,4); 
-        P3 = calib_data_matrix.row(0); 
-        P3.resize(3,4); 
+    Eigen::Map<Eigen::Matrix<double,4,12, Eigen::RowMajor>> calib_data_matrix(calib_data_vec.data());
+    P0 = calib_data_matrix.row(0); 
+    P0.resize(3,4); 
+    P1 = calib_data_matrix.row(0); 
+    P1.resize(3,4); 
+    P2 = calib_data_matrix.row(0); 
+    P2.resize(3,4); 
+    P3 = calib_data_matrix.row(0); 
+    P3.resize(3,4); 
 
-    }   
-}; 
+}   
+
+
 
 
 /*
