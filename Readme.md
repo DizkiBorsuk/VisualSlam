@@ -18,6 +18,6 @@ This is project i did as a part of my master thesis and my intrest in SLAM.
 
 ## Useful materials, theory etc. 
 
-Introduction to Visual SLAM: From Theory to Practice, Xian Gao - https://github.com/gaoxiang12/slambook2 
-Cyrill Stachniss yt channel - https://www.youtube.com/@CyrillStachniss
+Introduction to Visual SLAM: From Theory to Practice, Xian Gao - https://github.com/gaoxiang12/slambook2 <br />
+Cyrill Stachniss yt channel - https://www.youtube.com/@CyrillStachniss <br />
 
