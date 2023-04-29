@@ -51,20 +51,6 @@ void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
 
 /*
 
-class readDataset
-{
-private: 
-public:
-    std::string sequence_dir; 
-    std::string gt_poses_dir; 
-    std::string left_imgs_path; 
-    std::string right_imgs_path; 
-    std::string cam_valib_path;
-    readDataset(std::string sequence = "00");
-    ~readDataset();
-
-     
-};
 
 readDataset::readDataset(seqe)
 {
@@ -75,9 +61,4 @@ readDataset::readDataset(seqe)
     std::string cam_valib_path = "'../KITTY_dataset/sequences/" + sequence + "/calib.txt";
 
 }
-
-readDataset::~readDataset()
-{
-}
-
 */
