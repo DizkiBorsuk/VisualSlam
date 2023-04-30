@@ -8,6 +8,8 @@
 #include <opencv2/cudafilters.hpp>
 #include <opencv2/cudastereo.hpp>
 #include <opencv2/cudafeatures2d.hpp>
+//my headers
+#include "../include/readDataset.hpp"
 
 
 std::string left_img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/image_0/00%04d.png"; // path to img sequence 
@@ -19,7 +21,9 @@ int main(int argc, char** argv)
     cv::cuda::printCudaDeviceInfo(0); 
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
-
+    mrVSLAM::KITTI_Dataset kitti; 
+    kitti.readCalibData("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/calib.txt"); 
+    std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
 
 
 
