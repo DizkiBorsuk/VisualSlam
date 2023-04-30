@@ -4,6 +4,8 @@ project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
 include(CTest)
 enable_testing()
 
+set (CMAKE_CXX_STANDARD 17)
+
 set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
 set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
 
