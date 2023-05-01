@@ -18,8 +18,10 @@ namespace mrVSLAM{
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P2;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P3;
+        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> ground_truth_poses; 
 
         void readCalibData(std::string file_path); 
+        void getGTposes(std::string file_path);
 
     }; 
 

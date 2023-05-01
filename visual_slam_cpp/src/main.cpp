@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     kitti.readCalibData("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/calib.txt"); 
     std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
 
-
+    kitti.getGTposes("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses/07.txt"); 
 
     ////// ---------- /////////////
     cv::Mat left_frame, right_frame;  

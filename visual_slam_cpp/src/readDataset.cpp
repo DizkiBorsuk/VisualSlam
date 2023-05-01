@@ -17,7 +17,6 @@ void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
     std::string row_entries;  
     std::vector<double> calib_data_vec; 
 
-
     while(std::getline(calib_file, string_row))
     {
         std::stringstream row_data_stream(string_row);
@@ -43,12 +42,46 @@ void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
     P2.resize(3,4); 
     P3 = calib_data_matrix.row(0); 
     P3.resize(3,4); 
-
 }   
 
 
+void mrVSLAM::KITTI_Dataset::getGTposes(std::string file_path)
+{
+    std::ifstream gt_poses_file; 
+    gt_poses_file.open(file_path); 
 
+    if(gt_poses_file.fail())
+    {
+        std::cerr << "Fail to open ground truth poses file \n";  
+    }
 
+    std::string string_row;
+    std::string row_entries;  
+    std::vector<double> gt_poses_file_vec; 
+    std::vector<double> pose_vec; 
+    int number_of_gtposes = 0; 
+
+    while(std::getline(gt_poses_file, string_row))
+    {
+        std::stringstream row_data_stream(string_row);
+        while(std::getline(row_data_stream, row_entries, ' '))
+        {
+            gt_poses_file_vec.push_back(std::stod(row_entries)); 
+        }
+        number_of_gtposes++; 
+    }
+
+    for(auto i = 0; i < number_of_gtposes; i++)
+    {
+        for(int j = i; j < i+12; j++)
+        {
+            pose_vec.push_back(gt_poses_file_vec[j]); 
+        }
+        Eigen::Map<Eigen::Matrix<double,3,4, Eigen::RowMajor>> pose_matrix(pose_vec.data());
+        ground_truth_poses.push_back(pose_matrix); 
+    }
+    std::cout << "Number of poses in sequence: " << ground_truth_poses.size() << "\n"; 
+}
 /*
 
 
