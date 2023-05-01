@@ -2,6 +2,15 @@
 
 
 
+mrVSLAM::KITTI_Dataset::KITTI_Dataset(std::string sequence)
+{
+    std::string gt_poses_path = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
+    std::string camera_calibration_path =  "../KITTY_dataset/sequences/" + sequence + "/calib.txt" ;
+    std::string left_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_0/00%04d.png"; 
+    std::string right_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_1/00%04d.png";
+    std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
+
+}
 
 void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
 {

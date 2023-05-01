@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     cv::cuda::printCudaDeviceInfo(0); 
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
-    mrVSLAM::KITTI_Dataset kitti; 
+    mrVSLAM::KITTI_Dataset kitti("07"); 
     kitti.readCalibData("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/calib.txt"); 
     std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
 
