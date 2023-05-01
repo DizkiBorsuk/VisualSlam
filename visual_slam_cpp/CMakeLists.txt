@@ -14,11 +14,30 @@ find_package(Pangolin REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS})
 find_package(Eigen3  REQUIRED NO_MODULE)
 
+find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+find_package(PythonLibs 3.0 REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(
+    matplotlib
+    GIT_REPOSITORY https://github.com/lava/matplotlib-cpp.git
+    GIT_TAG        f23347fca25219d1c42cbb91608b5556814bf572
+)
+
+FetchContent_GetProperties(matplotlib)
+if(NOT matplotlib_POPULATED)
+    FetchContent_Populate(matplotlib)
+endif()
+include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
+
+
 add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp)
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
                       ${Pangolin_LIBRARIES}
+                      ${PYTHON_LIBRARIES}
+                      Python3::NumPy
                       )
 
 

@@ -10,18 +10,18 @@ namespace mrVSLAM{
     class KITTI_Dataset
     {
     private: 
-        std::string sequence_dir; 
-        std::string gt_poses_dir; 
-        std::string camera_calibration_path;
+        static std::string sequence_dir; 
+        static std::string gt_poses_dir; 
+        static std::string camera_calibration_path;
     public: 
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P0; 
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P2;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P3;
-        std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> ground_truth_poses; 
+        std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses; 
 
-        void readCalibData(std::string file_path); 
-        void getGTposes(std::string file_path);
+        void readCalibData(const std::string file_path); 
+        void getGTposes(const std::string file_path);
 
     }; 
 
