@@ -71,7 +71,7 @@ void mrVSLAM::KITTI_Dataset::getGTposes(std::string file_path)
         number_of_gtposes++; 
     }
 
-    for(auto i = 0; i < number_of_gtposes; i++)
+    for(auto i = 0; i < 12*number_of_gtposes; i+=12)
     {
         for(int j = i; j < i+12; j++)
         {
@@ -79,6 +79,7 @@ void mrVSLAM::KITTI_Dataset::getGTposes(std::string file_path)
         }
         Eigen::Map<Eigen::Matrix<double,3,4, Eigen::RowMajor>> pose_matrix(pose_vec.data());
         ground_truth_poses.push_back(pose_matrix); 
+        pose_vec.clear();
     }
     std::cout << "Number of poses in sequence: " << ground_truth_poses.size() << "\n"; 
 }

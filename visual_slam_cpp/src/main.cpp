@@ -10,6 +10,7 @@
 #include <opencv2/cudafeatures2d.hpp>
 //my headers
 #include "../include/readDataset.hpp"
+#include "../include/visualize_data.hpp"
 
 
 std::string left_img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/image_0/00%04d.png"; // path to img sequence 
@@ -26,7 +27,10 @@ int main(int argc, char** argv)
     std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
 
     kitti.getGTposes("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses/07.txt"); 
-    std::cout << std::setprecision(1) <<std::fixed << kitti.ground_truth_poses[0] <<  "\n"; 
+    std::cout <<  kitti.ground_truth_poses[3] <<  "\n"; 
+    //std::setprecision(1) <<std::fixed<<
+         
+
     std::cout << "\n" << "-------------"<<"\n"; 
 
 
@@ -80,5 +84,9 @@ int main(int argc, char** argv)
             break;
     }
     cv::destroyAllWindows(); 
+
+    mrVSLAM::plotPoses(kitti.ground_truth_poses, counter); 
+
+
     return 0; 
 }
