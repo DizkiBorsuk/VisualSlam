@@ -36,31 +36,43 @@ int main(int argc, char** argv)
 
     ////// ---------- /////////////
     cv::Mat left_frame, right_frame;  
+    cv::Mat stereo; 
     cv::cuda::GpuMat l_frame, r_frame; 
 
-    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
+    cv::namedWindow("Camera Img", cv::WINDOW_NORMAL); 
 
     cv::VideoCapture left_sequence; 
+    cv::VideoCapture right_sequence; 
     left_sequence.open(kitti.left_imgs_path, cv::CAP_IMAGES);
-    
+    right_sequence.open(kitti.right_imgs_path, cv::CAP_IMAGES); 
+
     if (!left_sequence.isOpened())
     {
       std::cerr << "Failed to open Image Sequence!\n"; 
       return 1;
     }
+
+    if (!right_sequence.isOpened())
+    {
+      std::cerr << "Failed to open right Image Sequence!\n"; 
+      return 1;
+    }
+
     
     while(true)
     {
         auto start = cv::getTickCount(); 
 
         left_sequence.read(left_frame);
+        right_sequence.read(right_frame); 
+
         if(left_frame.empty())
         {
             std::cout << "End of sequance \n"; 
             break;
         }
         
-        l_frame.upload(left_frame); 
+        //l_frame.upload(left_frame); 
 
         //////// ----- Algorithm body ------ /////////
 
@@ -70,13 +82,15 @@ int main(int argc, char** argv)
 
         //////// ----- Algorithm End ----- //////////
 
-        l_frame.upload(left_frame); 
+        //l_frame.upload(left_frame); 
+        
+        cv::hconcat(left_frame, right_frame, stereo); 
 
         auto end = cv::getTickCount(); 
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
-        cv::putText(left_frame, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,0),2);
-        cv::imshow("Camera Img", left_frame);
+        cv::putText(stereo, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,0),2);
+        cv::imshow("Camera Img", stereo);
         std::cout << "Frame num: " << counter++ << "\n"; 
 
         char key = (char)cv::waitKey(66); 
