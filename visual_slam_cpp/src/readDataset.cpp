@@ -2,24 +2,30 @@
 
 
 
-mrVSLAM::KITTI_Dataset::KITTI_Dataset(std::string sequence)
-{
-    std::string gt_poses_path = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
-    std::string camera_calibration_path =  "../KITTY_dataset/sequences/" + sequence + "/calib.txt" ;
-    std::string left_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_0/00%04d.png"; 
-    std::string right_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_1/00%04d.png";
-    std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
+mrVSLAM::KITTI_Dataset::KITTI_Dataset(const std::string sequence)
+{   
+    const std::string sequence_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences//"; 
+    const std::string gtp_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses//"; 
+    const std::string file = ".txt"; 
+    const std::string calib_file = "/calib.txt"; 
+    const std::string limg = "/image_0/00%04d.png"; 
+    const std::string rimg = "/image_1/00%04d.png"; 
 
-}
+    gt_poses_path = gtp_dir + sequence + file; 
+    camera_calibration_path = sequence_dir + sequence + calib_file; 
+    left_imgs_path = sequence_dir + sequence + limg; 
+    right_imgs_path = sequence_dir  + sequence + rimg;
+} 
 
-void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
+void mrVSLAM::KITTI_Dataset::readCalibData()
 {
     std::ifstream calib_file; 
-    calib_file.open(file_path); 
+    calib_file.open(camera_calibration_path);
+    //calib_file.open(file_path); 
 
     if(calib_file.fail())
     {
-        std::cerr << "Fail to open calib file \n";  
+        std::cerr << "Failed to open calib file \n";  
     }
 
     std::string string_row;
@@ -54,14 +60,15 @@ void mrVSLAM::KITTI_Dataset::readCalibData(std::string file_path)
 }   
 
 
-void mrVSLAM::KITTI_Dataset::getGTposes(std::string file_path)
+void mrVSLAM::KITTI_Dataset::getGTposes()
 {
     std::ifstream gt_poses_file; 
-    gt_poses_file.open(file_path); 
+    gt_poses_file.open(gt_poses_path.c_str());
+    //gt_poses_file.open(file_path); 
 
     if(gt_poses_file.fail())
     {
-        std::cerr << "Fail to open ground truth poses file \n";  
+        std::cerr << "Failed to open ground truth poses file \n";  
     }
 
     std::string string_row;
@@ -92,16 +99,3 @@ void mrVSLAM::KITTI_Dataset::getGTposes(std::string file_path)
     }
     std::cout << "Number of poses in sequence: " << ground_truth_poses.size() << "\n"; 
 }
-/*
-
-
-readDataset::readDataset(seqe)
-{
-    std::string sequence_dir = "../KITTY_dataset/sequences/" + sequence + "/"; 
-    std::string gt_poses_dir = "../KITTY_dataset/ground_truth_poses/" + sequence + ".txt"; 
-    std::string left_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_0/00%04d.png"; 
-    std::string right_imgs_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/" + sequence + "/image_1/00%04d.png"; 
-    std::string cam_valib_path = "'../KITTY_dataset/sequences/" + sequence + "/calib.txt";
-
-}
-*/

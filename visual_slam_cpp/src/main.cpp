@@ -13,7 +13,7 @@
 #include "../include/visualize_data.hpp"
 
 
-std::string left_img_path = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/image_0/00%04d.png"; // path to img sequence 
+
 int counter = 0; 
 
 int main(int argc, char** argv)
@@ -23,11 +23,11 @@ int main(int argc, char** argv)
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
     mrVSLAM::KITTI_Dataset kitti("07"); 
-    kitti.readCalibData("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences/07/calib.txt"); 
+    kitti.readCalibData(); 
     std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
 
-    kitti.getGTposes("C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses/07.txt"); 
-    std::cout <<  kitti.ground_truth_poses[3] <<  "\n"; 
+    kitti.getGTposes(); 
+    std::cout << kitti.ground_truth_poses[0] <<  "\n"; 
     //std::setprecision(1) <<std::fixed<<
          
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
     cv::VideoCapture left_sequence; 
-    left_sequence.open(left_img_path, cv::CAP_IMAGES);
+    left_sequence.open(kitti.left_imgs_path, cv::CAP_IMAGES);
     
     if (!left_sequence.isOpened())
     {
