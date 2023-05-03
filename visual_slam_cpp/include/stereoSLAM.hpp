@@ -3,7 +3,7 @@
 
 namespace mrVSLAM
 {
-    class StereoSLAM
+    class StereoVO
     {
     private: 
     public: 

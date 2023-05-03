@@ -2,7 +2,7 @@
 
 namespace mrVSLAM
 {
-    class MonoSLAM
+    class MonoVO
     {
     public: 
 
