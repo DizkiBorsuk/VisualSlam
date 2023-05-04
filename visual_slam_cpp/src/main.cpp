@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
     mrVSLAM::KITTI_Dataset kitti("07"); 
-    kitti.readCalibData(); 
-    std::cout << "Left camera matrix: \n" << kitti.P0 << "\n"; 
+    //kitti.readCalibData(); 
+    kitti.showPmatricies(); 
 
     kitti.getGTposes(); 
     std::cout << kitti.ground_truth_poses[0] <<  "\n"; 
@@ -98,6 +98,8 @@ int main(int argc, char** argv)
             break;
     }
     cv::destroyAllWindows(); 
+
+    /* Results */
 
     mrVSLAM::plotPoses(kitti.ground_truth_poses, counter); 
 
