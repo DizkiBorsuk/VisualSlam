@@ -31,7 +31,7 @@ endif()
 include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 
-add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp src/VO_temp.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp src/VO_temp.cpp src/SLAM.cpp )
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 

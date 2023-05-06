@@ -1,10 +1,5 @@
 #pragma once 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include "Eigen/Dense"
+#include "system.hpp"
 
 namespace mrVSLAM{
     class KITTI_Dataset
@@ -23,11 +18,18 @@ namespace mrVSLAM{
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P3;
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses; //poses are reprensented as a 3x4 transformation matrix:  3x3 - rotation matrix + 3x1 translation vector
 
-        KITTI_Dataset(std::string sequence); //initialize paths to camera images, ground truth poses and calibration files
+        KITTI_Dataset(const std::string& sequence); //initialize paths to camera images, ground truth poses and calibration files
         void readCalibData(); //get camera projection matrixies from calibration file 
         void getGTposes(); //get set of ground truth poses 
         void showPmatricies(); 
 
     }; 
 
+    class EuRoCMAV_Dataset
+    {
+
+    EuRoCMAV_Dataset(); 
+    
+    }; 
+    
 }

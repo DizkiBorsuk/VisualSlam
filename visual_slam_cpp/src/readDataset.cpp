@@ -2,7 +2,7 @@
 
 
 
-mrVSLAM::KITTI_Dataset::KITTI_Dataset(const std::string sequence)
+mrVSLAM::KITTI_Dataset::KITTI_Dataset(const std::string& sequence)
 {   
     /*
         Inputs: sequence - number of sequence from kitti dataset (07, 06, 00)
