@@ -1,5 +1,6 @@
 #include "../include/SLAM.hpp"
 
+
 int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 {
     cv::Mat left_frame; 
