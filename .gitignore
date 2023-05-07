@@ -5,6 +5,7 @@
 /visual_odometry/__pycache__/ 
 *.log
 build* 
+*.vscode
 
 CMakeLists.txt.user
 CMakeCache.txt
