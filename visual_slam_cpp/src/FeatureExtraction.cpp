@@ -1,6 +1,4 @@
-#include "../include/FeatureExtraction.hpp""
-
-
+#include "../include/FeatureExtraction.hpp"
 
 
 
@@ -9,13 +7,16 @@ void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const std::string& d
      
     if(descriptor_type == "SIFT")
     {
-        cv::Ptr<cv::FeatureDetector> detector = cv::SiftFeatureDetector::create(); 
+        detector = cv::SIFT::create(num_features);  
+        descriptor = cv::SIFT::create(num_features); 
+        detector->detect(frame, keypoints_1);
+        descriptor->compute(frame,keypoints_1,descriptors_1); 
 
     }
     else if(descriptor_type == "ORB")
     {
-        detector = cv::ORB::create();  // cv::Ptr<T> smart pointer in opencv 
-        descriptor = cv::ORB::create(); 
+        detector = cv::ORB::create(num_features);  
+        descriptor = cv::ORB::create(num_features); 
         detector->detect(frame, keypoints_1);
         descriptor->compute(frame,keypoints_1,descriptors_1); 
         
@@ -24,8 +25,26 @@ void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const std::string& d
     }
 }
 
+
 void mrVSLAM::FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const std::string& descriptor_type)
 {
+    if(descriptor_type == "SURF")
+    {
 
+
+    }
+    else if(descriptor_type == "ORB")
+    {
+        cv::Ptr<cv::cuda::ORB> gpu_ORB = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);  
+        //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
+        gpu_ORB->detectAndCompute(frame, cv::noArray(), keypoints_1, gpu_descriptors_1, false); 
+        //gpu_ORB->detect(frame, gpu_keypoints_1);
+        //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
+        //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
+
+
+    }else {
+        std::cerr << "Wrong name of the descriptor given" << "\n"; 
+    }
 
 }

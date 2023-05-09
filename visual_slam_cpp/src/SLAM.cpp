@@ -15,13 +15,11 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
     if (!left_sequence.isOpened())
     {
       std::cerr << "Failed to open Image Sequence!\n"; 
-      return 1;
+      return -1;
     }
 
     while(true)
     {
-        auto start = cv::getTickCount(); 
-
         left_sequence.read(left_frame);
 
         if(left_frame.empty())
@@ -30,23 +28,27 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
             break;
         }
         
-        //gpu_frame.upload(left_frame); 
+        auto start = cv::getTickCount(); 
+        gpu_frame.upload(left_frame); 
+        
 
         //////// ----- Algorithm body ------ /////////
 
         mrVSLAM::FeatureExtraction features; 
-        features.getFeatures(left_frame, "ORB"); 
+        features.getFeatures(gpu_frame, "ORB");  
+        //features.getFeatures(left_frame, "SIFT"); 
 
 
 
         //////// ----- Algorithm End ----- //////////
 
-        //cornersGPU.upload(corners); 
+        
+        gpu_frame.upload(left_frame); 
 
         
         //cv::hconcat(left_frame, right_frame, stereo); 
 
-        auto end = cv::getTickCount(); 
+        auto end = cv::getTickCount();
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
         cv::drawKeypoints(left_frame, features.keypoints_1, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);

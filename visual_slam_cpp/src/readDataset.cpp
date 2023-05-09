@@ -118,8 +118,6 @@ void mrVSLAM::KITTI_Dataset::getGTposes()
 
 void mrVSLAM::KITTI_Dataset::showPmatricies()
 {
-
-
     std::cout << "---------------- \n"; 
     std::cout << "Left grayscale camera projection matrix = \n" << P0 << "\n"; 
     std::cout << "\n"; 
