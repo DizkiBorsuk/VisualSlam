@@ -1,10 +1,11 @@
 #include "../include/SLAM.hpp"
-
+#include "../include/FeatureExtraction.hpp"
 
 int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 {
     cv::Mat left_frame; 
     cv::cuda::GpuMat gpu_frame; 
+    cv::RNG rng(12345); 
 
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
@@ -29,22 +30,26 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
             break;
         }
         
-        //l_frame.upload(left_frame); 
+        //gpu_frame.upload(left_frame); 
 
         //////// ----- Algorithm body ------ /////////
 
-
+        mrVSLAM::FeatureExtraction features; 
+        features.getFeatures(left_frame, "ORB"); 
 
 
 
         //////// ----- Algorithm End ----- //////////
 
-        //l_frame.upload(left_frame); 
+        //cornersGPU.upload(corners); 
+
         
         //cv::hconcat(left_frame, right_frame, stereo); 
 
         auto end = cv::getTickCount(); 
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
+
+        cv::drawKeypoints(left_frame, features.keypoints_1, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
 
         cv::putText(left_frame, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,0),2);
         cv::imshow("Camera Img", left_frame);

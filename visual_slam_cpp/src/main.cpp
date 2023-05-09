@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     cv::cuda::printCudaDeviceInfo(0); 
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
-    mrVSLAM::KITTI_Dataset kitti("07"); 
+    mrVSLAM::KITTI_Dataset kitti("06"); 
     kitti.readCalibData(); 
     kitti.showPmatricies(); 
 
