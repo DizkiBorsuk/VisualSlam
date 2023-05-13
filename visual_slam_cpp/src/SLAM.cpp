@@ -5,7 +5,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 {
     cv::Mat left_frame; 
     cv::cuda::GpuMat gpu_frame; 
-    cv::RNG rng(12345); 
+    
 
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
@@ -42,12 +42,11 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 
         //////// ----- Algorithm End ----- //////////
 
-        
-        gpu_frame.upload(left_frame); 
+    
 
         
         //cv::hconcat(left_frame, right_frame, stereo); 
-
+        
         auto end = cv::getTickCount();
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 

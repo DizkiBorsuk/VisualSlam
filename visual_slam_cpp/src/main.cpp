@@ -12,6 +12,7 @@ int main(int argc, char** argv)
 {
     std::cout << "Visual Slam start \n";  
     cv::cuda::printCudaDeviceInfo(0); 
+    cv::cuda::setDevice(0); 
 
     ///// ------ Read Calibration data and Ground Truth Poses ---- //////
     mrVSLAM::KITTI_Dataset kitti("07"); 
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
 
     //-------------------//
     
-
+    cv::cuda::resetDevice(); 
     /* Results */
 
     mrVSLAM::plotPoses(kitti.ground_truth_poses, slam.f_counter); 

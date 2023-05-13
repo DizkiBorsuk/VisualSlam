@@ -5,10 +5,9 @@ namespace mrVSLAM
 {
     class FeatureExtraction
     {
-        int num_features = 500; 
+        int num_features = 5000; 
         cv::Ptr<cv::FeatureDetector> detector;  // cv::Ptr<T> is like smart pointer in opencv
         cv::Ptr<cv::DescriptorExtractor> descriptor; 
-        cv::cuda::GpuMat gpu_keypoints_1, gpu_keypoints_2; 
         cv::cuda::GpuMat gpu_descriptors_1, gpu_desriptors_2;
 
     public: 
