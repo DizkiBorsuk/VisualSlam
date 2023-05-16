@@ -3,6 +3,10 @@
 
 int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 {
+    //Class object 
+    mrVSLAM::FeatureExtraction features; 
+
+
     cv::Mat left_frame; 
     cv::cuda::GpuMat gpu_frame; 
     
@@ -29,14 +33,15 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         }
         
         auto start = cv::getTickCount(); 
-        gpu_frame.upload(left_frame); 
+        //gpu_frame.upload(left_frame); 
         
 
         //////// ----- Algorithm body ------ /////////
 
-        mrVSLAM::FeatureExtraction features; 
-        features.getFeatures(gpu_frame, "ORB");  
-        //features.getFeatures(left_frame, "SIFT"); 
+        
+        features.num_features = 200; 
+        features.getFeatures(left_frame, FeatureExtraction::desctiptor_T::orb); 
+        features.matchFeatures(); 
 
 
 
@@ -50,7 +55,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         auto end = cv::getTickCount();
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
-        cv::drawKeypoints(left_frame, features.keypoints_1, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(left_frame, features.keypoints, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
 
         cv::putText(left_frame, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,0),2);
         cv::imshow("Camera Img", left_frame);
