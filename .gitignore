@@ -6,6 +6,7 @@
 *.log
 build* 
 *.vscode
+*.json
 
 CMakeLists.txt.user
 CMakeCache.txt

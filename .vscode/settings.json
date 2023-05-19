@@ -65,5 +65,6 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/build/_deps/matplotlib-src/contrib"
 }
