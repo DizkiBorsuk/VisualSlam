@@ -29,7 +29,7 @@ namespace mrVSLAM
         //FeatureExtraction(); 
         void getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type);
         void getFeatures(cv::cuda::GpuMat frame, const std::string& descriptor_type);
-        void matchFeatures(); 
+        void matchFeatures(const std::string& matcher_type, const float& low_rt = 0.7f); 
 
     }; 
    
