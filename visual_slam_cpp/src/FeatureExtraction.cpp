@@ -1,6 +1,11 @@
 #include "../include/FeatureExtraction.hpp"
 
 
+// mrVSLAM::FeatureExtraction::FeatureExtraction()
+// {
+//     prev_descriptors = cv::Mat::zeros(cv::Size(32,200), CV_8UC1); 
+// }
+
 
 void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type)
 {
@@ -36,39 +41,38 @@ void mrVSLAM::FeatureExtraction::matchFeatures()
 {
 
     matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
-    // matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE); 
+    //matcher = cv::DescriptorMatcher::create("BruteForce-Hamming"); 
     // matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
 
-    std::vector<cv::DMatch> good_matches; 
-    cv::Mat prev_descriptors;  //descriptors from frame k-1 
-    std::vector<cv::KeyPoint> prev_keyP; // vector to store keypoints from frame k-1
+    // std::vector<cv::DMatch> matches;
     std::vector<std::vector<cv::DMatch>> matches;
+    std::cout << "matches size = " << matches.size() << "\n"; 
+    cv::Point2i keypoint1; 
+    cv::Point2i keypoint2; 
+    std::vector<cv::Point2i> point_pair; 
 
-    const float ration_treshold = 0.75f; 
+    const float ration_treshold = 0.7f; 
 
     if(!prev_descriptors.empty())
     {
-        matcher->knnMatch(descriptors_1, prev_descriptors, matches,2); 
+        matcher->knnMatch(descriptors, prev_descriptors, matches, 2); 
+
         for (size_t i = 0; i < matches.size(); i++)
         {
             if (matches[i][0].distance < ration_treshold * matches[i][1].distance)
             {
                 good_matches.push_back(matches[i][0]);
-
+                keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
+                keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
+                point_pair.push_back(keypoint1); 
+                point_pair.push_back(keypoint2); 
+                matched_keypoints.push_back(point_pair); 
             }
+           point_pair.clear(); 
         }
     }
-
-    if(good_matches.size() > 0)
-    {
-
-
-    }
-
-    
-
-
-    prev_descriptors = descriptors_1; 
+    prev_descriptors = descriptors; 
+    prev_keyPs = keypoints; 
 }
 
 

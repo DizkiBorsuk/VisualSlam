@@ -38,11 +38,10 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 
         //////// ----- Algorithm body ------ /////////
 
-        
-        features.num_features = 200; 
+        cv::Mat des; 
+        features.num_features = 500; 
         features.getFeatures(left_frame, FeatureExtraction::desctiptor_T::orb); 
         features.matchFeatures(); 
-
 
 
         //////// ----- Algorithm End ----- //////////
@@ -56,6 +55,12 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         auto framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
         cv::drawKeypoints(left_frame, features.keypoints, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        
+        for(int p = 0; p < features.matched_keypoints.size(); p++)
+        {
+            cv::line(left_frame, features.matched_keypoints[p][0], features.matched_keypoints[p][1], cv::Scalar(255,0,0), 1); 
+        }
+        features.matched_keypoints.clear(); 
 
         cv::putText(left_frame, "fps :" + std::to_string(int(framesPerSecond)), cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,0),2);
         cv::imshow("Camera Img", left_frame);
