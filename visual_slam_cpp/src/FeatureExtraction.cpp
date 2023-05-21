@@ -31,19 +31,22 @@ void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& 
     }
 }
 
-void mrVSLAM::FeatureExtraction::matchFeatures(const std::string& matcher_type, const float& low_rt = 0.7f)
+void mrVSLAM::FeatureExtraction::matchFeatures(const std::string& matcher_type, const float& low_rt)
 {
-    if(matcher_type == "bruteForce")
-    {
-        matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
-    }
-    else if(matcher_type == "flann")
-    {
-        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
-        descriptors.convertTo(descriptors, CV_32F);
-    } else 
-    { std::cerr << "Wrong matcher given"; }
+    // if(matcher_type == "bruteForce")
+    // {
+    //     matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+    // }
+    // else if(matcher_type == "flann")
+    // {
+    //     matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
+    //     descriptors.convertTo(descriptors, CV_32F);
+    // } else 
+    // { std::cerr << "Wrong matcher given"; }
     
+    matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
+    descriptors.convertTo(descriptors, CV_32F);
+
     std::vector<std::vector<cv::DMatch>> matches;
     cv::Point2i keypoint1, keypoint2; 
     std::vector<cv::Point2i> point_pair; 
