@@ -31,27 +31,14 @@ void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& 
     }
 }
 
-void mrVSLAM::FeatureExtraction::matchFeatures(const std::string& matcher_type, const float& low_rt)
-{
-    // if(matcher_type == "bruteForce")
-    // {
-    //     matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
-    // }
-    // else if(matcher_type == "flann")
-    // {
-    //     matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
-    //     descriptors.convertTo(descriptors, CV_32F);
-    // } else 
-    // { std::cerr << "Wrong matcher given"; }
-    
+void mrVSLAM::FeatureExtraction::matchFeaturesFlann(const float& low_rt)
+{    
     matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
     descriptors.convertTo(descriptors, CV_32F);
 
     std::vector<std::vector<cv::DMatch>> matches;
     cv::Point2i keypoint1, keypoint2; 
-    std::vector<cv::Point2i> point_pair; 
-
-    const float ration_treshold = low_rt; 
+    std::vector<cv::Point2i> point_pair;  
 
     if(!prev_descriptors.empty())
     {
@@ -59,7 +46,7 @@ void mrVSLAM::FeatureExtraction::matchFeatures(const std::string& matcher_type, 
 
         for (size_t i = 0; i < matches.size(); i++)
         {
-            if (matches[i][0].distance < ration_treshold * matches[i][1].distance)
+            if (matches[i][0].distance < low_rt * matches[i][1].distance)
             {
                 good_matches.push_back(matches[i][0]);
                 keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
@@ -75,6 +62,35 @@ void mrVSLAM::FeatureExtraction::matchFeatures(const std::string& matcher_type, 
     prev_keyPs = keypoints; 
 }
 
+void mrVSLAM::FeatureExtraction::matchFeaturesBF(const float& low_rt)
+{    
+    matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
+
+    std::vector<std::vector<cv::DMatch>> matches;
+    cv::Point2i keypoint1, keypoint2; 
+    std::vector<cv::Point2i> point_pair; 
+
+    if(!prev_descriptors.empty())
+    {
+        matcher->knnMatch(descriptors, prev_descriptors, matches, 2); 
+
+        for (size_t i = 0; i < matches.size(); i++)
+        {
+            if (matches[i][0].distance < low_rt * matches[i][1].distance)
+            {
+                good_matches.push_back(matches[i][0]);
+                keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
+                keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
+                point_pair.push_back(keypoint1); 
+                point_pair.push_back(keypoint2); 
+                matched_keypoints.push_back(point_pair); 
+            }
+           point_pair.clear(); 
+        }
+    }
+    prev_descriptors = descriptors; 
+    prev_keyPs = keypoints; 
+}
 
 
 

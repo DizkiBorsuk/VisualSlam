@@ -7,42 +7,42 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
     mrVSLAM::FeatureExtraction features; 
 
 
-    cv::Mat left_frame; 
+    cv::Mat frame; 
     cv::cuda::GpuMat gpu_frame; 
-    
+    int start, end; 
+    double framesPerSecond; 
 
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
-    cv::VideoCapture left_sequence; 
-    left_sequence.open(imgs_path, cv::CAP_IMAGES);
+    cv::VideoCapture sequence; 
+    sequence.open(imgs_path, cv::CAP_IMAGES);
 
-    if (!left_sequence.isOpened())
+    if (!sequence.isOpened())
     {
       std::cerr << "Failed to open Image Sequence!\n"; 
       return -1;
     }
 
-    int start, end; 
-    double framesPerSecond; 
 
     while(true)
     {
-        left_sequence.read(left_frame);
+        sequence.read(frame);
 
-        if(left_frame.empty())
+        if(frame.empty())
         {
             std::cout << "End of sequance \n"; 
             break;
         }
         
-        start = cv::getTickCount(); 
+        //start = cv::getTickCount(); 
+        auto begin = std::chrono::high_resolution_clock::now();
         //gpu_frame.upload(left_frame); 
         
 
         //////// ----- Algorithm body ------ ///////// 
         features.num_features = 200; 
-        features.getFeatures(left_frame, FeatureExtraction::desctiptor_T::orb); 
-        features.matchFeatures("flann", 0.6f); 
+        features.getFeatures(frame, FeatureExtraction::desctiptor_T::orb); 
+        features.matchFeaturesFlann( 0.6f); 
 
 
         //////// ----- Algorithm End ----- //////////
@@ -52,21 +52,23 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         
         //cv::hconcat(left_frame, right_frame, stereo); 
         
-        end = cv::getTickCount();
-        framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
+        //end = cv::getTickCount();
+        auto cend = std::chrono::high_resolution_clock::now();
+        //framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-        cv::drawKeypoints(left_frame, features.keypoints, left_frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
         
         for(int p = 0; p < features.matched_keypoints.size(); p++)
         {
-            cv::line(left_frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
+            cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
         }
         features.matched_keypoints.clear(); 
 
-        cv::putText(left_frame, "fps: " + std::to_string(int(framesPerSecond)), 
-                    cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
-        cv::imshow("Camera Img", left_frame);
-        std::cout << "Frame num: " << f_counter++ << "\n"; 
+        // cv::putText(left_frame, "fps: " + std::to_string(int(framesPerSecond)), 
+        //             cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
+        cv::imshow("Camera Img", frame);
+        std::cout << "Frame num: " << f_counter++ << "\n" << "time: " << elapsed.count() << "\n"; 
 
         char key = (char)cv::waitKey(66); 
         if(key == 'q' || key == 27)
