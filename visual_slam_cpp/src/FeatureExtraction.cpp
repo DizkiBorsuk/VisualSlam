@@ -25,7 +25,6 @@ void mrVSLAM::FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& 
             descriptor->compute(frame,keypoints,descriptors); 
             break; 
         default: 
-            std::cerr << "Wrong name of the descriptor given" << "\n"; 
             break;  
 
     }
@@ -93,29 +92,28 @@ void mrVSLAM::FeatureExtraction::matchFeaturesBF(const float& low_rt)
 }
 
 
+void mrVSLAM::FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type)
+{
+    switch(descriptor_type)
+    {
+        case sift:  
+            break; 
+        case orb: 
+            gpu_orb_extractor = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
+            gpu_orb_extractor->detectAndCompute(frame,cv::noArray(), keypoints, gpu_descriptor); 
+            break; 
+        case akaze: 
+            break; 
+        default: 
+            break;  
+    }
 
-
-// void mrVSLAM::FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const std::string& descriptor_type)
-// {
-//     if(descriptor_type == "SURF")
-//     {
-
-
-//     }
-//     else if(descriptor_type == "ORB")
-//     {
-//         cv::Ptr<cv::cuda::ORB> gpu_detector = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);  
-//         //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
-//         //gpu_detector->detectAndCompute(frame, cv::noArray(), keypoints_1, gpu_descriptors_1, false); 
+        // cv::Ptr<cv::cuda::ORB> gpu_detector = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);  
+        // //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
+        // //gpu_detector->detectAndCompute(frame, cv::noArray(), keypoints_1, gpu_descriptors_1, false); 
         
-//         gpu_detector->detect(frame, keypoints_1);
-//         std::cout << "Number of features: " << keypoints_1.size() << "\n"; 
-//         //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
-//         //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
-
-
-//     }else {
-//         std::cerr << "Wrong name of the descriptor given" << "\n"; 
-//     }
-
-//}
+        // gpu_detector->detect(frame, keypoints_1);
+        // std::cout << "Number of features: " << keypoints_1.size() << "\n"; 
+        // //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
+        // //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
+}
