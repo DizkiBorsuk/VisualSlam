@@ -34,6 +34,8 @@ namespace mrVSLAM
         void getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type);
         void matchFeaturesFlann(const float& low_rt = 0.7f); 
         void matchFeaturesBF(const float& low_rt = 0.7f);
+        void matchGPUFeaturesFlann(const float& low_rt = 0.7f); 
+        void matchGPUFeaturesBF(const float& low_rt = 0.7f);
 
 
     }; 

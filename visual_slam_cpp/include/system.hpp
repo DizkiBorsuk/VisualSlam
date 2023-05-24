@@ -23,4 +23,5 @@
 #include <opencv2/cudafeatures2d.hpp>
 
 #include <chrono>
+#include <algorithm>
 
