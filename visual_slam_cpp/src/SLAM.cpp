@@ -65,7 +65,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 }
 
 
-int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path, bool GPU)
+int mrVSLAM::SLAM::executeGPUMonoSLAM(std::string& imgs_path)
 {
         //Class object 
     mrVSLAM::FeatureExtraction features; 

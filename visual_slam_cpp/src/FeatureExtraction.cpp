@@ -100,7 +100,7 @@ namespace mrVSLAM
                 break; 
             case orb: 
                 gpu_orb_extractor = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
-                gpu_orb_extractor->detectAndCompute(frame,cv::noArray(), keypoints, gpu_descriptors); 
+                gpu_orb_extractor->detectAndComputeAsync(frame,cv::noArray(), gpu_keypoints, gpu_descriptors, false); 
                 break; 
             case akaze: 
                 break; 
@@ -126,7 +126,7 @@ namespace mrVSLAM
         cv::Point2i keypoint1, keypoint2; 
         std::vector<cv::Point2i> point_pair; 
 
-        if(!prev_descriptors.empty())
+        if(!gpu_prev_descriptors.empty())
         {
             matcher->knnMatch(gpu_descriptors, prev_descriptors, matches, 2); 
 
@@ -135,16 +135,16 @@ namespace mrVSLAM
                 if (matches[i][0].distance < low_rt * matches[i][1].distance)
                 {
                     good_matches.emplace_back(matches[i][0]);
-                    keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
-                    keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
-                    point_pair.emplace_back(keypoint1); 
-                    point_pair.emplace_back(keypoint2); 
-                    matched_keypoints.emplace_back(point_pair); 
+                    // keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
+                    // keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
+                    // point_pair.emplace_back(keypoint1); 
+                    // point_pair.emplace_back(keypoint2); 
+                    // matched_keypoints.emplace_back(point_pair); 
                 }
-            point_pair.clear(); 
+            //point_pair.clear(); 
             }
         }
         gpu_prev_descriptors = gpu_descriptors; 
-        prev_keyPs = keypoints; 
+        //prev_keyPs = keypoints; 
     }
 }

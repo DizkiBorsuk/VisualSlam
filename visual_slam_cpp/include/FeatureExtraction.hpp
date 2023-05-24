@@ -13,8 +13,8 @@ namespace mrVSLAM
         cv::Ptr<cv::cuda::ORB> gpu_orb_extractor;
         cv::Ptr<cv::cuda::FastFeatureDetector> gpu_fast_detector; 
 
-        cv::cuda::GpuMat gpu_descriptors, gpu_prev_descriptors, gpu_descriptors_1, gpu_desriptors_2;
-        cv::Mat descriptors, prev_descriptors, descriptors_1, desriptors_2;
+        cv::cuda::GpuMat gpu_descriptors, gpu_prev_descriptors, gpu_keypoints, prev_gpu_keyPs;
+        cv::Mat descriptors, prev_descriptors;
 
 
         cv::Ptr<cv::DescriptorMatcher> matcher; // feature matcher object declaration 
@@ -27,8 +27,7 @@ namespace mrVSLAM
         //enum gpu_desctiptor_T{orb, surf, brief, akaze, brisk}; 
         int num_features; 
         
-        std::vector<cv::KeyPoint> keypoints, keypoints_1, keypoints_2; //vectors of KeyPoints for left and right frame 
-
+        std::vector<cv::KeyPoint> keypoints; 
         std::vector<cv::DMatch> good_matches; 
         std::vector<std::vector<cv::Point2i>> matched_keypoints; 
 

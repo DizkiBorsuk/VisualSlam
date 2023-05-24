@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
 
-include(CTest)
-enable_testing()
-
 set (CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
@@ -42,7 +39,3 @@ target_link_libraries(${PROJECT_NAME}
                       Python3::NumPy
                       )
 
-
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
