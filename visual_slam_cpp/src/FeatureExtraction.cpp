@@ -2,7 +2,7 @@
 
 namespace mrVSLAM 
 {
-    void FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type)
+    void FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type) noexcept
     {
         switch(descriptor_type)
         {
@@ -31,7 +31,7 @@ namespace mrVSLAM
         }
     }
 
-    void FeatureExtraction::matchFeaturesFlann(const float& low_rt)
+    void FeatureExtraction::matchFeaturesFlann(const float& low_rt) noexcept
     {    
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
         descriptors.convertTo(descriptors, CV_32F);
@@ -48,21 +48,21 @@ namespace mrVSLAM
             {
                 if (matches[i][0].distance < low_rt * matches[i][1].distance)
                 {
-                    good_matches.push_back(matches[i][0]);
+                    good_matches.emplace_back(matches[i][0]);
                     keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
                     keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
-                    point_pair.push_back(keypoint1); 
-                    point_pair.push_back(keypoint2); 
-                    matched_keypoints.push_back(point_pair); 
+                    point_pair.emplace_back(keypoint1); 
+                    point_pair.emplace_back(keypoint2); 
+                    matched_keypoints.emplace_back(point_pair); 
                 }
-            point_pair.clear(); 
+                point_pair.clear(); 
             }
         }
         prev_descriptors = descriptors; 
         prev_keyPs = keypoints; 
     }
 
-    void FeatureExtraction::matchFeaturesBF(const float& low_rt)
+    void FeatureExtraction::matchFeaturesBF(const float& low_rt) noexcept
     {    
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
 
@@ -92,7 +92,7 @@ namespace mrVSLAM
         prev_keyPs = keypoints; 
     }
 
-    void FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type)
+    void FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type) noexcept
     {
         switch(descriptor_type)
         {
@@ -118,7 +118,7 @@ namespace mrVSLAM
             // //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
     }
 
-    void FeatureExtraction::matchGPUFeaturesFlann(const float& low_rt)
+    void FeatureExtraction::matchGPUFeaturesFlann(const float& low_rt) noexcept
     {    
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
         descriptors.convertTo(descriptors, CV_32F);
@@ -149,7 +149,7 @@ namespace mrVSLAM
         prev_keyPs = keypoints; 
     }
 
-    void FeatureExtraction::matchGPUFeaturesBF(const float& low_rt)
+    void FeatureExtraction::matchGPUFeaturesBF(const float& low_rt) noexcept
     {    
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
 

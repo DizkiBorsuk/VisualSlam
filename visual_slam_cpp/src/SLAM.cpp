@@ -7,13 +7,13 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
     mrVSLAM::FeatureExtraction features; 
 
     cv::Mat frame; 
-    int start, end; 
-    double framesPerSecond; 
-
-    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
+    int start, end, framesPerSecond; 
 
     cv::VideoCapture sequence; 
     sequence.open(imgs_path, cv::CAP_IMAGES);
+    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
+    framesPerSecond = sequence.get(cv::CAP_PROP_FPS); 
+
 
     if (!sequence.isOpened())
     {
@@ -21,15 +21,9 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
       return -1;
     }
 
-    while(true)
+    while(sequence.isOpened())
     {
         sequence.read(frame);
-
-        if(frame.empty())
-        {
-            std::cout << "End of sequance \n"; 
-            break;
-        }
         
         start = cv::getTickCount(); 
         auto begin = std::chrono::high_resolution_clock::now();
@@ -48,15 +42,15 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-        cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        // cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
     
-        for(int p = 0; p < features.matched_keypoints.size(); p++)
-        {
-            cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
-        }
+        // for(int p = 0; p < features.matched_keypoints.size(); p++)
+        // {
+        //     cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
+        // }
         features.matched_keypoints.clear(); 
 
-        cv::putText(frame, "fps: " + std::to_string(int(framesPerSecond)), 
+        cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
                     cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
         cv::imshow("Camera Img", frame);
         std::cout << "Frame num: " << f_counter++ << "\n" << "time: " << elapsed.count() << "\n"; 
@@ -78,8 +72,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path, bool GPU)
 
     cv::Mat frame; 
     cv::cuda::GpuMat gpu_frame; 
-    int start, end; 
-    double framesPerSecond; 
+    int start, end, framesPerSecond; 
 
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
@@ -126,7 +119,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path, bool GPU)
         }
         features.matched_keypoints.clear(); 
 
-        cv::putText(frame, "fps: " + std::to_string(int(framesPerSecond)), 
+        cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
                     cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
         cv::imshow("Camera Img", frame);
         std::cout << "Frame num: " << f_counter++ << "\n"; 

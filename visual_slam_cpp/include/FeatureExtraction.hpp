@@ -5,6 +5,7 @@ namespace mrVSLAM
 {
     class FeatureExtraction
     {
+    private:
         // cv::Ptr<T> is like smart pointer in opencv
         cv::Ptr<cv::FeatureDetector> detector;   // detector object declaration  
         cv::Ptr<cv::DescriptorExtractor> descriptor; // descriptor object declaration 
@@ -30,12 +31,12 @@ namespace mrVSLAM
         std::vector<cv::DMatch> good_matches; 
         std::vector<std::vector<cv::Point2i>> matched_keypoints; 
 
-        void getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type);
-        void getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type);
-        void matchFeaturesFlann(const float& low_rt = 0.7f); 
-        void matchFeaturesBF(const float& low_rt = 0.7f);
-        void matchGPUFeaturesFlann(const float& low_rt = 0.7f); 
-        void matchGPUFeaturesBF(const float& low_rt = 0.7f);
+        void getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type) noexcept; 
+        void getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type) noexcept;
+        void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
+        void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
+        void matchGPUFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
+        void matchGPUFeaturesBF(const float& low_rt = 0.7f) noexcept;
 
 
     }; 
