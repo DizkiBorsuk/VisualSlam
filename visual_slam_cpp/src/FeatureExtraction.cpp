@@ -78,12 +78,12 @@ namespace mrVSLAM
             {
                 if (matches[i][0].distance < low_rt * matches[i][1].distance)
                 {
-                    good_matches.push_back(matches[i][0]);
+                    good_matches.emplace_back(matches[i][0]);
                     keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
                     keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
-                    point_pair.push_back(keypoint1); 
-                    point_pair.push_back(keypoint2); 
-                    matched_keypoints.push_back(point_pair); 
+                    point_pair.emplace_back(keypoint1); 
+                    point_pair.emplace_back(keypoint2); 
+                    matched_keypoints.emplace_back(point_pair); 
                 }
             point_pair.clear(); 
             }
@@ -100,7 +100,7 @@ namespace mrVSLAM
                 break; 
             case orb: 
                 gpu_orb_extractor = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
-                gpu_orb_extractor->detectAndCompute(frame,cv::noArray(), keypoints, gpu_descriptor); 
+                gpu_orb_extractor->detectAndCompute(frame,cv::noArray(), keypoints, gpu_descriptors); 
                 break; 
             case akaze: 
                 break; 
@@ -118,40 +118,9 @@ namespace mrVSLAM
             // //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
     }
 
-    void FeatureExtraction::matchGPUFeaturesFlann(const float& low_rt) noexcept
-    {    
-        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
-        descriptors.convertTo(descriptors, CV_32F);
-
-        std::vector<std::vector<cv::DMatch>> matches;
-        cv::Point2i keypoint1, keypoint2; 
-        std::vector<cv::Point2i> point_pair;  
-
-        if(!prev_descriptors.empty())
-        {
-            matcher->knnMatch(descriptors, prev_descriptors, matches, 2); 
-
-            for (size_t i = 0; i < matches.size(); i++)
-            {
-                if (matches[i][0].distance < low_rt * matches[i][1].distance)
-                {
-                    good_matches.push_back(matches[i][0]);
-                    keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
-                    keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
-                    point_pair.push_back(keypoint1); 
-                    point_pair.push_back(keypoint2); 
-                    matched_keypoints.push_back(point_pair); 
-                }
-            point_pair.clear(); 
-            }
-        }
-        prev_descriptors = descriptors; 
-        prev_keyPs = keypoints; 
-    }
-
     void FeatureExtraction::matchGPUFeaturesBF(const float& low_rt) noexcept
     {    
-        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
+        gpu_matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING); 
 
         std::vector<std::vector<cv::DMatch>> matches;
         cv::Point2i keypoint1, keypoint2; 
@@ -159,23 +128,23 @@ namespace mrVSLAM
 
         if(!prev_descriptors.empty())
         {
-            matcher->knnMatch(descriptors, prev_descriptors, matches, 2); 
+            matcher->knnMatch(gpu_descriptors, prev_descriptors, matches, 2); 
 
             for (size_t i = 0; i < matches.size(); i++)
             {
                 if (matches[i][0].distance < low_rt * matches[i][1].distance)
                 {
-                    good_matches.push_back(matches[i][0]);
+                    good_matches.emplace_back(matches[i][0]);
                     keypoint1 = keypoints[matches[i][0].queryIdx].pt;  
                     keypoint2 = prev_keyPs[matches[i][0].trainIdx].pt; 
-                    point_pair.push_back(keypoint1); 
-                    point_pair.push_back(keypoint2); 
-                    matched_keypoints.push_back(point_pair); 
+                    point_pair.emplace_back(keypoint1); 
+                    point_pair.emplace_back(keypoint2); 
+                    matched_keypoints.emplace_back(point_pair); 
                 }
             point_pair.clear(); 
             }
         }
-        prev_descriptors = descriptors; 
+        gpu_prev_descriptors = gpu_descriptors; 
         prev_keyPs = keypoints; 
     }
 }

@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     /* Main algorithm */
     
     mrVSLAM::SLAM slam; 
-    slam.executeMonoSLAM(kitti.left_imgs_path); 
+    slam.executeMonoSLAM(kitti.left_imgs_path, true); 
 
 
 

@@ -13,14 +13,15 @@ namespace mrVSLAM
         cv::Ptr<cv::cuda::ORB> gpu_orb_extractor;
         cv::Ptr<cv::cuda::FastFeatureDetector> gpu_fast_detector; 
 
-        cv::cuda::GpuMat gpu_descriptor, gpu_descriptors_1, gpu_desriptors_2;
+        cv::cuda::GpuMat gpu_descriptors, gpu_prev_descriptors, gpu_descriptors_1, gpu_desriptors_2;
         cv::Mat descriptors, prev_descriptors, descriptors_1, desriptors_2;
 
 
         cv::Ptr<cv::DescriptorMatcher> matcher; // feature matcher object declaration 
-
-         // descriptors for left and right frame
         std::vector<cv::KeyPoint> prev_keyPs;
+        
+        cv::Ptr<cv::cuda::DescriptorMatcher> gpu_matcher; 
+
     public:  
         enum desctiptor_T {sift, orb, surf, brief, akaze, brisk}; 
         //enum gpu_desctiptor_T{orb, surf, brief, akaze, brisk}; 
@@ -35,7 +36,6 @@ namespace mrVSLAM
         void getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type) noexcept;
         void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
         void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
-        void matchGPUFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
         void matchGPUFeaturesBF(const float& low_rt = 0.7f) noexcept;
 
 

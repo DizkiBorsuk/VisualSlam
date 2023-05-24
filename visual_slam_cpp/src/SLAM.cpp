@@ -96,12 +96,13 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path, bool GPU)
         }
         
         start = cv::getTickCount(); 
-        gpu_frame.upload(frame); 
+        gpu_frame.upload(frame); //!!!!!!!!!!
+
         
         //////// ----- Algorithm body ------ ///////// 
         features.num_features = 200; 
         features.getFeatures(gpu_frame, FeatureExtraction::desctiptor_T::orb); 
-        features.matchFeaturesFlann( 0.6f); 
+        features.matchGPUFeaturesBF( 0.6f); 
 
 
         //////// ----- Algorithm End ----- /////////
