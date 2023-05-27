@@ -2,37 +2,42 @@
 
 namespace mrVSLAM 
 {
-    void FeatureExtraction::getFeatures(const cv::Mat &frame, const desctiptor_T& descriptor_type) noexcept
+
+    FeatureExtraction::FeatureExtraction(const std::string &desType, const bool GPU)
     {
-        switch(descriptor_type)
+        if(GPU == false)
         {
-            case sift: 
-                detector = cv::SIFT::create(num_features);  
-                descriptor = cv::SIFT::create(num_features); 
-                detector->detect(frame, keypoints);
-                descriptor->compute(frame,keypoints,descriptors); 
-                break; 
-            case orb: 
-                // detector = cv::ORB::create(num_features);  
-                // descriptor = cv::ORB::create(num_features); 
-                // detector->detect(frame, keypoints);
-                // descriptor->compute(frame,keypoints,descriptors); 
+            if(desType == "orb")
+            {
+                // detector = cv::ORB::create(200);  
+                // descriptor = cv::ORB::create(200); 
                 detector = cv::FastFeatureDetector::create(40); 
-                detector->detect(frame, keypoints); 
-
-
-                break; 
-            case akaze: 
+            }
+            else if(desType == "sift")
+            {
+                detector = cv::SIFT::create();  
+                descriptor = cv::SIFT::create(); 
+            }
+            else if(desType == "akaze")
+            {
                 detector = cv::AKAZE::create(); 
                 descriptor = cv::AKAZE::create(); 
-
-                detector->detect(frame, keypoints);
-                descriptor->compute(frame,keypoints,descriptors); 
-                break; 
-            default: 
-                break;  
+            }
+            else{ std::cerr << "Wrong descriptor name" <<"\n"; }
+        } 
+        else 
+        {
 
         }
+    }
+    
+
+    void FeatureExtraction::getFeatures(const cv::Mat &frame) noexcept
+    {
+
+        detector->detect(frame, keypoints); 
+        //descriptor->compute(frame,keypoints, descriptors); 
+
     }
 
     void FeatureExtraction::matchFeaturesFlann(const float& low_rt) noexcept
@@ -96,21 +101,13 @@ namespace mrVSLAM
         prev_keyPs = keypoints; 
     }
 
-    void FeatureExtraction::getFeatures(const cv::cuda::GpuMat &frame, const desctiptor_T& descriptor_type) noexcept
+    void FeatureExtraction::getFeatures(const cv::cuda::GpuMat &frame) noexcept
     {
-        switch(descriptor_type)
-        {
-            case sift:  
-                break; 
-            case orb: 
-                gpu_orb_extractor = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
-                gpu_orb_extractor->detectAndComputeAsync(frame,cv::noArray(), gpu_keypoints, gpu_descriptors, false); 
-                break; 
-            case akaze: 
-                break; 
-            default: 
-                break;  
-        }
+     
+        gpu_orb_extractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
+        gpu_orb_extractor->detectAndComputeAsync(frame,cv::noArray(), gpu_keypoints, gpu_descriptors, false); 
+               
+     
 
             // cv::Ptr<cv::cuda::ORB> gpu_detector = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);  
             // //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 

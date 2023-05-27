@@ -29,16 +29,15 @@ namespace mrVSLAM
 
 
     public:  
-        enum desctiptor_T {sift, orb, surf, brief, akaze, brisk}; 
-        //enum gpu_desctiptor_T{orb, surf, brief, akaze, brisk}; 
-        int num_features; 
-        
         std::vector<cv::KeyPoint> keypoints; 
         std::vector<cv::DMatch> good_matches; 
         std::vector<std::vector<cv::Point2i>> matched_keypoints; 
 
-        void getFeatures(const cv::Mat &frame, const desctiptor_T& descriptor_type) noexcept; 
-        void getFeatures(const cv::cuda::GpuMat &frame, const desctiptor_T& descriptor_type) noexcept;
+
+        FeatureExtraction(const std::string &desType, const bool GPU); 
+        //FeatureExtraction(const std::string &desType = "orb", const bool GPU, int num_of_features = 500);
+        void getFeatures(const cv::Mat &frame) noexcept; 
+        void getFeatures(const cv::cuda::GpuMat &frame) noexcept;
         void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
         void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
         void matchGPUFeaturesBF(const float& low_rt = 0.7f) noexcept;

@@ -4,7 +4,7 @@
 int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 {
     //Class object 
-    mrVSLAM::FeatureExtraction features; 
+    mrVSLAM::FeatureExtraction features("orb", false); 
 
     cv::Mat frame; 
     int start, end, framesPerSecond; 
@@ -35,8 +35,8 @@ int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
         auto begin = std::chrono::high_resolution_clock::now();
 
         //////// ----- Algorithm body ------ ///////// 
-        features.num_features = 200; 
-        features.getFeatures(frame, FeatureExtraction::desctiptor_T::orb); 
+       
+        features.getFeatures(frame); 
         features.matchFeaturesFlann( 0.6f); 
 
 
@@ -74,7 +74,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
 {
         //Class object 
-    mrVSLAM::FeatureExtraction features; 
+    mrVSLAM::FeatureExtraction features("orb", true); 
 
     cv::Mat frame; 
     cv::cuda::GpuMat gpu_frame; 
@@ -106,8 +106,7 @@ int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
 
         
         //////// ----- Algorithm body ------ ///////// 
-        features.num_features = 200; 
-        features.getFeatures(gpu_frame, FeatureExtraction::desctiptor_T::orb); 
+        features.getFeatures(gpu_frame); 
         features.matchGPUFeaturesBF( 0.6f); 
 
 
