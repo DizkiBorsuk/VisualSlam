@@ -1,7 +1,7 @@
 #include "../include/SLAM.hpp"
 #include "../include/FeatureExtraction.hpp"
 
-int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
+int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 {
     //Class object 
     mrVSLAM::FeatureExtraction features; 
@@ -21,10 +21,16 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
       return -1;
     }
 
-    while(sequence.isOpened())
+    while(true)
     {
         sequence.read(frame);
         
+        if(frame.empty())
+        {
+            std::cout << "End of sequance \n"; 
+            break;
+        }
+
         start = cv::getTickCount(); 
         auto begin = std::chrono::high_resolution_clock::now();
 
@@ -42,12 +48,12 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
         framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-        // cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
     
-        // for(int p = 0; p < features.matched_keypoints.size(); p++)
-        // {
-        //     cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
-        // }
+        for(int p = 0; p < features.matched_keypoints.size(); p++)
+        {
+            cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
+        }
         features.matched_keypoints.clear(); 
 
         cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
@@ -65,7 +71,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(std::string& imgs_path)
 }
 
 
-int mrVSLAM::SLAM::executeGPUMonoSLAM(std::string& imgs_path)
+int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
 {
         //Class object 
     mrVSLAM::FeatureExtraction features; 

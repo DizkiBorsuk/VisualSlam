@@ -22,6 +22,12 @@ namespace mrVSLAM
         
         cv::Ptr<cv::cuda::DescriptorMatcher> gpu_matcher; 
 
+
+        //
+        typedef std::vector<uint32_t> DescType;
+        void computeORB(const cv::Mat &frame, std::vector<cv::KeyPoint> &key_points, std::vector<DescType> &descriptors); 
+
+
     public:  
         enum desctiptor_T {sift, orb, surf, brief, akaze, brisk}; 
         //enum gpu_desctiptor_T{orb, surf, brief, akaze, brisk}; 
@@ -31,8 +37,8 @@ namespace mrVSLAM
         std::vector<cv::DMatch> good_matches; 
         std::vector<std::vector<cv::Point2i>> matched_keypoints; 
 
-        void getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type) noexcept; 
-        void getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type) noexcept;
+        void getFeatures(const cv::Mat &frame, const desctiptor_T& descriptor_type) noexcept; 
+        void getFeatures(const cv::cuda::GpuMat &frame, const desctiptor_T& descriptor_type) noexcept;
         void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
         void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
         void matchGPUFeaturesBF(const float& low_rt = 0.7f) noexcept;

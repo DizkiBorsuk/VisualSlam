@@ -7,8 +7,12 @@ mrVSLAM::KITTI_Dataset::KITTI_Dataset(const std::string& sequence)
     /*
         Inputs: sequence - number of sequence from kitti dataset (07, 06, 00)
     */
-    const std::string sequence_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences//"; 
-    const std::string gtp_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses//"; 
+    //const std::string sequence_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/sequences//"; 
+    //const std::string gtp_dir = "C:/Users/Maciek/Desktop/dev_workspace/Projects/VisualSlam/KITTY_dataset/ground_truth_poses//"; 
+    
+    const std::string sequence_dir = "../KITTY_dataset/sequences/"; 
+    const std::string gtp_dir = "../KITTY_dataset/ground_truth_poses/"; 
+    
     const std::string file = ".txt"; 
     const std::string calib_file = "/calib.txt"; 
     const std::string limg = "/image_0/00%04d.png"; 

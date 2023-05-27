@@ -2,7 +2,7 @@
 
 namespace mrVSLAM 
 {
-    void FeatureExtraction::getFeatures(cv::Mat frame, const desctiptor_T& descriptor_type) noexcept
+    void FeatureExtraction::getFeatures(const cv::Mat &frame, const desctiptor_T& descriptor_type) noexcept
     {
         switch(descriptor_type)
         {
@@ -92,7 +92,7 @@ namespace mrVSLAM
         prev_keyPs = keypoints; 
     }
 
-    void FeatureExtraction::getFeatures(cv::cuda::GpuMat frame, const desctiptor_T& descriptor_type) noexcept
+    void FeatureExtraction::getFeatures(const cv::cuda::GpuMat &frame, const desctiptor_T& descriptor_type) noexcept
     {
         switch(descriptor_type)
         {
