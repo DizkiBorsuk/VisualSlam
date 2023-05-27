@@ -13,10 +13,14 @@ namespace mrVSLAM
                 descriptor->compute(frame,keypoints,descriptors); 
                 break; 
             case orb: 
-                detector = cv::ORB::create(num_features);  
-                descriptor = cv::ORB::create(num_features); 
-                detector->detect(frame, keypoints);
-                descriptor->compute(frame,keypoints,descriptors); 
+                // detector = cv::ORB::create(num_features);  
+                // descriptor = cv::ORB::create(num_features); 
+                // detector->detect(frame, keypoints);
+                // descriptor->compute(frame,keypoints,descriptors); 
+                detector = cv::FastFeatureDetector::create(40); 
+                detector->detect(frame, keypoints); 
+
+
                 break; 
             case akaze: 
                 detector = cv::AKAZE::create(); 
