@@ -109,7 +109,7 @@ int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
 
         
         //////// ----- Algorithm body ------ ///////// 
-        features.getFeatures(gpu_frame); 
+        features.getGPUFeatures(gpu_frame); 
         //features.matchGPUFeaturesBF( 0.6f); 
 
 

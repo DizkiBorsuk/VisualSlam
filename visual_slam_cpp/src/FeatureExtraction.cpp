@@ -48,7 +48,7 @@ namespace mrVSLAM
         descriptor->compute(frame, frame_keypoints, descriptors); 
     }
 
-    void FeatureExtraction::getGPUFeatures(const cv::cuda::GpuMat &frame) noexcept
+    void FeatureExtraction::getGPUFeatures(const cv::cuda::GpuMat frame) noexcept
     {
         gpu_orb_extractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
         gpu_orb_extractor->detectAndComputeAsync(frame,cv::noArray(), gpu_keypoints, gpu_descriptors, false); 
