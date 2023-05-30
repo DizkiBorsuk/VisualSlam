@@ -1,10 +1,11 @@
 #include "../include/SLAM.hpp"
 #include "../include/FeatureExtraction.hpp"
 
+
 int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 {
     //Class object 
-    mrVSLAM::FeatureExtraction features("orb", false); 
+    mrVSLAM::FeatureExtraction features("orb_cv", false, 200); 
 
     cv::Mat frame; 
     int start, end, framesPerSecond; 
@@ -37,7 +38,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
         //////// ----- Algorithm body ------ ///////// 
        
         features.getFeatures(frame); 
-        features.matchFeaturesFlann( 0.6f); 
+        features.matchFeaturesFlann(0.6f); 
 
 
         //////// ----- Algorithm End ----- //////////
@@ -48,13 +49,15 @@ int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
         framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-        cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
     
         for(int p = 0; p < features.matched_keypoints.size(); p++)
         {
             cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
         }
+
         features.matched_keypoints.clear(); 
+        features.frame_keypoints.clear(); 
 
         cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
                     cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
@@ -74,7 +77,7 @@ int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
 {
         //Class object 
-    mrVSLAM::FeatureExtraction features("orb", true); 
+    mrVSLAM::FeatureExtraction features("orb", true,200); 
 
     cv::Mat frame; 
     cv::cuda::GpuMat gpu_frame; 
@@ -107,7 +110,7 @@ int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
         
         //////// ----- Algorithm body ------ ///////// 
         features.getFeatures(gpu_frame); 
-        features.matchGPUFeaturesBF( 0.6f); 
+        //features.matchGPUFeaturesBF( 0.6f); 
 
 
         //////// ----- Algorithm End ----- /////////
@@ -117,13 +120,14 @@ int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
         end = cv::getTickCount();
         framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
 
-        cv::drawKeypoints(frame, features.keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+        cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
         
         for(int p = 0; p < features.matched_keypoints.size(); p++)
         {
             cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
         }
         features.matched_keypoints.clear(); 
+        features.frame_keypoints.clear(); 
 
         cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
                     cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
