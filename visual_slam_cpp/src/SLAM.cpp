@@ -4,17 +4,18 @@
 
 int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 {
-    //Class object 
-    mrVSLAM::FeatureExtraction features("orb_cv", false, 200); 
+    //Class objects 
+    mrVSLAM::FeatureExtraction features("orb_cv", false, 200);
 
-    cv::Mat frame; 
+    // Variables 
+    cv::Mat frame(1266,370, CV_8UC1); // declare img size and type, super important 
     int start, end, framesPerSecond; 
 
+    // Create img sequence and get 
     cv::VideoCapture sequence; 
     sequence.open(imgs_path, cv::CAP_IMAGES);
-    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
-    framesPerSecond = sequence.get(cv::CAP_PROP_FPS); 
 
+    cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
     if (!sequence.isOpened())
     {
