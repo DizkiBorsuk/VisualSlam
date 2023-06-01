@@ -10,10 +10,15 @@ namespace mrVSLAM
 
         if(GPU == false)
         {
-            if(desType == "orb_cv")
+            if(desType == "orb_harris")
             {
-                detector = cv::ORB::create(numberOfFeatures);  
-                descriptor = cv::ORB::create(numberOfFeatures); 
+                detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);  
+                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20); 
+            }
+            else if(desType == "orb_fast")
+            {
+                detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40);  
+                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40); 
             }
             else if(desType == "orb")
             {   

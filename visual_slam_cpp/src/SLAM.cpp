@@ -5,7 +5,7 @@
 int mrVSLAM::SLAM::executeMonoSLAM(const std::string& imgs_path)
 {
     //Class objects 
-    mrVSLAM::FeatureExtraction features("orb_cv", false, 200);
+    mrVSLAM::FeatureExtraction features("akaze", false, 500);
 
     // Variables 
     cv::Mat frame(1266,370, CV_8UC1); // declare img size and type, super important 
@@ -81,7 +81,7 @@ int mrVSLAM::SLAM::executeGPUMonoSLAM(const std::string& imgs_path)
     mrVSLAM::FeatureExtraction features("orb", true,200); 
 
     cv::Mat frame; 
-    cv::cuda::GpuMat gpu_frame; 
+    cv::cuda::GpuMat gpu_frame(1266,370, CV_8UC1); 
     int start, end, framesPerSecond; 
 
     cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
