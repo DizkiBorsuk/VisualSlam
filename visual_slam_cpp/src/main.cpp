@@ -1,6 +1,6 @@
 
 #include "../include/system.hpp"
-#include "../include/SLAM.hpp"
+#include "../include/monoSLAM.hpp"
 #include "../include/readDataset.hpp"
 #include "../include/visualize_data.hpp"
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     //--------------------//
     /* Main algorithm */
     
-    mrVSLAM::SLAM slam; 
+    mrVSLAM::monoSLAM slam(kitti.P0); 
     slam.executeMonoSLAM(kitti.left_imgs_path); 
 
 

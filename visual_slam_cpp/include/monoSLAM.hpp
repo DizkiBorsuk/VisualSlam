@@ -4,7 +4,7 @@
 
 namespace mrVSLAM
 {
-    class SLAM
+    class monoSLAM
     {
     private: 
         Eigen::Matrix3d R; //rotation matrix 
@@ -15,6 +15,9 @@ namespace mrVSLAM
 
     public:
         int f_counter = 0; 
+
+        monoSLAM() noexcept {} 
+        monoSLAM(const Eigen::Matrix<double,3,4> projectionMatrix) noexcept; 
         int executeMonoSLAM(const std::string& imgs_path); 
         int executeGPUMonoSLAM(const std::string& imgs_path); 
         void executeStereoSLAM(const std::string& left_camera_path, std::string& right_camera_path, bool gpu = true);

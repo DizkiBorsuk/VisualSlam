@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include "Eigen/Dense"
+#include <cmath>
 
 #include <pangolin/display/display.h>
 #include <pangolin/display/view.h>
