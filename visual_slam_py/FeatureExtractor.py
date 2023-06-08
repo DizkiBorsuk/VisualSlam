@@ -4,7 +4,9 @@ import numpy as np
 
 class FeatureExtractor(object): 
     def __init__(self, num_of_features) -> None:
-        self.orb = cv2.ORB_create(); 
+        self.orb = cv2.ORB_create()
+        self.matcher = cv2.BFMatcher()
+        
         self.numKP = num_of_features
         self.last = None 
     
@@ -24,8 +26,14 @@ class FeatureExtractor(object):
         keypoints = [cv2.KeyPoint(x = corner[0][0], y = corner[0][1], size = 20) for corner in corners]
         descriptors = self.orb.compute(img, keypoints)
         #keypoints = cv2.KeyPoint_convert(corners, size=20)
+        self.last = {'keyPoints': keypoints, 'descriptors': descriptors}
         
         return keypoints, descriptors
     
-    def BFmatcher(img): 
-        pass 
+    def BFmatcher(self, img): 
+        
+        if self.last is not None: 
+            pass  
+        
+        
+        

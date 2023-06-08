@@ -4,10 +4,11 @@ from DatasetRead import *
 from FeatureExtractor import * 
 
 
+
 kitti = ImportKittyDataset("07")
 P0, K0, _, _ = kitti.getCameraMatrixies()
 
-featuresExtractor = FeatureExtractor() 
+featuresExtractor = FeatureExtractor(1000) 
 
 
 
