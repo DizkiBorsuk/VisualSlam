@@ -2,7 +2,8 @@
 
 namespace mrVSLAM 
 {
-    FeatureExtraction::FeatureExtraction(const std::string &desType, const bool GPU, const int numberOfFeatures) noexcept
+    // FeatureExtraction::FeatureExtraction(const std::string &desType, const bool GPU, const int numberOfFeatures) noexcept
+    FeatureExtraction::FeatureExtraction(const monoSLAM::ExtractorType extractor, const bool GPU, const int numberOfFeatures) noexcept
     {
         /* Feature extraction class constructor
         This constructor creates detector and descriptor objects based on specified descriptor type.
@@ -10,32 +11,32 @@ namespace mrVSLAM
 
         if(GPU == false)
         {
-            if(desType == "orb_harris")
+            switch (extractor)
             {
+            case monoSLAM::ExtractorType::orb_harris:
                 detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);  
-                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20); 
-            }
-            else if(desType == "orb_fast")
-            {
+                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);
+                break;
+            case monoSLAM::ExtractorType::orb_fast:
                 detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40);  
                 descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40); 
-            }
-            else if(desType == "orb")
-            {   
+                break; 
+            case monoSLAM::ExtractorType::orb:
                 detector = cv::FastFeatureDetector::create(40); 
-                descriptor = cv::ORB::create(numberOfFeatures); 
-            }
-            else if(desType == "sift")
-            {
+                descriptor = cv::ORB::create(numberOfFeatures);
+                break;
+            case monoSLAM::ExtractorType::sift:
                 detector = cv::SIFT::create(numberOfFeatures);  
                 descriptor = cv::SIFT::create(numberOfFeatures); 
-            }
-            else if(desType == "akaze")
-            {
+                break;
+            case monoSLAM::ExtractorType::akaze:
                 detector = cv::AKAZE::create(); 
                 descriptor = cv::AKAZE::create(); 
+                break;            
+            default:
+                
+                break;
             }
-            else{ std::cerr << "Wrong descriptor name" <<"\n"; }
         } 
         else 
         {
@@ -73,8 +74,8 @@ namespace mrVSLAM
         descriptors.convertTo(descriptors, CV_32F);
 
         std::vector<std::vector<cv::DMatch>> matches;
-        cv::Point2i keypoint1, keypoint2; 
-        std::vector<cv::Point2i> point_pair;  
+        cv::Point2f keypoint1, keypoint2; 
+        std::vector<cv::Point2f> point_pair;  
 
         if(!prev_descriptors.empty())
         {
@@ -103,8 +104,8 @@ namespace mrVSLAM
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
 
         std::vector<std::vector<cv::DMatch>> matches;
-        cv::Point2i keypoint1, keypoint2; 
-        std::vector<cv::Point2i> point_pair; 
+        cv::Point2f keypoint1, keypoint2; 
+        std::vector<cv::Point2f> point_pair; 
 
         if(!prev_descriptors.empty())
         {

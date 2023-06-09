@@ -1,5 +1,6 @@
 #pragma once 
 #include "system.hpp"
+#include "monoSLAM.hpp"
 
 namespace mrVSLAM
 {
@@ -9,10 +10,11 @@ namespace mrVSLAM
     public:  
         std::vector<cv::KeyPoint>  frame_keypoints; 
         std::vector<cv::DMatch> good_matches; 
-        std::vector<std::vector<cv::Point2i>> matched_keypoints; 
+        std::vector<std::vector<cv::Point2f>> matched_keypoints; 
 
         FeatureExtraction() noexcept {} //default constructor 
-        FeatureExtraction(const std::string &desType, const bool GPU, const int numberOfFeatures) noexcept; 
+        // FeatureExtraction(const std::string &desType, const bool GPU, const int numberOfFeatures) noexcept; 
+        FeatureExtraction(const monoSLAM::ExtractorType, const bool GPU, const int numberOfFeatures) noexcept;
 
         void getFeatures(const cv::Mat frame) noexcept; 
         void getGPUFeatures(const cv::cuda::GpuMat frame) noexcept;
