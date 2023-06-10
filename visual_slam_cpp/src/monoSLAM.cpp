@@ -7,30 +7,35 @@ namespace mrVSLAM
     {
         //decomposing projection matrix P to intrinsic/camera matrix K,
         K = projectionMatrix.block<3,3>(0,0); 
+        cx = K.coeff(0,2); 
+        cy = K.coeff(1,2); 
+        fx = K.coeff(0,0); 
+        fy = K.coeff(1,1); 
+        std::cout << "K = " << K << "\n" << "c_y = " << cy; 
 
     }
 
     void monoSLAM::poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points, std::vector<cv::DMatch> &matches)
     {   
-        cv::Mat cvF(3,3, CV_8UC1); 
-        cv::Mat cvE(3,3, CV_8UC1); 
-        cv::Mat cvH(3,3, CV_8UC1);
-        cv::Mat cvR(3,3, CV_8UC1);
-        cv::Mat cvt; 
+        // cv::Mat cvF(3,3, CV_8UC1); 
+        // cv::Mat cvE(3,3, CV_8UC1); 
+        // cv::Mat cvH(3,3, CV_8UC1);
+        // cv::Mat cvR(3,3, CV_8UC1);
+        // cv::Mat cvt; 
 
-        std::vector<cv::Point2f> points_frame1, points_frame2; 
+        // std::vector<cv::Point2f> points_frame1, points_frame2; 
 
-        for(auto points: matched_points)
-        {
-            points_frame1.emplace_back(points[0]); 
-            points_frame1.emplace_back(points[1]); 
-        }
+        // for(auto points: matched_points)
+        // {
+        //     points_frame1.emplace_back(points[0]); 
+        //     points_frame1.emplace_back(points[1]); 
+        // }
 
-        cvF = cv::findFundamentalMat(points_frame1, points_frame2, cv::FM_8POINT); 
-        std::cout << "F = " << cvF << "\n"; 
-        cvE = cv::findEssentialMat(points_frame1, points_frame2, fy, (cx, cy)); 
-        cvH = cv::findHomography(points_frame1, points_frame2, cv::RANSAC, 3); 
-        cv::recoverPose(cvE, points_frame1, points_frame2, cvR, cvt, fy, (cx,cy)); 
+        // cvF = cv::findFundamentalMat(points_frame1, points_frame2, cv::FM_8POINT); 
+        // std::cout << "F = " << cvF << "\n"; 
+        // cvE = cv::findEssentialMat(points_frame1, points_frame2, fy, (cx, cy)); 
+        // cvH = cv::findHomography(points_frame1, points_frame2, cv::RANSAC, 3); 
+        // cv::recoverPose(cvE, points_frame1, points_frame2, cvR, cvt, fy, (cx,cy)); 
     }
 
 

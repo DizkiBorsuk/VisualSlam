@@ -10,7 +10,10 @@ namespace mrVSLAM
         Eigen::Matrix3d R; //rotation matrix 
         Eigen::Vector3d t; //translation vector 
         Eigen::Matrix3d H, F, K, E;  //homography, fundamental, Intrinsic and essential matrix
-        float cx, cy; 
+
+        //camera parameters 
+        float cx, cy, fx, fy; 
+
         void poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points, std::vector<cv::DMatch> &matches); 
 
     public:
