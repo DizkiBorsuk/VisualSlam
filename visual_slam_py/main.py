@@ -7,7 +7,13 @@ from ComputeStereo import *
 
 
 kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
-P0, K0, P1, K1 = kitti.getCameraMatrixies() #get projection and camera matricies 
+P0, _, P1, _ = kitti.getCameraMatrixies() #get projection and camera matricies 
+
+K0, r0, t0 = cv2.decomposeProjectionMatrix(P0)
+t0 = (t0 / t0[3])[:3]
+K1, r1, t1 = cv2.decomposeProjectionMatrix(P1)
+t1 = (t1 / t1[3])[:3]
+
 
 featuresExtractor = FeatureExtractor(1000) # 
 
@@ -27,7 +33,7 @@ def stereo_slam(frame1, frame2):
     
     cv2.imshow("vSlam",disparityMap)
     cv2.waitKey(33)
-    pass
+
 
 if __name__ == "__main__": 
      
@@ -44,5 +50,6 @@ if __name__ == "__main__":
             
         else: 
             break
+        
     cap.release()
     cv2.destroyAllWindows()
