@@ -6,6 +6,7 @@ import os
 
 
 class ImportKittyDataset(): 
+    #class to  import kitti dataset and reshape projection matricies to correct form 
     def __init__(self, img_sequance):
         
         self.sequance_dir = '../KITTY_dataset/sequences/{}/'.format(img_sequance) # directory of images
@@ -19,9 +20,14 @@ class ImportKittyDataset():
         print('number of frames', self.imgs_num)
         
     def getGTposes(self): 
-        """
         
+        """ 
+        method to get ground truth poses in form of list of 3x4 matricies (Rotation+translation) 
+
+        Returns:
+            _type_: List of 3x4 matricies
         """
+
         ground_truth_poses = pd.read_csv(self.ground_truth_poses_dir, delimiter=' ', header=None) #read ground truth poses
         gt_poses =np.zeros((len(ground_truth_poses), 3, 4))
         
@@ -37,10 +43,11 @@ class ImportKittyDataset():
         --------
         Gets camera calibration data from calib.txt file and reshapes it to 3x4 matrix (homogeneous projection matrix)
         P - Projection matrix 
-        P = [fx 0 cx; 
+        P - k[R|t]
+        K - Intrinsic parameteres 
+        K = [fx 0 cx; 
              0  fy cy; 
              0  0  1] f-focal length, c - optical center(center of frame in respect to image coordinate system)
-        K - Intrinsic parameteres 
         P0, K0 - left camera
         P1, K1 - right camera 
         

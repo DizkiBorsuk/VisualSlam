@@ -2,17 +2,18 @@ import cv2
 import numpy as np 
 from DatasetRead import *
 from FeatureExtractor import * 
+from ComputeStereo import *
 
 
 
-kitti = ImportKittyDataset("07")
-P0, K0, _, _ = kitti.getCameraMatrixies()
+kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
+P0, K0, P1, K1 = kitti.getCameraMatrixies() #get projection and camera matricies 
 
-featuresExtractor = FeatureExtractor(1000) 
+featuresExtractor = FeatureExtractor(1000) # 
 
 
 
-def main(img): 
+def mono_slam(img): 
     
     keyPoints,descriptors = featuresExtractor.extractFeatures(img)
     for point in keyPoints: 
@@ -20,16 +21,27 @@ def main(img):
         cv2.circle(img, (u,v),color = (0,0,255), radius=3)
     cv2.imshow("vSlam",img)
     cv2.waitKey(33)
-
+    
+def stereo_slam(frame1, frame2): 
+    disparityMap = computeStereoCorrespondance(frame1, frame2, matcher_type = 'block_matching')
+    
+    cv2.imshow("vSlam",disparityMap)
+    cv2.waitKey(33)
+    pass
 
 if __name__ == "__main__": 
      
-    cap = cv2.VideoCapture("../KITTY_dataset/sequences/07//image_0/00%04d.png", cv2.CAP_IMAGES)
+    cap = cv2.VideoCapture("../KITTY_dataset/sequences/07/image_0/00%04d.png", cv2.CAP_IMAGES)
+    cap_right = cv2.VideoCapture("../KITTY_dataset/sequences/07/image_1/00%04d.png", cv2.CAP_IMAGES)
     
     while cap.isOpened():
         ret, frame = cap.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
+        ret2, frame_right = cap.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
+        
         if ret == True: 
-            main(frame)
+            #mono_slam(frame) 
+            stereo_slam(frame, frame_right)
+            
         else: 
             break
     cap.release()
