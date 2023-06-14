@@ -7,12 +7,11 @@ from ComputeStereo import *
 
 
 kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
-P0, _, P1, _ = kitti.getCameraMatrixies() #get projection and camera matricies 
-
-K0, r0, t0,_,_,_,_ = cv2.decomposeProjectionMatrix(P0)
-t0 = (t0 / t0[3])[:3]
-K1, r1, t1,_,_,_,_  = cv2.decomposeProjectionMatrix(P1)
-t1 = (t1 / t1[3])[:3]
+P_left, K_left, t_left, P_right, K_right, t_right = kitti.getCameraMatrixies() #get projection and camera matricies 
+print("t_left = ", t_left)
+print("t_rigt = ", t_right)
+print("K_right ", K_right)
+print("K_left = ", K_left)
 
 
 featuresExtractor = FeatureExtractor(1000) # 
@@ -31,8 +30,9 @@ def mono_slam(img):
 def stereo_slam(frame1, frame2): 
     
     disparityMap = computeStereoCorrespondance(frame1, frame2, matcher_type = 'block_matching')
-    depthMap = computeDepthMap(disparityMap=disparityMap, K_left=K0, t_left=t0, t_right=t1)
-    print(depthMap[300,1000])
+    depthMap = computeDepthMap(disparityMap, K_left, t_left, t_right)
+    print(depthMap)
+    
     
     cv2.imshow("vSlam",disparityMap)
     cv2.waitKey(33)
@@ -45,12 +45,12 @@ if __name__ == "__main__":
     
     while cap.isOpened():
         ret, frame = cap.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
-        ret2, frame_right = cap.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
+        ret2, frame_right = cap_right.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
         
         if ret == True: 
             #mono_slam(frame) 
             stereo_slam(frame, frame_right)
-            
+            #pass
         else: 
             break
         

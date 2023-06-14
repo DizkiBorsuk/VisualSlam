@@ -61,12 +61,13 @@ class ImportKittyDataset():
         P1 = np.array(calib.loc['P1:']).reshape((3,4)) # P0 and P1 are for grayscale images 
         P2 = np.array(calib.loc['P2:']).reshape((3,4)) # P2 and P3 are for RGB images
         P3 = np.array(calib.loc['P3:']).reshape((3,4))
-        K0 = P0[0:3, 0:3]
-        K1 = P1[0:3, 0:3]
-        #intrinsic1,rotation1,translation1,_,_,_,_ = cv.decomposeProjectionMatrix(P1)
-        print('Left camera matrix = \n', P0)
-        print('Right camera matrix = \n',P1)
-        return P0, K0, P1, K1 
+    
+        K0, R0, t0, _, _, _, _ = cv.decomposeProjectionMatrix(P0)
+        K1, R1, t1, _, _, _, _ = cv.decomposeProjectionMatrix(P1)
+        t0 = (t0 / t0[3])[:3]
+        t1 = (t1 / t1[3])[:3]
+
+        return P0, K0,t0, P1, K1,t1 
         
     
       
