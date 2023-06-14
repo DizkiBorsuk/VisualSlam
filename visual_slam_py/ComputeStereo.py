@@ -21,14 +21,16 @@ def computeStereoCorrespondance(left_img, right_img, matcher_type):
      
     return disparitie_map  
 
-def computeDepthMap(disparityMap, K_left, t_left, K_right, t_right): 
+def computeDepthMap(disparityMap, K_left, t_left, t_right): 
     
     fx1 = K_left[0][0]
 
     b = t_right[0] - t_left[0] # b - distance between cameras center points in x direction 
     
+    disparityMap[disparityMap == 0.0] = 0.1
+    disparityMap[disparityMap == -1.0] = 0.1
     
-    depthMap = np.ones(disparityMap.shape)
-    depthMap = fx1*b/disparityMap
+    depthMap = np.zeros(disparityMap.shape)
+    depthMap = fx1*b//disparityMap
     
     return depthMap 

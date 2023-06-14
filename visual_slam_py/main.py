@@ -9,9 +9,9 @@ from ComputeStereo import *
 kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
 P0, _, P1, _ = kitti.getCameraMatrixies() #get projection and camera matricies 
 
-K0, r0, t0 = cv2.decomposeProjectionMatrix(P0)
+K0, r0, t0,_,_,_,_ = cv2.decomposeProjectionMatrix(P0)
 t0 = (t0 / t0[3])[:3]
-K1, r1, t1 = cv2.decomposeProjectionMatrix(P1)
+K1, r1, t1,_,_,_,_  = cv2.decomposeProjectionMatrix(P1)
 t1 = (t1 / t1[3])[:3]
 
 
@@ -29,7 +29,10 @@ def mono_slam(img):
     cv2.waitKey(33)
     
 def stereo_slam(frame1, frame2): 
+    
     disparityMap = computeStereoCorrespondance(frame1, frame2, matcher_type = 'block_matching')
+    depthMap = computeDepthMap(disparityMap=disparityMap, K_left=K0, t_left=t0, t_right=t1)
+    print(depthMap[300,1000])
     
     cv2.imshow("vSlam",disparityMap)
     cv2.waitKey(33)
