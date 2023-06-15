@@ -33,7 +33,7 @@ namespace mrVSLAM
                 detector = cv::AKAZE::create(); 
                 descriptor = cv::AKAZE::create(); 
                 break;            
-            default:
+            default: 
                 
                 break;
             }

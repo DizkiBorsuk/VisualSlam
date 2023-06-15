@@ -29,7 +29,10 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 
-add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp src/monoSLAM.cpp src/FeatureExtraction.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp src/readDataset.cpp 
+                                                                   src/monoSLAM.cpp 
+                                                                   src/FeatureExtraction.cpp
+                                                                   src/stereoSLAM.cpp)
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 

@@ -3,7 +3,7 @@
 
 namespace mrVSLAM
 {
-    monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> projectionMatrix) noexcept
+    monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
     {
         //decomposing projection matrix P to intrinsic/camera matrix K,
         K = projectionMatrix.block<3,3>(0,0); 

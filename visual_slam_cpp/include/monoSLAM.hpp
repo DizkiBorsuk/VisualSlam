@@ -21,7 +21,7 @@ namespace mrVSLAM
         std::array<double,6> x_t; // object state x_t = [x,y,z, phi,theta,gamma]
 
         monoSLAM() noexcept {} 
-        monoSLAM(const Eigen::Matrix<double,3,4> projectionMatrix) noexcept; 
+        monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept; 
         int executeMonoSLAM(const std::string& imgs_path); 
         int executeGPUMonoSLAM(const std::string& imgs_path); 
 
