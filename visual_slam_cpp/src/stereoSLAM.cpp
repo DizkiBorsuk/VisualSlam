@@ -1,7 +1,24 @@
 #include "../include/stereoSLAM.hpp"
+#include <cmath>
 
 namespace mrVSLAM
 {
+    StereoSLAM::StereoSLAM(const Eigen::Matrix<double,3,4> &P_left, const Eigen::Matrix<double,3,4> &P_right, const int &stereoMatcherType)
+    {
+        if(stereoMatcherType == 1)
+        {
+            stereoMatcher = cv::StereoBM::create(numOfDisparities, blockSize); 
+        }
+        else if(stereoMatcherType == 2)
+        {
+            stereoMatcher == cv::StereoSGBM::create(0, numOfDisparities,blockSize, pow(16*sad_window,2), pow(96*sad_window,2), 0, 0, 0, 0, 0, cv::StereoSGBM::MODE_SGBM_3WAY); 
+        }
+        else
+        {
+
+        }
+    }
+
     int StereoSLAM::executeStereoSLAM(const std::string& left_imgs_path, const std::string& right_imgs_path)
     {
 
@@ -35,6 +52,18 @@ namespace mrVSLAM
 
             
         }
+
+    }
+
+    void computeDisparityMap(const cv::Mat &left_img, const cv::Mat &right_img); 
+    {
+
+
+        if(stereoMatcherType == 1)
+        {
+
+        }
+        
 
     }
 
