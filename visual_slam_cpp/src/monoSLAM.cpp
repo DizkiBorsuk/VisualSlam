@@ -46,7 +46,7 @@ namespace mrVSLAM
         mrVSLAM::FeatureExtraction features(ExtractorType::orb_fast, false, 500);
     
         // Variables 
-        cv::Mat frame(370, 1226, CV_8UC1); // declare img size and type, super important 
+        cv::Mat frame(370, 1226,CV_8UC1); // declare img size and type, super important 
         int start, end, framesPerSecond; 
 
         // Create img sequence and get 
