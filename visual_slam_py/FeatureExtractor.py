@@ -5,7 +5,7 @@ import numpy as np
 class FeatureExtractor(object): 
     def __init__(self, num_of_features) -> None:
         self.orb = cv2.ORB_create()
-        self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
         
         self.numKP = num_of_features
         self.last = None 
@@ -33,18 +33,18 @@ class FeatureExtractor(object):
     
     def BFmatcher(self, keypoints, descriptors): 
 
-        matches = []
+        return_matches = []
         if self.last != None: 
-            matches = self.matcher.match(descriptors,self.last[1])  
+            matches = self.matcher.knnMatch(descriptors,self.last[1],2)  
             for m,n in matches:
                 if m.distance < 0.75*n.distance:
                     keypoint1 = keypoints[m.queryIdx].pt
                     keypoint2 = self.last[0][m.trainIdx].pt
-                    matches.append((keypoint1,keypoint2))
+                    return_matches.append((keypoint1,keypoint2))
         
         self.last = [keypoints,descriptors]
         
-        return matches
+        return return_matches
         
         
         

@@ -17,13 +17,15 @@ featuresExtractor = FeatureExtractor(1000) #
 
 def mono_slam(img): 
     
-    keyPoints,descriptors, matches = featuresExtractor.extractFeatures(img)
+    keyPoints,descriptors = featuresExtractor.extractFeatures(img)
     
-    # matches = featuresExtractor.BFmatcher(keyPoints, descriptors)
+    matches = featuresExtractor.BFmatcher(keyPoints, descriptors)
     
-    for point in keyPoints: 
-        u,v = map(lambda x: int(round(x)), point.pt) # img coordinates of each KeyPoint 
-        cv2.circle(img, (u,v),color = (0,0,255), radius=3)
+    for matched_point1, mathced_point2 in matches: 
+        u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
+        u2,v2 = map(lambda x: int(round(x)), mathced_point2)
+        cv2.circle(img, (u1,v1),color = (0,0,255), radius=3)
+        cv2.line(img,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
     cv2.imshow("vSlam",img)
     cv2.waitKey(33)
     
@@ -31,10 +33,10 @@ def stereo_slam(frame1, frame2):
     
     disparityMap = computeStereoCorrespondance(frame1, frame2, matcher_type = 'sgbm') #block_matching or sgbm
     depthMap = computeDepthMap(disparityMap, K_left, t_left, t_right)
-    print(depthMap)
+    print(disparityMap.size)
     
-    # cv2.imshow("vSlam",disparityMap)
-    # cv2.waitKey(33)
+    cv2.imshow("vSlam",disparityMap)
+    cv2.waitKey(33)
 
 
 if __name__ == "__main__": 
