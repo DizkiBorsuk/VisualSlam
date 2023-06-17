@@ -6,12 +6,11 @@ namespace mrVSLAM
     monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
     {
         //decomposing projection matrix P to intrinsic/camera matrix K,
-        //K = projectionMatrix.block<3,3>(0,0); 
+        K = projectionMatrix.block<3,3>(0,0); 
         cx = projectionMatrix.coeff(0,2); 
         cy = projectionMatrix.coeff(1,2); 
         fx = projectionMatrix.coeff(0,0); 
         fy = projectionMatrix.coeff(1,1); 
-        std::cout << "K = " << K << "\n" << "c_y = " << cy; 
 
     }
 
@@ -55,8 +54,8 @@ namespace mrVSLAM
 
         if (!sequence.isOpened())
         {
-        std::cerr << "Failed to open Image Sequence!\n"; 
-        return -1;
+            std::cerr << "Failed to open Image Sequence!\n"; 
+            return -1;
         }
 
         while(true)
@@ -76,7 +75,7 @@ namespace mrVSLAM
         
             features.getFeatures(frame); 
             //features.matchFeaturesBF(0.75f); 
-            features.matchFeaturesFlann(0.7f); 
+            features.matchFeaturesFlann(0.6f); 
 
             //////// ----- Algorithm End ----- //////////
 
@@ -86,11 +85,11 @@ namespace mrVSLAM
             framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-            // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+            // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
             for(int p = 0; p < features.matched_keypoints.size(); p++)
-            {
-                cv::circle(frame, features.matched_keypoints[p][0], 3, cv::Scalar::all(-1));
+            { 
+                cv::circle(frame, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
                 cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
             }
 

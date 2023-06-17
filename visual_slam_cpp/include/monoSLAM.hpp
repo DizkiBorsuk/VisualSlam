@@ -7,13 +7,13 @@ namespace mrVSLAM
     class monoSLAM
     {
     private: 
-        // Eigen::Matrix3d R; //rotation matrix 
-        // Eigen::Vector3d t; //translation vector 
-        // Eigen::Matrix3d H, F, K, E;  //homography, fundamental, Intrinsic and essential matrix
-        cv::Mat R, H, F, K, E, t; 
+        Eigen::Matrix3d R; //rotation matrix 
+        Eigen::Vector3d t; //translation vector 
+        Eigen::Matrix3d H, F, K, E;  //homography, fundamental, Intrinsic and essential matrix
+        //cv::Mat R, H, F, K, E, t; 
 
         //camera parameters 
-        float cx, cy, fx, fy; 
+        float cx, cy, fx, fy; // fx should be the same as fy 
 
         void poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points, std::vector<cv::DMatch> &matches); 
 
