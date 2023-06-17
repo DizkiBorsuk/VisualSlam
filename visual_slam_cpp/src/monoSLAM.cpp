@@ -38,8 +38,6 @@ namespace mrVSLAM
         // cv::recoverPose(cvE, points_frame1, points_frame2, cvR, cvt, fy, (cx,cy)); 
     }
 
-
-
     int mrVSLAM::monoSLAM::executeMonoSLAM(const std::string& imgs_path)
     {
         //Class objects 
@@ -77,8 +75,8 @@ namespace mrVSLAM
             //////// ----- Algorithm body ------ ///////// 
         
             features.getFeatures(frame); 
-            features.matchFeaturesFlann(0.6f); 
-
+            //features.matchFeaturesBF(0.75f); 
+            features.matchFeaturesFlann(0.7f); 
 
             //////// ----- Algorithm End ----- //////////
 
@@ -88,10 +86,11 @@ namespace mrVSLAM
             framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-            cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
+            // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
         
             for(int p = 0; p < features.matched_keypoints.size(); p++)
             {
+                cv::circle(frame, features.matched_keypoints[p][0], 3, cv::Scalar::all(-1));
                 cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
             }
 

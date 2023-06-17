@@ -24,8 +24,6 @@ namespace mrVSLAM
 
         cv::Mat left_frame(370,1226, CV_8UC1); 
         cv::Mat right_frame(370,1226, CV_8UC1); 
-        cv::Mat left_frame(370, 1226, CV_8UC1); 
-        cv::Mat right_frame(370, 1226, CV_8UC1); 
         int start, end, framesPerSecond; 
 
         cv::VideoCapture left_sequence; 
@@ -58,15 +56,9 @@ namespace mrVSLAM
 
     }
 
-    void computeDisparityMap(const cv::Mat &left_img, const cv::Mat &right_img); 
+    void computeDisparityMap(const cv::Mat &left_img, const cv::Mat &right_img)
     {
 
-
-        if(stereoMatcherType == 1)
-        {
-
-        }
-        
 
     }
 

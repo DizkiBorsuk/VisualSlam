@@ -7,9 +7,10 @@ namespace mrVSLAM
     class monoSLAM
     {
     private: 
-        Eigen::Matrix3d R; //rotation matrix 
-        Eigen::Vector3d t; //translation vector 
-        Eigen::Matrix3d H, F, K, E;  //homography, fundamental, Intrinsic and essential matrix
+        // Eigen::Matrix3d R; //rotation matrix 
+        // Eigen::Vector3d t; //translation vector 
+        // Eigen::Matrix3d H, F, K, E;  //homography, fundamental, Intrinsic and essential matrix
+        cv::Mat R, H, F, K, E, t; 
 
         //camera parameters 
         float cx, cy, fx, fy; 
