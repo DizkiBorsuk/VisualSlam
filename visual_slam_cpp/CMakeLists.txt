@@ -10,7 +10,9 @@ IF(WIN32)
     set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
 ELSE()
-
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
 ENDIF()
 
 
@@ -41,7 +43,8 @@ add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp
                                             src/readDataset.cpp 
                                             src/monoSLAM.cpp 
                                             src/FeatureExtraction.cpp
-                                            src/stereoSLAM.cpp)
+                                            src/stereoSLAM.cpp
+                                            src/tools.cpp)
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
