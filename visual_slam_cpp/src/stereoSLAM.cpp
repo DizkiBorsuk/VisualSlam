@@ -11,7 +11,7 @@ namespace mrVSLAM
         }
         else if(stereoMatcherType == 2)
         {
-            //stereoMatcher == cv::StereoSGBM::create(0, numOfDisparities,blockSize, pow(16*sad_window,2), pow(96*sad_window,2), 0, 0, 0, 0, 0, cv::StereoSGBM::MODE_SGBM_3WAY); 
+            stereoMatcher = cv::StereoSGBM::create(0, numOfDisparities,blockSize, pow(16*sad_window,2), pow(96*sad_window,2), 0, 0, 0, 0, 0, cv::StereoSGBM::MODE_SGBM_3WAY); 
         }
         else
         {
