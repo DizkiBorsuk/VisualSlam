@@ -53,7 +53,7 @@ namespace mrVSLAM
 
             
         }
-
+        return 0; 
     }
 
     void computeDisparityMap(const cv::Mat &left_img, const cv::Mat &right_img)

@@ -6,11 +6,11 @@ namespace mrVSLAM
     monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
     {
         //decomposing projection matrix P to intrinsic/camera matrix K,
-        K = projectionMatrix.block<3,3>(0,0); 
-        cx = K.coeff(0,2); 
-        cy = K.coeff(1,2); 
-        fx = K.coeff(0,0); 
-        fy = K.coeff(1,1); 
+        //K = projectionMatrix.block<3,3>(0,0); 
+        cx = projectionMatrix.coeff(0,2); 
+        cy = projectionMatrix.coeff(1,2); 
+        fx = projectionMatrix.coeff(0,0); 
+        fy = projectionMatrix.coeff(1,1); 
         std::cout << "K = " << K << "\n" << "c_y = " << cy; 
 
     }

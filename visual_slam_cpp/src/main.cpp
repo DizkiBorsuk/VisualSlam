@@ -30,8 +30,6 @@ int main(int argc, char** argv)
     slam.executeMonoSLAM(kitti.left_imgs_path); 
 
 
-
-
     //-------------------//
     
     //cv::cuda::resetDevice(); 

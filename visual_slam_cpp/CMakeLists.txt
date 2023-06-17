@@ -2,9 +2,14 @@ cmake_minimum_required(VERSION 3.15)
 project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 17)
+set(CMAKE_BUILD_TYPE "Release")
 
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
-set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
+IF(WIN32)
+    set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
+    set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
+ELSE()
+ENDIF()
+
 
 find_package(OpenCV REQUIRED)
 find_package(Pangolin REQUIRED)
