@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     //cv::cuda::resetDevice(); 
     /* Results */
 
-    mrVSLAM::plotPoses(kitti.ground_truth_poses, slam.f_counter); 
+    mrVSLAM::plotPoses(kitti.ground_truth_poses, slam.poses, slam.f_counter); 
 
 
     return 0; 

@@ -25,8 +25,12 @@ namespace mrVSLAM
         return essentialMatrix; 
     }
 
+    void decomposeProjectionMatrix(const Eigen::Matrix<double,3,4> &projectionMatrix, 
+                                   const Eigen::Matrix3d &K, 
+                                   const Eigen::Matrix3d &R, 
+                                   const Eigen::Vector3d &t)
+    {
+        
 
-
-
-
+    }
 }

@@ -6,35 +6,50 @@ namespace mrVSLAM
     monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
     {
         //decomposing projection matrix P to intrinsic/camera matrix K,
-        K = projectionMatrix.block<3,3>(0,0); 
+        // K = projectionMatrix.block<3,3>(0,0);
+
+        cv::eigen2cv(projectionMatrix, P); 
+        cv::decomposeProjectionMatrix(P, K, R, t_h); 
+        t = (cv::Mat_<double>(3,1) <<0,0,0); 
         cx = projectionMatrix.coeff(0,2); 
         cy = projectionMatrix.coeff(1,2); 
         fx = projectionMatrix.coeff(0,0); 
         fy = projectionMatrix.coeff(1,1); 
+        std::cout << "cx = " << cx <<"\n cy = " << cy <<"\n f = " <<fx <<"\n"; 
+        std::cout << "t = " << t << "R = " << R << "\n K = " << K << "\n"; 
 
     }
 
-    void monoSLAM::poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points, std::vector<cv::DMatch> &matches)
+    void monoSLAM::poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points)
     {   
-        // cv::Mat cvF(3,3, CV_8UC1); 
-        // cv::Mat cvE(3,3, CV_8UC1); 
-        // cv::Mat cvH(3,3, CV_8UC1);
-        // cv::Mat cvR(3,3, CV_8UC1);
-        // cv::Mat cvt; 
+        std::vector<cv::Point2f> points_frame1, points_frame2; 
+        cv::Point2f principialPoint(cx,cy); 
 
-        // std::vector<cv::Point2f> points_frame1, points_frame2; 
 
-        // for(auto points: matched_points)
-        // {
-        //     points_frame1.emplace_back(points[0]); 
-        //     points_frame1.emplace_back(points[1]); 
-        // }
+        std::cout << "mathced points size = " << matched_points.size() << "\n"; 
+        if(matched_points.size() >= 8)
+        {
+            for(int i = 0; i < matched_points.size(); i++)
+            {
+                points_frame1.emplace_back(matched_points[i][0]); 
+                points_frame2.emplace_back(matched_points[i][1]); 
+            }
 
-        // cvF = cv::findFundamentalMat(points_frame1, points_frame2, cv::FM_8POINT); 
-        // std::cout << "F = " << cvF << "\n"; 
-        // cvE = cv::findEssentialMat(points_frame1, points_frame2, fy, (cx, cy)); 
-        // cvH = cv::findHomography(points_frame1, points_frame2, cv::RANSAC, 3); 
-        // cv::recoverPose(cvE, points_frame1, points_frame2, cvR, cvt, fy, (cx,cy)); 
+            F = cv::findFundamentalMat(points_frame1, points_frame2, cv::FM_8POINT); 
+            std::cout << "F = " << F << "\n"; 
+            E = cv::findEssentialMat(points_frame1, points_frame2, fy, principialPoint); 
+            H = cv::findHomography(points_frame1, points_frame2, cv::RANSAC, 3); 
+            cv::recoverPose(E, points_frame1, points_frame2, R, t, fy, principialPoint);
+            std::cout << "R = " << R <<"\n t = " << t << "\n";
+            cv::cv2eigen(R,R_e); 
+            cv::cv2eigen(t, t_e); 
+            
+            Rt << R_e, t_e; 
+            
+            std::cout << "Rt = " << Rt <<"\n";
+            poses.emplace_back(Rt); 
+        }
+  
     }
 
     int mrVSLAM::monoSLAM::executeMonoSLAM(const std::string& imgs_path)
@@ -75,8 +90,10 @@ namespace mrVSLAM
         
             features.getFeatures(frame); 
             //features.matchFeaturesBF(0.75f); 
-            features.matchFeaturesFlann(0.6f); 
-
+            features.matchFeaturesFlann(0.6f);  
+            poseEstimationEpiCons(features.matched_keypoints); 
+            
+ ; 
             //////// ----- Algorithm End ----- //////////
 
             

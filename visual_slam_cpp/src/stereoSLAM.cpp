@@ -36,8 +36,8 @@ namespace mrVSLAM
 
         if (!left_sequence.isOpened() || !right_sequence.isOpened())
         {
-        std::cerr << "Failed to open Image Sequence!\n"; 
-        return -1;
+            std::cerr << "Failed to open Image Sequence!\n"; 
+            return -1;
         }
 
         while(true)

@@ -2,8 +2,8 @@
 
 namespace plt = matplotlibcpp; 
 
-void mrVSLAM::plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, 
-                        std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& poses, const int num_of_frames)
+void mrVSLAM::plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, 
+                        std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &poses, const int num_of_frames)
 {
     /*
     Function to visualize estimated poses and ground truth poses on 2D plot 
