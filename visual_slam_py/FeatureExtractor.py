@@ -1,15 +1,19 @@
 import cv2 
 import numpy as np
-
+from skimage.measure import ransac 
+from skimage.transform import FundamentalMatrixTransform 
+from skimage.transform import EssentialMatrixTransform
 
 class FeatureExtractor(object): 
-    def __init__(self, num_of_features) -> None:
-        self.orb = cv2.ORB_create()
+    def __init__(self, num_of_features, cx, cy) -> None:
+        self.orb = cv2.ORB_create(num_of_features)
         self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
         
         self.numKP = num_of_features
         self.last = None 
         self.prev_KP = None
+        self.cx = cx
+        self.cy = cy
     
     def extractFeatures(self,img):
         # GY, GX = 10, 2
@@ -43,6 +47,26 @@ class FeatureExtractor(object):
                     return_matches.append((keypoint1,keypoint2))
         
         self.last = [keypoints,descriptors]
+        
+        print("number of matches pre ransac: ", len(return_matches))
+        
+        if len(return_matches) > 10: 
+            return_matches = np.array(return_matches)
+            
+            ## Normalizacja koordynat - znalezienie srodka 
+            return_matches[:,:,0] -=  self.cx
+            return_matches[:,:,1] -=  self.cy
+            
+            #filtracja matchy 
+            model, inliers = ransac((return_matches[:,0], return_matches[:,1]),
+                                    #EssentialMatrixTransform,
+                                    FundamentalMatrixTransform, 
+                                    min_samples = 8, 
+                                    residual_threshold=1, 
+                                    max_trials=100)
+            
+            return_matches = return_matches[inliers]
+            print("number of matches after ransac: ", len(return_matches))
         
         return return_matches
         
