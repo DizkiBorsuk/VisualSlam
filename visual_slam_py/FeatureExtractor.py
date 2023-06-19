@@ -5,16 +5,21 @@ from skimage.transform import FundamentalMatrixTransform
 from skimage.transform import EssentialMatrixTransform
 
 class FeatureExtractor(object): 
-    def __init__(self, num_of_features, cx, cy) -> None:
+    def __init__(self, num_of_features, intrinsicMatrix) -> None:
         self.orb = cv2.ORB_create(num_of_features)
         self.matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
         
         self.numKP = num_of_features
+        self.K = intrinsicMatrix
+        self.Kinv = np.linalg.inv(self.K)
+        self.cx = intrinsicMatrix[0][2]
+        self.cy = intrinsicMatrix[1][2]
+        self.f = intrinsicMatrix[0][0]
+        
         self.last = None 
         self.prev_KP = None
-        self.cx = cx
-        self.cy = cy
-    
+        
+
     def extractFeatures(self,img):
         # GY, GX = 10, 2
         
@@ -41,7 +46,7 @@ class FeatureExtractor(object):
         if self.last != None: 
             matches = self.matcher.knnMatch(descriptors,self.last[1],2)  
             for m,n in matches:
-                if m.distance < 0.75*n.distance:
+                if m.distance < 0.5*n.distance:
                     keypoint1 = keypoints[m.queryIdx].pt
                     keypoint2 = self.last[0][m.trainIdx].pt
                     return_matches.append((keypoint1,keypoint2))
@@ -67,6 +72,7 @@ class FeatureExtractor(object):
             
             return_matches = return_matches[inliers]
             print("number of matches after ransac: ", len(return_matches))
+            print("Fundamental matrix = \n", model.params)
         
         return return_matches
         

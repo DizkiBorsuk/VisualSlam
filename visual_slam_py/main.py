@@ -9,15 +9,16 @@ from tools import *
 
 
 kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
-P_left, K_left, t_left, P_right, K_right, t_right = kitti.getCameraMatrixies() #get projection and camera matricies 
-cx = K_left[0][2]
-cy = K_left[1][2]
-print("K = ", K_left)
+P, K, t, P_right, K_right, t_right = kitti.getCameraMatrixies() #get projection and camera matricies 
+cx = K[0][2]
+cy = K[1][2]
+f = K[0][0]
+print("K = ", K)
 print("cx = ", cx)
 print("cy = ", cy)
 
 
-featuresExtractor = FeatureExtractor(800, cx, cy) # 
+featuresExtractor = FeatureExtractor(800, K) # 
 
 
 
@@ -46,7 +47,7 @@ def mono_slam(img):
 def stereo_slam(frame1, frame2): 
     
     disparityMap = computeStereoCorrespondance(frame1, frame2, matcher_type = 'sgbm') #block_matching or sgbm
-    depthMap = computeDepthMap(disparityMap, K_left, t_left, t_right)
+    depthMap = computeDepthMap(disparityMap, K, t, t_right)
     print(disparityMap.size)
     
     cv2.imshow("vSlam",disparityMap)
