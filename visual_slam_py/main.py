@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from DatasetRead import *
 from FeatureExtractor import * 
 from ComputeStereo import *
+from tools import *
 
 
 
@@ -26,16 +27,18 @@ def mono_slam(img):
     matches = featuresExtractor.BFmatcher(keyPoints, descriptors)
     
     for matched_point1, matched_point2 in matches: 
-        u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
-        u2,v2 = map(lambda x: int(round(x)), matched_point2)
-        #denormalizacja 
-        u1 += cx
-        u2 += cx
-        v1 += cy
-        v2 += cy
+        # u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
+        # u2,v2 = map(lambda x: int(round(x)), matched_point2)
+        # #denormalizacja 
+        # u1 += cx
+        # u2 += cx
+        # v1 += cy
+        # v2 += cy
+        u1,v1 = denormalize(matched_point1, cx, cy)
+        u2,v2 = denormalize(matched_point2, cx, cy)
         
-        cv2.circle(img, (u1.astype(int),v1.astype(int)),color = (0,0,255), radius=3)
-        cv2.line(img,(u1.astype(int),v1.astype(int)),(u2.astype(int),v2.astype(int)),color = (255,0,0), thickness = 2)
+        cv2.circle(img, (u1,v1),color = (0,0,255), radius=3)
+        cv2.line(img,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
         
     cv2.imshow("vSlam",img)
     cv2.waitKey(33)
