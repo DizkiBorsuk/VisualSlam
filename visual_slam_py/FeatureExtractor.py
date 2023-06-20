@@ -3,6 +3,7 @@ import numpy as np
 from skimage.measure import ransac 
 from skimage.transform import FundamentalMatrixTransform 
 from skimage.transform import EssentialMatrixTransform
+from tools import *
 
 class FeatureExtractor(object): 
     def __init__(self, num_of_features, intrinsicMatrix) -> None:
@@ -46,7 +47,7 @@ class FeatureExtractor(object):
         if self.last != None: 
             matches = self.matcher.knnMatch(descriptors,self.last[1],2)  
             for m,n in matches:
-                if m.distance < 0.5*n.distance:
+                if m.distance < 0.6*n.distance:
                     keypoint1 = keypoints[m.queryIdx].pt
                     keypoint2 = self.last[0][m.trainIdx].pt
                     return_matches.append((keypoint1,keypoint2))
@@ -56,21 +57,22 @@ class FeatureExtractor(object):
         print("number of matches pre ransac: ", len(return_matches))
         
         if len(return_matches) > 10: 
-            return_matches = np.array(return_matches)
             
+            return_matches = np.array(return_matches)
             ## Normalizacja koordynat - znalezienie srodka 
-            return_matches[:,:,0] -=  self.cx
-            return_matches[:,:,1] -=  self.cy
+            return_matches[:,0,:]  = normalize(return_matches[:,0,:], self.Kinv)
+            return_matches[:,1,:]  = normalize(return_matches[:,1,:], self.Kinv)
             
             #filtracja matchy 
             model, inliers = ransac((return_matches[:,0], return_matches[:,1]),
                                     #EssentialMatrixTransform,
-                                    FundamentalMatrixTransform, 
+                                    FundamentalMatrixTransform,
                                     min_samples = 8, 
-                                    residual_threshold=1, 
+                                    residual_threshold=0.001, 
                                     max_trials=100)
             
             return_matches = return_matches[inliers]
+            #print("matches = ", return_matches)
             print("number of matches after ransac: ", len(return_matches))
             print("Fundamental matrix = \n", model.params)
         

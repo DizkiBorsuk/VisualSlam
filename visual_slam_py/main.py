@@ -18,7 +18,7 @@ print("cx = ", cx)
 print("cy = ", cy)
 
 
-featuresExtractor = FeatureExtractor(800, K) # 
+featuresExtractor = FeatureExtractor(1000, K) # 
 
 
 
@@ -35,8 +35,8 @@ def mono_slam(img):
         # u2 += cx
         # v1 += cy
         # v2 += cy
-        u1,v1 = denormalize(matched_point1, cx, cy)
-        u2,v2 = denormalize(matched_point2, cx, cy)
+        u1,v1 = denormalize(matched_point1, K)
+        u2,v2 = denormalize(matched_point2, K)
         
         cv2.circle(img, (u1,v1),color = (0,0,255), radius=3)
         cv2.line(img,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
