@@ -47,7 +47,7 @@ class FeatureExtractor(object):
         if self.last != None: 
             matches = self.matcher.knnMatch(descriptors,self.last[1],2)  
             for m,n in matches:
-                if m.distance < 0.6*n.distance:
+                if m.distance < 0.75*n.distance:
                     keypoint1 = keypoints[m.queryIdx].pt
                     keypoint2 = self.last[0][m.trainIdx].pt
                     return_matches.append((keypoint1,keypoint2))
@@ -65,10 +65,9 @@ class FeatureExtractor(object):
             
             #filtracja matchy 
             model, inliers = ransac((return_matches[:,0], return_matches[:,1]),
-                                    #EssentialMatrixTransform,
-                                    FundamentalMatrixTransform,
+                                    EssentialMatrixTransform,
                                     min_samples = 8, 
-                                    residual_threshold=0.001, 
+                                    residual_threshold=0.005, 
                                     max_trials=100)
             
             return_matches = return_matches[inliers]
