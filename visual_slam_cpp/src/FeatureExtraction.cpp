@@ -80,11 +80,11 @@ namespace mrVSLAM
 
         if(!prev_descriptors.empty())
         {
-            matcher->knnMatch(descriptors, prev_descriptors, matches, 2); 
+            matcher->knnMatch(descriptors, prev_descriptors, matches, 2); // finds 2 best matches for descriptors 
 
             for (size_t i = 0; i < matches.size(); i++)
             {
-                if (matches[i][0].distance < low_rt * matches[i][1].distance)
+                if (matches[i][0].distance < low_rt * matches[i][1].distance) // compare 1 best match with second best match  
                 {
                     good_matches.emplace_back(matches[i][0]);
                     keypoint1 = frame_keypoints[matches[i][0].queryIdx].pt;  

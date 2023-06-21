@@ -26,22 +26,27 @@ def mono_slam(img):
     
     keyPoints,descriptors = featuresExtractor.extractFeatures(img)
     matches = featuresExtractor.BFmatcher(keyPoints, descriptors)
+    pose = featuresExtractor.getPose() 
+    print("Rt = \n", pose)
+    
+    img_rgb = cv2.cvtColor(img,cv.COLOR_GRAY2BGR) 
     
     for matched_point1, matched_point2 in matches: 
         # u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
         # u2,v2 = map(lambda x: int(round(x)), matched_point2)
-        # #denormalizacja 
-        # u1 += cx
-        # u2 += cx
-        # v1 += cy
-        # v2 += cy
+        #denormalizacja 
+        # u1 += int(round(cx))
+        # u2 += int(round(cx))
+        # v1 += int(round(cy))
+        # v2 += int(round(cy))
         u1,v1 = denormalize(matched_point1, K)
         u2,v2 = denormalize(matched_point2, K)
         
-        cv2.circle(img, (u1,v1),color = (0,0,255), radius=3)
-        cv2.line(img,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
+        cv2.circle(img_rgb, (u1,v1),color = (0,0,255), radius=3)
+        cv2.line(img_rgb,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
         
-    cv2.imshow("vSlam",img)
+  
+    cv2.imshow("vSlam",img_rgb)
     cv2.waitKey(33)
     
 def stereo_slam(frame1, frame2): 

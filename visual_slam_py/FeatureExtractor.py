@@ -19,6 +19,7 @@ class FeatureExtractor(object):
         
         self.last = None 
         self.prev_KP = None
+        self.E = None 
         
 
     def extractFeatures(self,img):
@@ -56,15 +57,17 @@ class FeatureExtractor(object):
         
         print("number of matches pre ransac: ", len(return_matches))
         
-        if len(return_matches) > 10: 
+        if len(return_matches) > 0: 
             
             return_matches = np.array(return_matches)
             ## Normalizacja koordynat - znalezienie srodka 
+            # return_matches[:,:,0] -= self.cx
+            # return_matches[:,:,1] -= self.cy
             return_matches[:,0,:]  = normalize(return_matches[:,0,:], self.Kinv)
             return_matches[:,1,:]  = normalize(return_matches[:,1,:], self.Kinv)
-            
+    
             #filtracja matchy 
-            model, inliers = ransac((return_matches[:,0], return_matches[:,1]),
+            self.E, inliers = ransac((return_matches[:,0], return_matches[:,1]),
                                     EssentialMatrixTransform,
                                     min_samples = 8, 
                                     residual_threshold=0.005, 
@@ -73,9 +76,28 @@ class FeatureExtractor(object):
             return_matches = return_matches[inliers]
             #print("matches = ", return_matches)
             print("number of matches after ransac: ", len(return_matches))
-            print("Fundamental matrix = \n", model.params)
+            # print("Fundamental matrix = \n", self.E.params)
         
         return return_matches
         
         
+    def getPose(self): 
         
+        W = np.mat([[0,-1,0], [1,0,0], [0,0,1]])
+        R = np.mat([[1, 0, 0], [0,1,0], [0,0,1]]) 
+        t = np.array([0, 0 ,0])
+        if self.E != None:
+            u, w, vt = np.linalg.svd(self.E.params)
+            assert np.linalg.det(u) > 0
+            if np.linalg.det(vt) < 0: 
+                vt *=-1.0
+            
+            R = np.dot(np.dot(u,W), vt)
+            if np.sum(R.diagonal()) < 0: 
+                R = np.dot(np.dot(u,W.T), vt)
+            t = u[:,2]
+            # print(" macierz rotacji \n", R)
+            # print("suma na diagonali R",np.sum(R.diagonal()))
+        
+        pose = np.concatenate([R, t.reshape(3,1)], axis = 1)
+        return pose 
