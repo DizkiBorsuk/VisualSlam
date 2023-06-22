@@ -92,12 +92,15 @@ namespace mrVSLAM
                     point_pair.emplace_back(keypoint1); 
                     point_pair.emplace_back(keypoint2); 
                     matched_keypoints.emplace_back(point_pair); 
+
+                    prev_keyPs = frame_keypoints[matches[i][0]]; 
+                    prev_descriptors = descriptors[matches[i][0]]; 
                 }
                 point_pair.clear(); 
             }
         }
-        prev_descriptors = descriptors; 
-        prev_keyPs = frame_keypoints; 
+        //prev_descriptors = descriptors; 
+        //prev_keyPs = frame_keypoints; 
     }
 
     void FeatureExtraction::matchFeaturesBF(const float& low_rt) noexcept
@@ -122,11 +125,14 @@ namespace mrVSLAM
                     point_pair.emplace_back(keypoint1); 
                     point_pair.emplace_back(keypoint2); 
                     matched_keypoints.emplace_back(point_pair); 
+
+                    prev_keyPs = frame_keypoints[matches[i][0]]; 
+                    prev_descriptors = descriptors[matches[i][0]]; 
                 }
             point_pair.clear(); 
             }
         }
-        prev_descriptors = descriptors; 
-        prev_keyPs = frame_keypoints; 
+        // prev_descriptors = descriptors; 
+        // prev_keyPs = frame_keypoints; 
     }
 }

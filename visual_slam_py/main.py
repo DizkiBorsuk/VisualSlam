@@ -6,8 +6,7 @@ from FeatureExtractor import *
 from ComputeStereo import *
 from tools import *
 
-
-
+trajectory = []
 kitti = ImportKittyDataset("07") #clas object to get kitti dataset 
 P, K, t, P_right, K_right, t_right = kitti.getCameraMatrixies() #get projection and camera matricies 
 cx = K[0][2]
@@ -29,6 +28,9 @@ def mono_slam(img):
     pose = featuresExtractor.getPose() 
     print("Rt = \n", pose)
     
+    trajectory.append(pose)
+    
+    
     img_rgb = cv2.cvtColor(img,cv.COLOR_GRAY2BGR) 
     
     for matched_point1, matched_point2 in matches: 
@@ -46,8 +48,8 @@ def mono_slam(img):
         cv2.line(img_rgb,(u1,v1),(u2,v2),color = (255,0,0), thickness = 2)
         
   
-    cv2.imshow("vSlam",img_rgb)
-    cv2.waitKey(33)
+    return img_rgb
+    
     
 def stereo_slam(frame1, frame2): 
     
@@ -56,7 +58,6 @@ def stereo_slam(frame1, frame2):
     print(disparityMap.size)
     
     cv2.imshow("vSlam",disparityMap)
-    cv2.waitKey(33)
 
 
 if __name__ == "__main__": 
@@ -69,11 +70,19 @@ if __name__ == "__main__":
         ret2, frame_right = cap_right.read() #ret ostrzymuje wartość czy ramki są czytane czy nie
         
         if ret == True: 
-            mono_slam(frame) 
+            
+            img = mono_slam(frame) 
             #stereo_slam(frame, frame_right)
-
+            cv2.imshow("vSlam",img)
+            if cv2.waitKey(33) & 0xFF == ord('q'):
+                trajectory = np.array(trajectory)
+                plt.plot(trajectory[:,:,3][:,0], trajectory[:,:,3][:,2])
+                plt.show()
+                break
+            
         else: 
             break
-        
+   
+    
     cap.release()
     cv2.destroyAllWindows()

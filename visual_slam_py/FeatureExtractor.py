@@ -40,7 +40,7 @@ class FeatureExtractor(object):
         keypoints, descriptors = self.orb.compute(img, keypoints)
         #keypoints = cv2.KeyPoint_convert(corners, size=20)
                     
-        return keypoints, descriptors
+        return np.array([(keyP.pt[0], keyP.pt[1]) for keyP in keypoints]), descriptors
     
     def BFmatcher(self, keypoints, descriptors): 
 
@@ -49,15 +49,15 @@ class FeatureExtractor(object):
             matches = self.matcher.knnMatch(descriptors,self.last[1],2)  
             for m,n in matches:
                 if m.distance < 0.75*n.distance:
-                    keypoint1 = keypoints[m.queryIdx].pt
-                    keypoint2 = self.last[0][m.trainIdx].pt
+                    keypoint1 = keypoints[m.queryIdx]
+                    keypoint2 = self.last[0][m.trainIdx]
                     return_matches.append((keypoint1,keypoint2))
         
         self.last = [keypoints,descriptors]
         
         print("number of matches pre ransac: ", len(return_matches))
         
-        if len(return_matches) > 0: 
+        if len(return_matches) > 8: 
             
             return_matches = np.array(return_matches)
             ## Normalizacja koordynat - znalezienie srodka 
@@ -66,11 +66,11 @@ class FeatureExtractor(object):
             return_matches[:,0,:]  = normalize(return_matches[:,0,:], self.Kinv)
             return_matches[:,1,:]  = normalize(return_matches[:,1,:], self.Kinv)
     
-            #filtracja matchy 
+            #filtracja matchy             
             self.E, inliers = ransac((return_matches[:,0], return_matches[:,1]),
                                     EssentialMatrixTransform,
                                     min_samples = 8, 
-                                    residual_threshold=0.005, 
+                                    residual_threshold=0.02, 
                                     max_trials=100)
             
             return_matches = return_matches[inliers]

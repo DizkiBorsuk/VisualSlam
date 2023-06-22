@@ -5,6 +5,7 @@ import numpy as np
 
 def denormalize(input_points, K):
     ret = np.dot(K, np.array([input_points[0], input_points[1], 1.0]))
+    # ret /= ret[2]
     return int(round(ret[0])), int(round(ret[1]))
 
 def normalize(input_points, Kinv): 
