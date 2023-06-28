@@ -1,9 +1,9 @@
-#include "../include/stereoSLAM.hpp"
+#include "../include/tempStereo.hpp"
 #include <cmath>
 
 namespace mrVSLAM
 {
-    StereoSLAM::StereoSLAM(const Eigen::Matrix<double,3,4> &P_left, const Eigen::Matrix<double,3,4> &P_right, const int &stereoMatcherType)
+    StereoVO::StereoVO(const Eigen::Matrix<double,3,4> &P_left, const Eigen::Matrix<double,3,4> &P_right, const int &stereoMatcherType)
     {
         if(stereoMatcherType == 1)
         {
@@ -19,7 +19,7 @@ namespace mrVSLAM
         }
     }
 
-    int StereoSLAM::executeStereoSLAM(const std::string& left_imgs_path, const std::string& right_imgs_path)
+    int StereoVO::executeStereoSLAM(const std::string& left_imgs_path, const std::string& right_imgs_path)
     {
 
         cv::Mat left_frame(370,1226, CV_8UC1); 

@@ -90,8 +90,8 @@ namespace mrVSLAM
         
             features.getFeatures(frame); 
             //features.matchFeaturesBF(0.75f); 
-            features.matchFeaturesFlann(0.6f);  
-            poseEstimationEpiCons(features.matched_keypoints); 
+            features.matchFeaturesBF(0.75f);  
+            //poseEstimationEpiCons(features.matched_keypoints); 
             
  ; 
             //////// ----- Algorithm End ----- //////////

@@ -43,7 +43,7 @@ add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp
                                             src/readDataset.cpp 
                                             src/monoSLAM.cpp 
                                             src/FeatureExtraction.cpp
-                                            src/stereoSLAM.cpp
+                                            src/tempStereo.cpp
                                             src/tools.cpp)
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
