@@ -1,30 +1,12 @@
 #include "../include/monoSLAM.hpp"
 #include "../include/FeatureExtraction.hpp"
+#include "../include/camera.hpp"
 
 namespace mrVSLAM
 {
-    monoSLAM::monoSLAM(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
-    {
-        //decomposing projection matrix P to intrinsic/camera matrix K,
-        // K = projectionMatrix.block<3,3>(0,0);
-
-        cv::eigen2cv(projectionMatrix, P); 
-        cv::decomposeProjectionMatrix(P, K, R, t_h); 
-        t = (cv::Mat_<double>(3,1) <<0,0,0); 
-        cx = projectionMatrix.coeff(0,2); 
-        cy = projectionMatrix.coeff(1,2); 
-        fx = projectionMatrix.coeff(0,0); 
-        fy = projectionMatrix.coeff(1,1); 
-        std::cout << "cx = " << cx <<"\n cy = " << cy <<"\n f = " <<fx <<"\n"; 
-        std::cout << "t = " << t << "R = " << R << "\n K = " << K << "\n"; 
-
-    }
-
     void monoSLAM::poseEstimationEpiCons(std::vector<std::vector<cv::Point2f>> &matched_points)
     {   
         std::vector<cv::Point2f> points_frame1, points_frame2; 
-        cv::Point2f principialPoint(cx,cy); 
-
 
         std::cout << "mathced points size = " << matched_points.size() << "\n"; 
         if(matched_points.size() >= 8)
@@ -55,7 +37,7 @@ namespace mrVSLAM
     int mrVSLAM::monoSLAM::executeMonoSLAM(const std::string& imgs_path)
     {
         //Class objects 
-        mrVSLAM::FeatureExtraction features(ExtractorType::orb_fast, false, 500);
+        mrVSLAM::FeatureExtraction features(ExtractorType::orb_gptt, false, 500);
     
         // Variables 
         cv::Mat frame(370, 1226,CV_8UC1); // declare img size and type, super important 
@@ -89,8 +71,8 @@ namespace mrVSLAM
             //////// ----- Algorithm body ------ ///////// 
         
             features.getFeatures(frame); 
-            //features.matchFeaturesBF(0.75f); 
-            features.matchFeaturesBF(0.75f);  
+            features.matchFeaturesBF(0.75f); 
+            //features.matchFeaturesBF(0.75f);  
             //poseEstimationEpiCons(features.matched_keypoints); 
             
  ; 

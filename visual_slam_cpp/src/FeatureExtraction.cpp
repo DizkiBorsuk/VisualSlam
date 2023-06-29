@@ -26,6 +26,10 @@ namespace mrVSLAM
                 detector = cv::FastFeatureDetector::create(40); 
                 descriptor = cv::ORB::create(numberOfFeatures);
                 break;
+            case monoSLAM::ExtractorType::orb_gptt:
+                detector = cv::GFTTDetector::create(); 
+                descriptor = cv::ORB::create(numberOfFeatures);
+                break;
             case monoSLAM::ExtractorType::sift:
                 detector = cv::SIFT::create(numberOfFeatures);  
                 descriptor = cv::SIFT::create(numberOfFeatures); 
