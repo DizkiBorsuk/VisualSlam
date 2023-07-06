@@ -38,13 +38,17 @@ endif()
 include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotlib_SOURCE_DIR})
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
+set(Sources src/main.cpp 
+            src/visualize_data.cpp 
+            src/readDataset.cpp 
+            src/monoSLAM.cpp 
+            src/FeatureExtraction.cpp
+            src/tempStereo.cpp
+            src/tools.cpp
+            src/camera.cpp)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/visualize_data.cpp 
-                                            src/readDataset.cpp 
-                                            src/monoSLAM.cpp 
-                                            src/FeatureExtraction.cpp
-                                            src/tempStereo.cpp
-                                            src/tools.cpp)
+
+add_executable(${PROJECT_NAME} ${Sources})
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 

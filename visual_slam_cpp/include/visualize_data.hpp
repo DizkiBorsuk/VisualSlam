@@ -2,6 +2,13 @@
 #include "system.hpp"
 #include "readDataset.hpp"
 
+#include <pangolin/display/display.h>
+#include <pangolin/display/view.h>
+#include <pangolin/handler/handler.h>
+#include <pangolin/gl/gldraw.h> 
+#include "matplotlibcpp.h"
+
+
 
 
 

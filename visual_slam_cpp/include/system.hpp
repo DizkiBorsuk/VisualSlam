@@ -7,12 +7,7 @@
 #include <sstream>
 #include "Eigen/Dense"
 #include <cmath>
-
-#include <pangolin/display/display.h>
-#include <pangolin/display/view.h>
-#include <pangolin/handler/handler.h>
-#include <pangolin/gl/gldraw.h> 
-#include "matplotlibcpp.h"
+#include <memory>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>

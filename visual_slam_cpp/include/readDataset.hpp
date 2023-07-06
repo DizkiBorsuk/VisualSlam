@@ -7,6 +7,7 @@ namespace mrVSLAM{
     private: 
  
     public: 
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         std::string gt_poses_path; 
         std::string camera_calibration_path; 
         std::string left_imgs_path; 
