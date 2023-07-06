@@ -46,6 +46,7 @@ set(Sources src/main.cpp
             src/tempStereo.cpp
             src/tools.cpp
             src/camera.cpp)
+set(Headers include/camera.hpp include/FeatureExtraction.hpp include/Map.hpp)
 
 
 add_executable(${PROJECT_NAME} ${Sources})
