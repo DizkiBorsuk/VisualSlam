@@ -39,6 +39,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
+            src/SLAM.cpp
             src/visualize_data.cpp 
             src/readDataset.cpp 
             src/monoSLAM.cpp 
@@ -46,10 +47,17 @@ set(Sources src/main.cpp
             src/tempStereo.cpp
             src/tools.cpp
             src/camera.cpp)
-set(Headers include/camera.hpp include/FeatureExtraction.hpp include/Map.hpp)
+
+set(Headers include/camera.hpp 
+            include/FeatureExtraction.hpp 
+            include/Map.hpp
+            include/readDataset.hpp
+            include/SLAM.hpp
+            include/system.hpp
+            )
 
 
-add_executable(${PROJECT_NAME} ${Sources})
+add_executable(${PROJECT_NAME} ${Sources} ${Headers})
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
