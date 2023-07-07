@@ -9,9 +9,6 @@
 #include "matplotlibcpp.h"
 
 
-
-
-
 namespace mrVSLAM
 {
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, 

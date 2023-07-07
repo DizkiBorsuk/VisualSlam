@@ -3,11 +3,9 @@
 
 namespace mrVSLAM
 {
-
     class Camera
     {
     public: 
-
         // camera calibration parameters 
         double fx = 0, fy = 0, cx = 0, cy = 0; 
         cv::Point2d principialPoint = {0,0}; 

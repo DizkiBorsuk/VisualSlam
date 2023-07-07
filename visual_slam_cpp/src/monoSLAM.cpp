@@ -1,4 +1,4 @@
-#include "../include/monoSLAM.hpp"
+#include "../include/featureVO.hpp"
 #include "../include/FeatureExtraction.hpp"
 #include "../include/camera.hpp"
 
@@ -34,7 +34,7 @@ namespace mrVSLAM
   
     // }
 
-    int mrVSLAM::monoSLAM::executeMonoSLAM(const std::string& imgs_path)
+    int mrVSLAM::featureVO::executeMonoSLAM(const std::string& imgs_path)
     {
         //Class objects 
         mrVSLAM::FeatureExtraction features(ExtractorType::orb_gptt, false, 500);

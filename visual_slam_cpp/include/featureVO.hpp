@@ -4,7 +4,10 @@
 
 namespace mrVSLAM
 {
-    class monoSLAM
+    enum MatcherType {BruteForce, Flann}; 
+    enum ExtractorType {orb, orb_fast, orb_harris, orb_gptt, sift, akaze}; 
+
+    class featureVO
     {
     private: 
         cv::Mat H, F, K, E, t_h = cv::Mat(4,1,CV_8UC1), t = cv::Mat(3,1,CV_8UC1); 
@@ -25,8 +28,7 @@ namespace mrVSLAM
         int executeMonoSLAM(const std::string& imgs_path); 
         int executeGPUMonoSLAM(const std::string& imgs_path); 
 
-        enum MatcherType {BruteForce, Flann}; 
-        enum ExtractorType {orb, orb_fast, orb_harris, orb_gptt, sift, akaze}; 
+
 
     }; 
 

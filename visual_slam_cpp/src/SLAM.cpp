@@ -18,13 +18,12 @@ namespace mrVSLAM
         {
         case featureMono:
             camera.setCamera(dataset.P0); 
-            std::cout << "fx =" <<camera.fx << "\n"; 
             break;
         case featureStereo: 
             camera.setCamera(dataset.P0);
             right_camera.setCamera(dataset.P1);  
             baseline = getStereoBaseline(camera.t_mat, right_camera.t_mat); 
-            std::cout << "baseline = " << baseline << "\n"; 
+
             break; 
         case direct: 
             break; 
@@ -37,5 +36,11 @@ namespace mrVSLAM
    {
 
         return 0; 
+   }
+
+   void SLAM::showResult()
+   {
+        plotPoses(dataset.ground_truth_poses, frame_counter); 
+
    }
 }
