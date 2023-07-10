@@ -10,6 +10,8 @@ namespace mrVSLAM
     private: 
     // basic 
         int frame_counter = 0; 
+        int fps = 0; 
+        
         KITTI_Dataset dataset; 
     // mono 
         //std::unique_ptr<Camera> camera; 

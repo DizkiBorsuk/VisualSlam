@@ -1,4 +1,4 @@
-#pragma once 
+
 #include "system.hpp"
 
 
@@ -25,8 +25,6 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> poses;
         Eigen::Matrix<double, 3,4, Eigen::RowMajor> Rt; 
 
-        int executeMonoSLAM(const std::string& imgs_path); 
-        int executeGPUMonoSLAM(const std::string& imgs_path); 
 
 
 
