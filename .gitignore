@@ -3,6 +3,7 @@
 /KITTY_dataset/sequences/00/
 /visual_slam_cpp/build
 /visual_slam_py/__pycache__/ 
+*.pyc 
 *.log
 build* 
 *.vscode

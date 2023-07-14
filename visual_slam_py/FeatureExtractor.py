@@ -27,22 +27,28 @@ def extractFeatures(img, num_of_features):
 def matchFrames(Frame1, Frame2): 
 
     return_matches = []
-    Rt = np.zeros((3,4))
+    firstDesIdxs, secondDesIdxs = [], []; 
+    Rt = np.zeros((4,4))
     matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
     
     matches = matcher.knnMatch(Frame1.descriptos, Frame2.descriptos, k = 2)  
     #low's ratio test - basic filtration 
     for m,n in matches:
         if m.distance < 0.75*n.distance:
+            firstDesIdxs.append(m.queryIdx)
+            secondDesIdxs.append(m.trainIdx)
+            
             keypoint1 = Frame1.featurePts[m.queryIdx]
             keypoint2 = Frame2.featurePts[m.trainIdx]
             return_matches.append((keypoint1,keypoint2))
    
-   
     print("number of matches pre ransac: ", len(return_matches))
-   
+
+    
     if len(return_matches) >= 8: 
        
+        firstDesIdxs = np.array(firstDesIdxs)
+        secondDesIdxs = np.array(secondDesIdxs)
         return_matches = np.array(return_matches)
         #filtracja matchy             
         E, inliers = ransac((return_matches[:,0], return_matches[:,1]),
@@ -57,7 +63,7 @@ def matchFrames(Frame1, Frame2):
 
         Rt = getPose(E) 
             
-    return return_matches, Rt
+    return firstDesIdxs[inliers], secondDesIdxs[inliers], return_matches, Rt
    
    
 def getPose(EssentailMatrix): 
@@ -76,7 +82,7 @@ def getPose(EssentailMatrix):
         R = np.dot(np.dot(u,W), vt)
         if np.sum(R.diagonal()) < 0: 
             R = np.dot(np.dot(u,W.T), vt)
-        t = u[:,2]
+        t = u[:,2] 
         # print(" macierz rotacji \n", R)
         # print("suma na diagonali R",np.sum(R.diagonal()))
         
@@ -92,9 +98,8 @@ class Frame():
         self.Kinv = np.linalg.inv(self.K)
         self.cx = intrinsicMatrix[0][2]
         self.cy = intrinsicMatrix[1][2]
-        self.f = intrinsicMatrix[0][0]
-        IRt = np.eye(4) # transformation matrix 
-        self.pose = IRt 
+        self.f = intrinsicMatrix[0][0] 
+        self.pose = np.eye(4)    # homogenous transformation matrix 
         
         featurePoints, self.descriptos = extractFeatures(img, num_of_features)
         self.featurePts = normalize(featurePoints, self.Kinv)

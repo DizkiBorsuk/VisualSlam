@@ -5,32 +5,52 @@ from DatasetRead import *
 from FeatureExtractor import * 
 from ComputeStereo import *
 from tools import *
+from Map import * 
 
-trajectory = []
+
 dataset = ImportKittyDataset("07") #clas object to get kitti dataset 
 P, K, t, P_right, K_right, t_right = dataset.getCameraMatrixies() #get projection and camera matricies 
+gtPoses = dataset.getGTposes() 
+print(gtPoses.shape)
+
+
+map = Map() 
 
 frames = []
-IRt = np.eye(4)# transformation matrix 
+points = []
+trajectory = []
+
 
 def mono_slam(img): 
     
-    frame = Frame(img, K, 500) #
+    frame = Frame(img, K, 500) # create Frame object 
     frames.append(frame)
-    if len(frames) <= 1: 
+    
+    if len(frames) <= 1:
         return
     
-    matchedPts, Rt = matchFrames(frames[-1], frames[-2]) # match 
-    print(matchedPts.shape)
-    pointsIn4D = cv2.triangulatePoints(IRt[:3], Rt[:3], matchedPts[:,0].T, matchedPts[:,1].T).T #https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gad3fc9a0c82b08df034234979960b778c
+    frame1DesIdx, frame2DesIdx, matchedPts, Rt = matchFrames(frames[-1], frames[-2]) # match 
+    frames[-1].pose = np.dot(Rt, (frames[-2].pose)) # get real pose of Frame # pose is 4x4 matrix that has rotation and translation in homogenous coordinates
+    trajectory.append(frames[-1].pose) 
     
-    good4dPts = np.abs(pointsIn4D[:,3]) > 0.005
-    pointsIn4D = pointsIn4D[good4dPts] # discard points 
+    pointsIn4D = cv2.triangulatePoints(frames[-1].pose[:3],frames[-2].pose[:3], frames[-1].featurePts[frame1DesIdx].T, frames[-2].featurePts[frame2DesIdx].T).T #https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gad3fc9a0c82b08df034234979960b778c
+    
+    pointsIn4D /= pointsIn4D[:,3:] 
+    print("Homogenous points \n", pointsIn4D)
+    good4dPts = ((np.abs(pointsIn4D[:,3]) > 0.005) & (pointsIn4D[:,2] > 0))
+    pointsIn4D = pointsIn4D[good4dPts] # discard points without enough parallax
+
     
     frames[-1].pose = np.dot(Rt, (frames[-2].pose).T) # get real pose of Frame 
     
-    #print("Homogenous points \n", pointsIn4D)
     print("Last frame pose : \n", frames[-1].pose)
+    
+    
+    for point in pointsIn4D: 
+        pt = Point(point) 
+        pt.addObservation(frames[-1], frame1DesIdx)
+        pt.addObservation(frames[-2], frame2DesIdx)
+    
     
     for pointsIn1, pointsIn2 in matchedPts: 
         # u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
@@ -79,3 +99,9 @@ if __name__ == "__main__":
     
     cap.release()
     cv2.destroyAllWindows()
+    trajectory = np.array(trajectory)
+    plt.plot(gtPoses[:,:,3][:,0], gtPoses[:,:,3][:,2])
+    plt.plot(trajectory[:,:,3][:,0], trajectory[:,:,3][:,2])
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
+    plt.show()

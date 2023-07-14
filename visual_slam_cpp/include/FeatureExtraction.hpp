@@ -41,4 +41,13 @@ namespace mrVSLAM
         typedef std::vector<uint32_t> descType;
         //void computeORB(const cv::Mat &frame, std::vector<cv::KeyPoint> &keyPoints, std::vector<descType> &descriptors); 
     }; 
+
+    class Frame
+    {
+    public: 
+        
+    private: 
+
+
+    }
 }
