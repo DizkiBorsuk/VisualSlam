@@ -3,30 +3,29 @@
 
 namespace mrVSLAM
 {
-    enum ExtractorType {featureMono, featureStereo, direct}; 
-    enum MatcherType {}; 
-
+    enum ExtractorType {OrbHarris, OrbFast, ORB, OrbGptt, SIFT, AKAZE}; 
+    enum MatcherType {BruteForce, Flann}; 
 
     class FeatureExtraction
     {
-
     public:  
-        std::vector<cv::KeyPoint>  frame_keypoints; 
+        std::vector<cv::KeyPoint> frame_keypoints; 
         cv::Mat descriptors; 
+        cv::cuda::GpuMat gpuDescriptors, gpuKeypoints; 
 
-
+        //default constructor and non-dafault constructor 
         FeatureExtraction() noexcept {} //default constructor 
         FeatureExtraction(const ExtractorType, const bool GPU, const int numberOfFeatures) noexcept;
 
         void getFeatures(const cv::Mat frame) noexcept; 
         void getGPUFeatures(const cv::cuda::GpuMat frame) noexcept;
 
-        //void matchGPUFeaturesBF(const float& low_rt = 0.7f) noexcept;
     private:
         // CPU detector and descriptor objects declaration 
         cv::Ptr<cv::FeatureDetector> detector;   // detector object declaration  
         cv::Ptr<cv::DescriptorExtractor> descriptor; 
 
+        // GPU detector and descriptor 
         cv::Ptr<cv::cuda::ORB> gpuOrbExtractor;
         cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
 
@@ -35,8 +34,13 @@ namespace mrVSLAM
     class FrameMatcher
     {
     public: 
-        std::vector<cv::DMatch> good_matches; 
-        std::vector<std::vector<cv::Point2f>> matched_keypoints; 
+        std::vector<cv::DMatch> goodMatches; 
+        std::vector<std::vector<cv::Point2f>> matchedKeypoints; 
+
+        FrameMatcher() noexcept {} 
+        FrameMatcher(const Frame &frame1, const Frame &frame2, MatcherType) noexcept; 
+
+
         void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
         void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
 
