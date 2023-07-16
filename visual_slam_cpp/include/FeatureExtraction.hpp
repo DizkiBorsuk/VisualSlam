@@ -38,7 +38,7 @@ namespace mrVSLAM
         std::vector<std::vector<cv::Point2f>> matchedKeypoints; 
 
         FrameMatcher() noexcept {} 
-        FrameMatcher(const Frame &frame1, const Frame &frame2, MatcherType) noexcept; 
+        FrameMatcher(const Frame &frame1, const Frame &frame2, MatcherType, const float low_rt = 0.7f) noexcept; 
 
 
         void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
