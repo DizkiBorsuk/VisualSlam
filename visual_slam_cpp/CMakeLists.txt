@@ -43,13 +43,13 @@ set(Sources src/main.cpp
             src/visualize_data.cpp 
             src/readDataset.cpp 
             src/monoSLAM.cpp 
-            src/FeatureExtraction.cpp
+            src/FrameExtraction.cpp
             src/tempStereo.cpp
             src/tools.cpp
             src/camera.cpp)
 
 set(Headers include/camera.hpp 
-            include/FeatureExtraction.hpp 
+            include/FrameExtraction.hpp 
             include/Map.hpp
             include/readDataset.hpp
             include/SLAM.hpp

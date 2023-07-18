@@ -11,7 +11,8 @@ namespace mrVSLAM
         cv::Point2d principialPoint = {0,0}; 
         // camera intrinsic and extrinsic 
         Eigen::Matrix3d K_eigen, R_eigen;  
-        cv::Mat K_mat, R_mat, t_mat; 
+        cv::Mat K, R, t; // K - intrinsic matrix, R - camera rotation matrix 
+        // t - camera translation vector 
 
         void setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix); 
     }; 

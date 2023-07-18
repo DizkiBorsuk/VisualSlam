@@ -55,11 +55,13 @@ namespace mrVSLAM
     {
     public: 
         Eigen::Matrix3d K_eigen, invK_eigen; 
-        Eigen::Matrix4d pose_eigen;
+        Eigen::Matrix4d pose_eigen; 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
         cv::Mat descriptors; 
+        
+        int frameId; 
 
-        Frame(const cv::Mat &img, )
+        Frame(const cv::Mat &image, cv::Mat &cameraMatrix, );
     private: 
 
     };

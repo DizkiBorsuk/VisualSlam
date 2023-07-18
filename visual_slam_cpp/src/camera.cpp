@@ -19,10 +19,10 @@ namespace mrVSLAM
         cv::eigen2cv(projectionMatrix, P); // convert camera eigen matrix to cv::Mat format 
 
         //decompose both projection matrixies 
-        cv::decomposeProjectionMatrix(P, K_mat, R_mat, th); 
+        cv::decomposeProjectionMatrix(P, K, R, th); 
 
         //convert th and thr to euclidian space 
-        cv::convertPointsFromHomogeneous(th.reshape(4,1), t_mat); //https://answers.opencv.org/question/176008/opencv-error-assertion-failed-_dstfixedtype-in-cvconvertpointshomogeneous/
+        cv::convertPointsFromHomogeneous(th.reshape(4,1), t); //https://answers.opencv.org/question/176008/opencv-error-assertion-failed-_dstfixedtype-in-cvconvertpointshomogeneous/
 
         // std::cout << "cx = " << cx <<"\n cy = " << cy <<"\n f = " <<fx <<"\n"; 
         // std::cout << "t1 = " << t_mat << "R = " << R_mat << "\n K = " << K_mat << "\n"; 
