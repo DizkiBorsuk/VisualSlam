@@ -2,11 +2,16 @@
 
 namespace mrVSLAM 
 {
-    Frame::Frame(const cv::Mat &image, cv::Mat &cameraMatrix, const int frameId)
+    Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures)
     {
         this->frameId = frameId; 
         K = cameraMatrix; 
         invK = K.inv(); 
+        pose = pose.eye(); 
+
+        auto features = extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures); 
+        frameFeaturePoints = features.frameKeypoints; 
+        frameDescriptors = features.descriptors; 
         
     }
 

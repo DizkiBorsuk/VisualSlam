@@ -12,19 +12,19 @@ namespace mrVSLAM
         dataset.readCalibData(); // get camera calibration matrix 
         dataset.showPmatricies(); 
         dataset.getGTposes(); // get ground truth trajectory 
-        // std::cout << std::setprecision(1) << std::fixed << dataset.ground_truth_poses[0] <<  "\n"; 
-        std::cout << "\n" << "-------------"<<"\n"; 
+        // std::cout << std::setprecision(1) << std::fixed << dataset.ground_truth_poses[0] <<  "\n";  
 
         camera.setCamera(dataset.P0); // set left camera
         right_camera.setCamera(dataset.P1);  // set right camera 
         baseline = getStereoBaseline(camera.t, right_camera.t); // calculate baseline 
-        std::cout << "baseline = " << baseline <<""
+        std::cout << "baseline = " << baseline << "\n"; 
+        std::cout << "\n" << "-------------"<<"\n"; 
     }
 
 //###################
 
-   int SLAM::runMonoSLAM()
-   {
+    int SLAM::runMonoSLAM()
+    {
         cv::Mat img(370, 1226,CV_8UC1); // declare img size and type, super important 
 
         // Create img sequence and get 
@@ -75,7 +75,7 @@ namespace mrVSLAM
             features.matched_keypoints.clear(); 
             features.frame_keypoints.clear(); 
 
-            cv::putText(img, "fps: " + std::to_string(framesPerSecond), 
+            cv::putText(img, "fps: " + std::to_string(fps), 
                         cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
             cv::imshow("Camera Img", img);
             std::cout << "Frame num: " << frame_counter++ << "\n" << "time: " << elapsed.count() << "\n"; 
@@ -87,11 +87,34 @@ namespace mrVSLAM
         sequence.release(); 
         cv::destroyAllWindows(); 
         return 0; 
-   }
+    }
 
-   void SLAM::showResult()
-   {
+    int SLAM::runStereoSLAM()
+    {
+        cv::Mat imgLeft(370, 1226,CV_8UC1);
+        cv::Mat imgRight(370, 1226,CV_8UC1);
+
+        cv::VideoCapture sequenceLeft;
+        cv::VideoCapture sequenceRight; 
+        sequenceLeft.open(dataset.left_imgs_path, cv::CAP_IMAGES); 
+        sequenceRight.open(dataset.right_imgs_path, cv::CAP_IMAGES);
+
+        if (!sequenceLeft.isOpened() || !sequenceRight.isOpened()) {
+            std::cerr << "Failed to open Image Sequence!\n"; 
+            return -1;
+        }
+
+        while (true)
+        {
+            /* code */
+        }
+        
+    }   
+
+
+    void SLAM::showResult()
+    {
         plotPoses(dataset.ground_truth_poses, frame_counter); 
 
-   }
+    }
 }

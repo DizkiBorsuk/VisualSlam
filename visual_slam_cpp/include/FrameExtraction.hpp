@@ -55,9 +55,9 @@ namespace mrVSLAM
         cv::Matx<double, 4, 4> pose;  
 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat descriptors; 
+        cv::Mat frameDescriptors; 
         
-        Frame(const cv::Mat &image, cv::Mat &cameraMatrix, const int frameId);
+        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures);
     private: 
 
     };
