@@ -10,9 +10,9 @@ namespace mrVSLAM
     private:
         double baseline = 0 ;
         double f = 0;  
-        const int sad_window = 9;  
-        const int numOfDisparities = sad_window*16; 
-        const int blockSize = 11; 
+        const int sadWindow = 9;  
+        const int numOfDisparities = sadWindow*16; // number of disparities must be divisible by 16 //https://docs.opencv.org/3.4/d2/d85/classcv_1_1StereoSGBM.html#ad985310396dd4d95a003b83811bbc138a21fac9fae6db6a60a940fd24cc61f081
+        const int blockSize = 7; // should be in range 3-11
         cv::Ptr<cv::StereoMatcher> stereoMatcher; 
 
     public: 
@@ -33,16 +33,22 @@ namespace mrVSLAM
         switch (matcher)
         {
         case BlockMatching:
-            stereoMatcher = cv::StereoBM::create(); 
+            stereoMatcher = cv::StereoBM::create(numOfDisparities, blockSize); 
             break;
         case SGBM:
-            stereoMatcher = cv::StereoSGBM::create(); 
+            stereoMatcher = cv::StereoSGBM::create(0, numOfDisparities, blockSize, 8*12*sadWindow, 32*12*sadWindow, cv::StereoSGBM::MODE_SGBM_3WAY); 
             break;  
         
         default:
             break;
         }
     }
-   
+    
+    void StereoDepth::calculateDepth(const cv::Mat &leftImg, const cv::Mat &rightImg)
+    {
+        stereoMatcher->compute(leftImg, rightImg, disparityMap); 
+        std::cout << "size of disparity map = " << disparityMap.size()<< "\n"; 
+        
+    }
 
 }

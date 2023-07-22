@@ -12,7 +12,9 @@ namespace mrVSLAM
         auto features = extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures); 
         frameFeaturePoints = features.frameKeypoints; 
         frameDescriptors = features.descriptors; 
-        
+        /*
+        add coordinates normalization, transform from img cordinates to camera coordinates 
+        */
     }
 
     feature extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures)

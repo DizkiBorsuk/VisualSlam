@@ -44,7 +44,6 @@ set(Sources src/main.cpp
             src/readDataset.cpp 
             src/monoSLAM.cpp 
             src/FrameExtraction.cpp
-            src/tempStereo.cpp
             src/tools.cpp
             src/camera.cpp)
 
@@ -54,6 +53,7 @@ set(Headers include/camera.hpp
             include/readDataset.hpp
             include/SLAM.hpp
             include/system.hpp
+            include/Stereo.hpp
             )
 
 
