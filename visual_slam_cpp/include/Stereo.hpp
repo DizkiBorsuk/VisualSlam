@@ -48,7 +48,7 @@ namespace mrVSLAM
     {
         stereoMatcher->compute(leftImg, rightImg, disparityMap); 
         std::cout << "size of disparity map = " << disparityMap.size()<< "\n"; 
-        
+        depthMap = (f*baseline) * disparityMap;  
     }
 
 }

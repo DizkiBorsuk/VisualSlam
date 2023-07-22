@@ -52,7 +52,7 @@ namespace mrVSLAM
 
             //////// ----- Algorithm body ------ ///////// 
 
-            Frame frame(img, camera.K, frame_counter); // create Frame object that holds all information about current frame/img 
+            Frame frame(img, camera.K, frame_counter, 800); // create Frame object that holds all information about current frame/img 
 
             
  
@@ -66,14 +66,14 @@ namespace mrVSLAM
 
             // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
-            for(int p = 0; p < features.matched_keypoints.size(); p++)
-            { 
-                cv::circle(img, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
-                cv::line(img, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
-            }
+            // for(int p = 0; p < features.matched_keypoints.size(); p++)
+            // { 
+            //     cv::circle(img, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
+            //     cv::line(img, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
+            // }
 
-            features.matched_keypoints.clear(); 
-            features.frame_keypoints.clear(); 
+            // features.matched_keypoints.clear(); 
+            // features.frame_keypoints.clear(); 
 
             cv::putText(img, "fps: " + std::to_string(fps), 
                         cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
@@ -115,6 +115,8 @@ namespace mrVSLAM
                 std::cout << "End of sequance \n"; 
                 break;
             }
+
+            stereo.calculateDepth(imgLeft, imgRight); 
 
 
         }

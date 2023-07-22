@@ -23,9 +23,7 @@ namespace mrVSLAM
     //stereo 
         //std::unique_ptr<Camera> right_camera; 
         Camera right_camera; 
-        double baseline = 0; 
-        // not sure if size is correct 
-        cv::Mat depthMap = cv::Mat(370, 1226, CV_16SC1);
+        double baseline = 0;
 
 
     public: 
