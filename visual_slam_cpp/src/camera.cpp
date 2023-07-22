@@ -28,8 +28,8 @@ namespace mrVSLAM
         // std::cout << "t1 = " << t_mat << "R = " << R_mat << "\n K = " << K_mat << "\n"; 
     }
 
-    double getStereoBaseline(const cv::Mat &t1, const cv::Mat &t2)
+    double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2)
     {
-        return abs(t1.at<double>(0,0) - t2.at<double>(0,0)); 
+        return abs(t1(0) - t2(0)); 
     }
 }

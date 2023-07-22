@@ -4,9 +4,9 @@
 namespace mrVSLAM
 {
     //SLAM Class constructors 
-   SLAM::~SLAM() = default;  
-   SLAM::SLAM(SlamType typeIn, std::string sequence_number) 
-   {
+    SLAM::~SLAM() = default;  
+    SLAM::SLAM(std::string sequence_number) 
+    {
         // get kitti dataset 
         dataset.chooseSequence(sequence_number); 
         dataset.readCalibData(); // get camera calibration matrix 
@@ -15,29 +15,17 @@ namespace mrVSLAM
         // std::cout << std::setprecision(1) << std::fixed << dataset.ground_truth_poses[0] <<  "\n"; 
         std::cout << "\n" << "-------------"<<"\n"; 
 
-        switch (typeIn)
-        {
-            case featureMono:
-                camera.setCamera(dataset.P0); 
-                break;
-            case featureStereo: 
-                camera.setCamera(dataset.P0);
-                right_camera.setCamera(dataset.P1);  
-                baseline = getStereoBaseline(camera.t, right_camera.t); 
-                break; 
-            case direct: 
-                break; 
-            default:
-                break;
-        }
-   }
+        camera.setCamera(dataset.P0); // set left camera
+        right_camera.setCamera(dataset.P1);  // set right camera 
+        baseline = getStereoBaseline(camera.t, right_camera.t); // calculate baseline 
+        std::cout << "baseline = " << baseline <<""
+    }
 
 //###################
 
-   int SLAM::runSLAM()
+   int SLAM::runMonoSLAM()
    {
         cv::Mat img(370, 1226,CV_8UC1); // declare img size and type, super important 
-        int start, end, framesPerSecond; 
 
         // Create img sequence and get 
         cv::VideoCapture sequence; 
@@ -59,20 +47,21 @@ namespace mrVSLAM
                 break;
             }
 
-            start = cv::getTickCount(); 
+            loopStart = cv::getTickCount(); 
             auto begin = std::chrono::high_resolution_clock::now();
 
             //////// ----- Algorithm body ------ ///////// 
-        
+
+            Frame frame(img, camera.K, frame_counter); // create Frame object that holds all information about current frame/img 
 
             
- ; 
+ 
             //////// ----- Algorithm End ----- //////////
 
             
-            end = cv::getTickCount();
+            loopEnd = cv::getTickCount();
+            fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
             auto cend = std::chrono::high_resolution_clock::now();
-            framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
             // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);

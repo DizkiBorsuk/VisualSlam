@@ -1,7 +1,10 @@
+#pragma once 
+
 #include "system.hpp"
 #include "camera.hpp"
 #include "readDataset.hpp"
 #include "visualize_data.hpp"
+#include "FrameExtraction.hpp"
 
 namespace mrVSLAM
 {
@@ -10,8 +13,9 @@ namespace mrVSLAM
     private: 
     // basic 
         int frame_counter = 0; 
-        int fps = 0; 
-        
+        int fps = 0, loopStart = 0, loopEnd = 0; 
+        std::vector<Frame> frames; 
+
         KITTI_Dataset dataset;
     // mono 
         //std::unique_ptr<Camera> camera; 
@@ -25,8 +29,8 @@ namespace mrVSLAM
     public: 
         enum SlamType {featureMono, featureStereo, direct}; 
         
+        SLAM(const std::string sequence_number);
         ~SLAM(); 
-        SLAM(SlamType, std::string sequence_number); 
         
         // delete move and copy constructrs/operators
         SLAM(const SLAM&) = delete;  
@@ -35,8 +39,10 @@ namespace mrVSLAM
         SLAM& operator=(const SLAM&&) = delete; 
 
         //void initSLAM(); 
-        int runSLAM(); 
-        int runGpuSLAM();  
+        int runMonoSLAM();
+        int runStereoSLAM();  
+        int runGpuMonoSLAM();
+        int runGpuStereoSLAM();   
 
         void showResult(); 
     }; 

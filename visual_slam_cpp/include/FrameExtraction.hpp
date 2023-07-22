@@ -6,30 +6,22 @@ namespace mrVSLAM
     enum ExtractorType {OrbHarris, OrbFast, ORB, OrbGptt, SIFT, AKAZE}; 
     enum MatcherType {BruteForce, Flann}; 
 
-    class FeatureExtraction
+    struct feature
     {
-    public:  
-        std::vector<cv::KeyPoint> frame_keypoints; 
+        std::vector<cv::KeyPoint> frameKeypoints; 
         cv::Mat descriptors; 
-        cv::cuda::GpuMat gpuDescriptors, gpuKeypoints; 
+    };
 
-        //default constructor and non-dafault constructor 
-        FeatureExtraction() noexcept {} //default constructor 
-        FeatureExtraction(const ExtractorType, const bool GPU, const int numberOfFeatures) noexcept;
+    struct gpuFeature
+    {
+        cv::cuda::GpuMat gpuKeypoints; 
+        cv::cuda::GpuMat gpuDescriptors;  
+    };
 
-        void getFeatures(const cv::Mat frame) noexcept; 
-        void getGPUFeatures(const cv::cuda::GpuMat frame) noexcept;
 
-    private:
-        // CPU detector and descriptor objects declaration 
-        cv::Ptr<cv::FeatureDetector> detector;   // detector object declaration  
-        cv::Ptr<cv::DescriptorExtractor> descriptor; 
+    feature extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures); 
+    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures); 
 
-        // GPU detector and descriptor 
-        cv::Ptr<cv::cuda::ORB> gpuOrbExtractor;
-        cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
-
-    }; 
 
     class FrameMatcher
     {
@@ -37,12 +29,10 @@ namespace mrVSLAM
         std::vector<cv::DMatch> goodMatches; 
         std::vector<std::vector<cv::Point2f>> matchedKeypoints; 
 
-        FrameMatcher() noexcept {} 
-        FrameMatcher(const Frame &frame1, const Frame &frame2, MatcherType, const float low_rt = 0.7f) noexcept; 
+        FrameMatcher() noexcept; 
 
-
-        void matchFeaturesFlann(const float& low_rt = 0.7f) noexcept; 
-        void matchFeaturesBF(const float& low_rt = 0.7f) noexcept;
+        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept; 
+        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept;
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;
@@ -51,17 +41,23 @@ namespace mrVSLAM
     };
 
 
+
+
     class Frame
     {
     public: 
+        int frameId; 
+
         Eigen::Matrix3d K_eigen, invK_eigen; 
         Eigen::Matrix4d pose_eigen; 
+
+        cv::Matx<double, 3, 3> K, invK;
+        cv::Matx<double, 4, 4> pose;  
+
         std::vector<cv::KeyPoint> frameFeaturePoints;  
         cv::Mat descriptors; 
         
-        int frameId; 
-
-        Frame(const cv::Mat &image, cv::Mat &cameraMatrix, );
+        Frame(const cv::Mat &image, cv::Mat &cameraMatrix, const int frameId);
     private: 
 
     };

@@ -2,64 +2,64 @@
 
 namespace mrVSLAM 
 {
-    FeatureExtraction::FeatureExtraction(const ExtractorType extractor, const bool GPU, const int numberOfFeatures) noexcept
+    Frame::Frame(const cv::Mat &image, cv::Mat &cameraMatrix, const int frameId)
     {
-        /* Feature extraction class constructor
-        This constructor creates detector and descriptor objects based on specified descriptor type.
-        */
+        this->frameId = frameId; 
+        K = cameraMatrix; 
+        invK = K.inv(); 
+        
+    }
 
-        if(GPU == false)
+    feature extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures)
+    {
+        cv::Ptr<cv::FeatureDetector> detector; 
+        cv::Ptr<cv::DescriptorExtractor>  descriptor; 
+        std::vector<cv::KeyPoint> keypoints; 
+        cv::Mat descriptors; 
+
+        keypoints.reserve(numberOfFeatures);
+
+        switch (extractor)
         {
-            switch (extractor)
-            {
-            case ExtractorType::OrbHarris:
-                detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);  
-                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);
-                break;
-            case ExtractorType::OrbFast:
-                detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40);  
-                descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31,40); 
-                break; 
-            case ExtractorType::ORB:
-                detector = cv::FastFeatureDetector::create(40); 
-                descriptor = cv::ORB::create(numberOfFeatures);
-                break;
-            case ExtractorType::OrbGptt:
-                detector = cv::GFTTDetector::create(); 
-                descriptor = cv::ORB::create(numberOfFeatures);
-                break;
-            case ExtractorType::SIFT:
-                detector = cv::SIFT::create(numberOfFeatures);  
-                descriptor = cv::SIFT::create(numberOfFeatures); 
-                break;
-            case ExtractorType::AKAZE:
-                detector = cv::AKAZE::create(); 
-                descriptor = cv::AKAZE::create(); 
-                break;            
-            default: 
-                
-                break;
-            }
-        } 
-        else 
-        {
-            // add gpu detecotr declaration 
+        case ExtractorType::OrbHarris:
+            detector = cv::ORB::create(numberOfFeatures,cv::ORB::HARRIS_SCORE);  
+            descriptor = cv::ORB::create(numberOfFeatures, cv::ORB::HARRIS_SCORE);
+            break;
+        case ExtractorType::OrbFast:
+            detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
+            descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
+            break; 
+        case ExtractorType::ORB:
+            detector = cv::FastFeatureDetector::create(40); 
+            descriptor = cv::ORB::create(numberOfFeatures);
+            break;
+        case ExtractorType::OrbGptt:
+            detector = cv::GFTTDetector::create(); 
+            descriptor = cv::ORB::create(numberOfFeatures);
+            break;
+        case ExtractorType::SIFT:
+            detector = cv::SIFT::create(numberOfFeatures);  
+            descriptor = cv::SIFT::create(numberOfFeatures); 
+            break;
+        case ExtractorType::AKAZE:
+            detector = cv::AKAZE::create(); 
+            descriptor = cv::AKAZE::create(); 
+            break;            
+        default: 
+            break;
         }
+        detector->detect(img, keypoints); 
+        descriptor->compute(img, keypoints, descriptors); 
 
-        frame_keypoints.reserve(numberOfFeatures); // change to double from int 
-    }
+        return {keypoints, descriptors}; 
+    }    
     
-
-    void FeatureExtraction::getFeatures(const cv::Mat frame) noexcept
-    {
-        detector->detect(frame, frame_keypoints); 
-        descriptor->compute(frame, frame_keypoints, descriptors); 
-    }
-
-    void FeatureExtraction::getGPUFeatures(const cv::cuda::GpuMat frame) noexcept
-    {
-        gpuOrbExtractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
-        gpuOrbExtractor->detectAndComputeAsync(frame,cv::noArray(), gpuDescriptors, gpuKeypoints, false); 
+    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures)  
+    {   
+        cv::cuda::GpuMat descriptors, keypoints; 
+        //cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
+        cv::Ptr<cv::cuda::ORB> gpuOrbExtractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
+        gpuOrbExtractor->detectAndComputeAsync(img,cv::noArray(), keypoints, descriptors, false); 
         // cv::Ptr<cv::cuda::ORB> gpu_detector = cv::cuda::ORB::create(num_features,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);  
         // //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
         // //gpu_detector->detectAndCompute(frame, cv::noArray(), keypoints_1, gpu_descriptors_1, false); 
@@ -68,6 +68,7 @@ namespace mrVSLAM
         // std::cout << "Number of features: " << keypoints_1.size() << "\n"; 
         // //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
         // //gpu_ORB->convert(gpu_keypoints_1, keypoints_1); 
+        return {keypoints, descriptors}; 
     }
 
     void FrameMatcher::matchFeaturesFlann(const float& low_rt) noexcept
