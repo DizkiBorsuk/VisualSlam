@@ -101,7 +101,6 @@ namespace mrVSLAM
             number_of_gtposes++; // count number of poses (rows in file)
         }
 
-
         // from vector with all entries from file get 12 element vector and map it to eigen matrix (Transformation matrix)
         // append matrix to ground_truth_poses vector to create sequence of matricies
         for(auto i = 0; i < 12*number_of_gtposes; i+=12) // loop thru all elements, jumping every row in file 
@@ -118,7 +117,7 @@ namespace mrVSLAM
     }
 
 
-    void mrVSLAM::KITTI_Dataset::showPmatricies()
+    void mrVSLAM::KITTI_Dataset::showPmatricies() const
     {
         std::cout << "---------------- \n"; 
         std::cout << "Left grayscale camera projection matrix = \n" << P0 << "\n"; 

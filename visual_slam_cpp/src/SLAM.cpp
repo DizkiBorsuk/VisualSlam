@@ -1,5 +1,5 @@
 #include "../include/SLAM.hpp"
-#include "../include/FrameExtraction.hpp"
+#include "../include/Stereo.hpp"
 
 namespace mrVSLAM
 {
@@ -104,9 +104,19 @@ namespace mrVSLAM
             return -1;
         }
 
+        StereoDepth stereo(stereoMatcherType::BlockMatching, baseline, camera.fx); 
+
         while (true)
         {
-            /* code */
+            sequenceLeft.read(imgLeft); 
+            sequenceRight.read(imgRight); 
+
+            if(imgLeft.empty() || imgRight.empty()) {
+                std::cout << "End of sequance \n"; 
+                break;
+            }
+
+
         }
         
     }   

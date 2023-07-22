@@ -24,15 +24,13 @@ namespace mrVSLAM{
         void chooseSequence(const std::string sequence); 
         void readCalibData(); //get camera projection matrixies from calibration file 
         void getGTposes(); //get set of ground truth poses 
-        void showPmatricies(); 
-        
-
+        void showPmatricies() const; 
     }; 
 
     class EuRoCMAV_Dataset
     {
 
-    EuRoCMAV_Dataset(); 
+        EuRoCMAV_Dataset(); 
     
     }; 
     
