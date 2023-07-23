@@ -23,6 +23,26 @@ namespace mrVSLAM
     gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures); 
 
 
+
+    class Frame
+    {
+    public: 
+        int frameId; 
+
+        Eigen::Matrix3d K_eigen, invK_eigen; 
+        Eigen::Matrix4d pose_eigen; 
+
+        cv::Matx<double, 3, 3> K, invK;
+        cv::Matx<double, 4, 4> pose;  
+
+        std::vector<cv::KeyPoint> frameFeaturePoints;  
+        cv::Mat frameDescriptors; 
+        
+        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures);
+    private: 
+
+    };
+
     class FrameMatcher
     {
     public: 
@@ -43,22 +63,5 @@ namespace mrVSLAM
 
 
 
-    class Frame
-    {
-    public: 
-        int frameId; 
 
-        Eigen::Matrix3d K_eigen, invK_eigen; 
-        Eigen::Matrix4d pose_eigen; 
-
-        cv::Matx<double, 3, 3> K, invK;
-        cv::Matx<double, 4, 4> pose;  
-
-        std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors; 
-        
-        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures);
-    private: 
-
-    };
 }

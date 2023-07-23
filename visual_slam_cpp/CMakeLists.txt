@@ -42,7 +42,6 @@ set(Sources src/main.cpp
             src/SLAM.cpp
             src/visualize_data.cpp 
             src/readDataset.cpp 
-            src/monoSLAM.cpp 
             src/FrameExtraction.cpp
             src/tools.cpp
             src/camera.cpp)

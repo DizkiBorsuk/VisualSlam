@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     cv::cuda::printCudaDeviceInfo(0); 
     //cv::cuda::setDevice(0); 
     //--------------------//
-    mrVSLAM::SLAM slam(mrVSLAM::SLAM::SlamType::featureStereo, "07"); 
+    mrVSLAM::SLAM slam("07"); 
     
     //-------------------//
     return 0; 
