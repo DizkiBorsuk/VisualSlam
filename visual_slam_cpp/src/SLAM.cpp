@@ -94,8 +94,7 @@ namespace mrVSLAM
         cv::Mat imgLeft(370, 1226,CV_8UC1);
         cv::Mat imgRight(370, 1226,CV_8UC1);
 
-        cv::VideoCapture sequenceLeft;
-        cv::VideoCapture sequenceRight; 
+        cv::VideoCapture sequenceLeft, sequenceRight;
         sequenceLeft.open(dataset.left_imgs_path, cv::CAP_IMAGES); 
         sequenceRight.open(dataset.right_imgs_path, cv::CAP_IMAGES);
 
@@ -106,6 +105,7 @@ namespace mrVSLAM
 
         StereoDepth stereo(stereoMatcherType::BlockMatching, baseline, camera.fx); 
 
+
         while (true)
         {
             sequenceLeft.read(imgLeft); 
@@ -115,12 +115,26 @@ namespace mrVSLAM
                 std::cout << "End of sequance \n"; 
                 break;
             }
+            loopStart = cv::getTickCount();
+
 
             stereo.calculateDepth(imgLeft, imgRight); 
 
 
+            loopEnd = cv::getTickCount();
+            fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
+            cv::putText(stereo.disparityMap, "fps: " + std::to_string(fps), 
+                        cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
+            cv::imshow("Camera Img", stereo.disparityMap);
+
+            char key = (char)cv::waitKey(33); 
+            if(key == 'q' || key == 27)
+                break;
         }
-        
+        sequenceLeft.release(); 
+        sequenceRight.release();
+        cv::destroyAllWindows(); 
+        return 0; 
     }   
 
 

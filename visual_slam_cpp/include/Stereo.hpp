@@ -10,16 +10,20 @@ namespace mrVSLAM
     private:
         double baseline = 0 ;
         double f = 0;  
+        double M = 0; // f*baseline 
+        const int minDisparity = 0; 
         const int sadWindow = 9;  
         const int numOfDisparities = sadWindow*16; // number of disparities must be divisible by 16 //https://docs.opencv.org/3.4/d2/d85/classcv_1_1StereoSGBM.html#ad985310396dd4d95a003b83811bbc138a21fac9fae6db6a60a940fd24cc61f081
-        const int blockSize = 7; // should be in range 3-11
+        const int blockSize = 15; // should be in range 3-11
         cv::Ptr<cv::StereoMatcher> stereoMatcher; 
+
+        cv::Mat disparity16 = cv::Mat(370, 1226, CV_16S);
 
     public: 
         
         // disparity map is map map of diffrence in image location of the same 3d point from 2 diffrent camera angles 
-        cv::Mat disparityMap = cv::Mat(370, 1226, CV_16SC1); // not sure if size is correct 
-        cv::Mat depthMap = cv::Mat(370, 1226, CV_16SC1);
+        cv::Mat disparityMap = cv::Mat(370, 1226, CV_32FC1); 
+        cv::Mat depthMap = cv::Mat(370, 1226, CV_32FC1);
 
         StereoDepth(stereoMatcherType, double baseline, double focalLength) noexcept; 
 
@@ -30,13 +34,15 @@ namespace mrVSLAM
     StereoDepth::StereoDepth(stereoMatcherType matcher, double baseline, double focalLength) noexcept
         : baseline(baseline), f(focalLength)
     {
+        M = baseline*f; 
+
         switch (matcher)
         {
         case BlockMatching:
             stereoMatcher = cv::StereoBM::create(numOfDisparities, blockSize); 
             break;
         case SGBM:
-            stereoMatcher = cv::StereoSGBM::create(0, numOfDisparities, blockSize, 8*12*sadWindow, 32*12*sadWindow, cv::StereoSGBM::MODE_SGBM_3WAY); 
+            stereoMatcher = cv::StereoSGBM::create(0, numOfDisparities, blockSize, 24*sadWindow*sadWindow, 96*sadWindow*sadWindow, cv::StereoSGBM::MODE_SGBM_3WAY); 
             break;  
         
         default:
@@ -46,9 +52,13 @@ namespace mrVSLAM
     
     void StereoDepth::calculateDepth(const cv::Mat &leftImg, const cv::Mat &rightImg)
     {
-        stereoMatcher->compute(leftImg, rightImg, disparityMap); 
-        std::cout << "size of disparity map = " << disparityMap.size()<< "\n"; 
-        depthMap = (f*baseline) * disparityMap;  
+        stereoMatcher->compute(leftImg, rightImg, disparity16); 
+         
+        disparity16.convertTo(disparityMap, CV_32F, 1.0); 
+        disparityMap = (disparityMap/16.0f - (float)minDisparity)/((float)numOfDisparities);
+
+        depthMap = M / disparityMap;  
+        std::cout << "depthMap = \n" << disparityMap; 
     }
 
 }
