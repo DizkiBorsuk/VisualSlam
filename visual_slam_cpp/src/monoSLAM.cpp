@@ -1,6 +1,4 @@
-#include "../include/featureVO.hpp"
-#include "../include/FeatureExtraction.hpp"
-#include "../include/camera.hpp"
+
 
 namespace mrVSLAM
 {
@@ -34,79 +32,5 @@ namespace mrVSLAM
   
     // }
 
-    int mrVSLAM::featureVO::executeMonoSLAM(const std::string& imgs_path)
-    {
-        //Class objects 
-        mrVSLAM::FeatureExtraction features(ExtractorType::orb_gptt, false, 500);
-    
-        // Variables 
-        cv::Mat frame(370, 1226,CV_8UC1); // declare img size and type, super important 
-        int start, end, framesPerSecond; 
-
-        // Create img sequence and get 
-        cv::VideoCapture sequence; 
-        sequence.open(imgs_path, cv::CAP_IMAGES);
-
-        cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
-
-        if (!sequence.isOpened())
-        {
-            std::cerr << "Failed to open Image Sequence!\n"; 
-            return -1;
-        }
-
-        while(true)
-        {
-            sequence.read(frame);
-            
-            if(frame.empty())
-            {
-                std::cout << "End of sequance \n"; 
-                break;
-            }
-
-            start = cv::getTickCount(); 
-            auto begin = std::chrono::high_resolution_clock::now();
-
-            //////// ----- Algorithm body ------ ///////// 
-        
-            features.getFeatures(frame); 
-            features.matchFeaturesBF(0.75f); 
-            //features.matchFeaturesBF(0.75f);  
-            //poseEstimationEpiCons(features.matched_keypoints); 
-            
- ; 
-            //////// ----- Algorithm End ----- //////////
-
-            
-            end = cv::getTickCount();
-            auto cend = std::chrono::high_resolution_clock::now();
-            framesPerSecond = 1/((end - start)/cv::getTickFrequency()); 
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
-
-            // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
-        
-            for(int p = 0; p < features.matched_keypoints.size(); p++)
-            { 
-                cv::circle(frame, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
-                cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
-            }
-
-            features.matched_keypoints.clear(); 
-            features.frame_keypoints.clear(); 
-
-            cv::putText(frame, "fps: " + std::to_string(framesPerSecond), 
-                        cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
-            cv::imshow("Camera Img", frame);
-            std::cout << "Frame num: " << f_counter++ << "\n" << "time: " << elapsed.count() << "\n"; 
-
-            char key = (char)cv::waitKey(66); 
-            if(key == 'q' || key == 27)
-                break;
-        }
-        cv::destroyAllWindows(); 
-
-        return 0; 
-    }
 }
 

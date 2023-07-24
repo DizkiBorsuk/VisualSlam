@@ -23,7 +23,6 @@ namespace mrVSLAM
     gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures); 
 
 
-
     class Frame
     {
     public: 
@@ -51,8 +50,8 @@ namespace mrVSLAM
 
         FrameMatcher() noexcept; 
 
-        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept; 
-        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept;
+        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f); 
+        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f);
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;

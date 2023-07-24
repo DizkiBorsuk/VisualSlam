@@ -6,8 +6,8 @@ namespace mrVSLAM
     {
         this->frameId = frameId; 
         K = cameraMatrix; 
-        invK = K.inv(); 
-        pose = pose.eye(); 
+        //invK = K.inv(); 
+        //pose = pose.eye(); 
 
         auto features = extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures); 
         frameFeaturePoints = features.frameKeypoints; 
@@ -17,6 +17,8 @@ namespace mrVSLAM
         */
     }
 
+    //####################
+
     feature extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures)
     {
         cv::Ptr<cv::FeatureDetector> detector; 
@@ -24,7 +26,7 @@ namespace mrVSLAM
         std::vector<cv::KeyPoint> keypoints; 
         cv::Mat descriptors; 
 
-        keypoints.reserve(numberOfFeatures);
+        //keypoints.reserve(numberOfFeatures);
 
         switch (extractor)
         {
@@ -58,7 +60,6 @@ namespace mrVSLAM
         detector->detect(img, keypoints); 
         descriptor->compute(img, keypoints, descriptors); 
 
-        std::cout << "descriptors size" << descriptors.size()<< "\n"; 
         return {keypoints, descriptors}; 
     }    
     
@@ -74,6 +75,22 @@ namespace mrVSLAM
         // //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
 
         return {keypoints, descriptors}; 
+    }
+
+    //###################   
+
+    FrameMatcher::FrameMatcher() noexcept
+    {
+
+    }
+
+    void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) 
+    {
+
+    }
+    void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) 
+    {
+        
     }
 
     // void FrameMatcher::matchFeaturesFlann(const float& low_rt) noexcept

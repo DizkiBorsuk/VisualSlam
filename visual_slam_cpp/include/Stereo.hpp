@@ -11,10 +11,10 @@ namespace mrVSLAM
         double baseline = 0 ;
         double f = 0;  
         double M = 0; // f*baseline 
-        const int minDisparity = 0; 
-        const int sadWindow = 9;  
-        const int numOfDisparities = sadWindow*16; // number of disparities must be divisible by 16 //https://docs.opencv.org/3.4/d2/d85/classcv_1_1StereoSGBM.html#ad985310396dd4d95a003b83811bbc138a21fac9fae6db6a60a940fd24cc61f081
-        const int blockSize = 15; // should be in range 3-11
+        static constexpr int minDisparity = 0; 
+        static constexpr int sadWindow = 9;  
+        static constexpr int numOfDisparities = sadWindow*16; // number of disparities must be divisible by 16 //https://docs.opencv.org/3.4/d2/d85/classcv_1_1StereoSGBM.html#ad985310396dd4d95a003b83811bbc138a21fac9fae6db6a60a940fd24cc61f081
+        static constexpr int blockSize = 15; // should be in range 3-11
         cv::Ptr<cv::StereoMatcher> stereoMatcher; 
 
         cv::Mat disparity16 = cv::Mat(370, 1226, CV_16S);

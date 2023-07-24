@@ -25,7 +25,7 @@ namespace mrVSLAM
 
     int SLAM::runMonoSLAM()
     {
-        cv::Mat img(370, 1226,CV_8UC1); // declare img size and type, super important 
+        cv::Mat img( cv::Size(370, 1226),CV_8UC1); // declare img size and type, super important 
 
         // Create img sequence and get 
         cv::VideoCapture sequence; 
@@ -52,9 +52,10 @@ namespace mrVSLAM
 
             //////// ----- Algorithm body ------ ///////// 
 
-            Frame frame(img, camera.K, frame_counter, 800); // create Frame object that holds all information about current frame/img 
+            Frame frame(img, camera.K, frame_counter, 500); // create Frame object that holds all information about current frame/img 
 
-            
+            std::cout <<"descriptor size = "<< frame.frameDescriptors.size << "\n"; 
+            std::cout <<"typ" << frame.frameDescriptors.type()<< "\n"; 
  
             //////// ----- Algorithm End ----- //////////
 
@@ -64,7 +65,7 @@ namespace mrVSLAM
             auto cend = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
 
-            // cv::drawKeypoints(frame, features.frame_keypoints, frame, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
+            //cv::drawKeypoints(img, frame.frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
             // for(int p = 0; p < features.matched_keypoints.size(); p++)
             // { 

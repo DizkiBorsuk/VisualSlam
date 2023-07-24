@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     //cv::cuda::setDevice(0); 
     //--------------------//
     mrVSLAM::SLAM slam("07"); 
-    slam.runStereoSLAM(); 
+    slam.runMonoSLAM(); 
     
     //-------------------//
     return 0; 
