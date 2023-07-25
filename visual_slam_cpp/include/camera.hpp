@@ -14,10 +14,10 @@ namespace mrVSLAM
         cv::Matx<double,3, 3> K, R; // K - intrinsic matrix, R - camera rotation matrix 
         cv::Matx<double, 3, 1> t;// t - camera translation vector 
 
-        void setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix); 
+        void setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept; 
     }; 
 
-    double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2); 
+    double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2) noexcept; 
 
 }
 

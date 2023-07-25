@@ -2,16 +2,12 @@
 
 namespace mrVSLAM 
 {
-    Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures)
+    Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept
+                : frameId(frameId), K(cameraMatrix)
     {
-        this->frameId = frameId; 
-        K = cameraMatrix; 
-        //invK = K.inv(); 
-        //pose = pose.eye(); 
+        frameFeaturePoints.reserve(numOfFeatures*sizeof(cv::KeyPoint)); 
+        extraxtFeatures(image, ExtractorType::ORB, numOfFeatures, frameFeaturePoints, frameDescriptors); 
 
-        auto features = extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures); 
-        frameFeaturePoints = features.frameKeypoints; 
-        frameDescriptors = features.descriptors; 
         /*
         add coordinates normalization, transform from img cordinates to camera coordinates 
         */
@@ -19,12 +15,10 @@ namespace mrVSLAM
 
     //####################
 
-    feature extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures)
+     inline void extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept
     {
         cv::Ptr<cv::FeatureDetector> detector; 
         cv::Ptr<cv::DescriptorExtractor>  descriptor; 
-        std::vector<cv::KeyPoint> keypoints; 
-        cv::Mat descriptors; 
 
         //keypoints.reserve(numberOfFeatures);
 
@@ -57,13 +51,11 @@ namespace mrVSLAM
         default: 
             break;
         }
-        detector->detect(img, keypoints); 
-        descriptor->compute(img, keypoints, descriptors); 
-
-        return {keypoints, descriptors}; 
+        detector->detect(img, outKeypoint); 
+        descriptor->compute(img, outKeypoint, outDescriptors); 
     }    
     
-    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures)  
+    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept
     {   
         cv::cuda::GpuMat descriptors, keypoints; 
         //cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
@@ -84,11 +76,11 @@ namespace mrVSLAM
 
     }
 
-    void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) 
+    void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept
     {
 
     }
-    void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) 
+    void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept
     {
         
     }

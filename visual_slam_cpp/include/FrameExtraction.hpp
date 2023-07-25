@@ -6,12 +6,6 @@ namespace mrVSLAM
     enum ExtractorType {OrbHarris, OrbFast, ORB, OrbGptt, SIFT, AKAZE}; 
     enum MatcherType {BruteForce, Flann}; 
 
-    struct feature
-    {
-        std::vector<cv::KeyPoint> frameKeypoints; 
-        cv::Mat descriptors; 
-    };
-
     struct gpuFeature
     {
         cv::cuda::GpuMat gpuKeypoints; 
@@ -19,25 +13,21 @@ namespace mrVSLAM
     };
 
 
-    feature extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures); 
-    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures); 
+    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
+    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept; 
 
 
     class Frame
     {
     public: 
         int frameId; 
-
-        Eigen::Matrix3d K_eigen, invK_eigen; 
-        Eigen::Matrix4d pose_eigen; 
-
         cv::Matx<double, 3, 3> K, invK;
         cv::Matx<double, 4, 4> pose;  
 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors; 
+        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_8UC1);
         
-        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures);
+        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept;
     private: 
 
     };
@@ -50,8 +40,8 @@ namespace mrVSLAM
 
         FrameMatcher() noexcept; 
 
-        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f); 
-        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f);
+        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept; 
+        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept;
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;

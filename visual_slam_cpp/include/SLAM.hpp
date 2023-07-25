@@ -27,9 +27,8 @@ namespace mrVSLAM
 
 
     public: 
-        enum SlamType {featureMono, featureStereo, direct}; 
         
-        SLAM(const std::string sequence_number);
+        SLAM(const std::string sequence_number) noexcept;
         ~SLAM(); 
         
         // delete move and copy constructrs/operators
@@ -39,10 +38,10 @@ namespace mrVSLAM
         SLAM& operator=(const SLAM&&) = delete; 
 
         //void initSLAM(); 
-        int runMonoSLAM();
-        int runStereoSLAM();  
-        int runGpuMonoSLAM();
-        int runGpuStereoSLAM();   
+        int runMonoSLAM() noexcept;
+        int runStereoSLAM() noexcept;  
+        int runGpuMonoSLAM() noexcept;
+        int runGpuStereoSLAM() noexcept;   
 
         void showResult(); 
     }; 

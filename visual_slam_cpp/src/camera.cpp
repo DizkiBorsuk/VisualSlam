@@ -3,9 +3,8 @@
 
 namespace mrVSLAM
 {
-    void Camera::setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix)
+    void Camera::setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept
     {
-        
         // get camera calibration parameters 
         cx = projectionMatrix.coeff(0,2); 
         cy = projectionMatrix.coeff(1,2); 
@@ -30,7 +29,7 @@ namespace mrVSLAM
         // std::cout << "t1 = " << t_mat << "R = " << R_mat << "\n K = " << K_mat << "\n"; 
     }
 
-    double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2)
+    double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2) noexcept
     {
         return abs(t1(0) - t2(0)); 
     }
