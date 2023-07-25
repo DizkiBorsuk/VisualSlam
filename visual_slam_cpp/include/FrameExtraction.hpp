@@ -25,7 +25,7 @@ namespace mrVSLAM
         cv::Matx<double, 4, 4> pose;  
 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_8UC1);
+        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_32FC1);
         
         Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept;
     private: 

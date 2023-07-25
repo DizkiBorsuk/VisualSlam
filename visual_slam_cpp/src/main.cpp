@@ -1,6 +1,7 @@
 
 #include "../include/system.hpp"
 #include "../include/SLAM.hpp"
+#include "../include/visualize_data.hpp"
 
 
 
@@ -14,6 +15,7 @@ int main(int argc, char** argv)
     //--------------------//
     mrVSLAM::SLAM slam("07"); 
     slam.runMonoSLAM(); 
+    mrVSLAM::plotPerformance(slam.performance); 
     
     //-------------------//
     return 0; 

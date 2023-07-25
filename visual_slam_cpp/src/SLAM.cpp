@@ -19,6 +19,9 @@ namespace mrVSLAM
         baseline = getStereoBaseline(camera.t, right_camera.t); // calculate baseline 
         std::cout << "baseline = " << baseline << "\n"; 
         std::cout << "\n" << "-------------"<<"\n"; 
+
+        frames.reserve(6500*sizeof(Frame));
+        performance.reserve(2000); 
     }
 
 //###################
@@ -52,8 +55,9 @@ namespace mrVSLAM
 
             //////// ----- Algorithm body ------ ///////// 
 
-            Frame frame(img, camera.K, frame_counter, 500); // create Frame object that holds all information about current frame/img 
-
+            // Frame frame(img, camera.K, frame_counter, 500); // create Frame object that holds all information about current frame/img 
+            // frames.emplace_back(frame); 
+            frames.emplace_back(img, camera.K, frame_counter, 500); 
  
             //////// ----- Algorithm End ----- //////////
 
@@ -62,8 +66,9 @@ namespace mrVSLAM
             fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
             auto cend = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
+            performance.emplace_back(fps); 
 
-            cv::drawKeypoints(img, frame.frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
+            cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
             // for(int p = 0; p < features.matched_keypoints.size(); p++)
             // { 
@@ -79,7 +84,7 @@ namespace mrVSLAM
             cv::imshow("Camera Img", img);
             std::cout << "Frame num: " << frame_counter++ << "\n" << "time: " << elapsed.count() << "\n"; 
 
-            char key = (char)cv::waitKey(33); 
+            char key = (char)cv::waitKey(1); 
             if(key == 'q' || key == 27)
                 break;
         }
@@ -135,11 +140,4 @@ namespace mrVSLAM
         cv::destroyAllWindows(); 
         return 0; 
     }   
-
-
-    void SLAM::showResult()
-    {
-        plotPoses(dataset.ground_truth_poses, frame_counter); 
-
-    }
 }

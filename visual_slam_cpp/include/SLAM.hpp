@@ -24,10 +24,11 @@ namespace mrVSLAM
         //std::unique_ptr<Camera> right_camera; 
         Camera right_camera; 
         double baseline = 0;
-
-
+    
     public: 
-        
+
+        std::vector<int> performance; 
+        //
         SLAM(const std::string sequence_number) noexcept;
         ~SLAM(); 
         
