@@ -58,6 +58,7 @@ void mrVSLAM::plotPerformance(std::vector<int> loopTimes)
 
     std::cout << "------- Results --------- \n"; 
     std::cout << "mean fps = " << mean << "\n"; 
+    std::cout << "min value = " << *std::min_element(loopTimes.begin(), loopTimes.end()) << "\n"; 
 
     plt::figure(); 
     plt::plot(loopTimes); 

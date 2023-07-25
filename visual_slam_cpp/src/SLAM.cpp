@@ -20,7 +20,7 @@ namespace mrVSLAM
         std::cout << "baseline = " << baseline << "\n"; 
         std::cout << "\n" << "-------------"<<"\n"; 
 
-        frames.reserve(6500*sizeof(Frame));
+        frames.reserve(3000*sizeof(Frame));
         performance.reserve(2000); 
     }
 
