@@ -23,10 +23,10 @@ trajectory = []
 
 def mono_slam(img): 
     
-    frame = Frame(img, K, 500) # create Frame object 
+    frame = Frame(img, K, 500, map) # create Frame object 
     frames.append(frame)
     
-    if len(frames) <= 1:
+    if frame.id == 0:
         return
     
     frame1DesIdx, frame2DesIdx, matchedPts, Rt = matchFrames(frames[-1], frames[-2]) # match 
@@ -37,7 +37,8 @@ def mono_slam(img):
     
     pointsIn4D /= pointsIn4D[:,3:] 
     print("Homogenous points \n", pointsIn4D)
-    good4dPts = ((np.abs(pointsIn4D[:,3]) > 0.005) & (pointsIn4D[:,2] > 0))
+    good4dPts = pointsIn4D[:,2] > 0
+    # good4dPts = ((np.abs(pointsIn4D[:,3]) > 0.005) & (pointsIn4D[:,2] > 0))
     pointsIn4D = pointsIn4D[good4dPts] # discard points without enough parallax
 
     
@@ -46,10 +47,12 @@ def mono_slam(img):
     print("Last frame pose : \n", frames[-1].pose)
     
     
-    for point in pointsIn4D: 
-        pt = Point(point) 
-        pt.addObservation(frames[-1], frame1DesIdx)
-        pt.addObservation(frames[-2], frame2DesIdx)
+    for i, point in enumerate(pointsIn4D): 
+        if not good4dPts[i]:
+            continue
+        pt = Point(point, map) 
+        pt.addObservation(frames[-1], frame1DesIdx[i])
+        pt.addObservation(frames[-2], frame2DesIdx[i])
     
     
     for pointsIn1, pointsIn2 in matchedPts: 
@@ -96,7 +99,6 @@ if __name__ == "__main__":
         else: 
             break
    
-    
     cap.release()
     cv2.destroyAllWindows()
     trajectory = np.array(trajectory)

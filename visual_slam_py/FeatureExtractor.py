@@ -4,6 +4,7 @@ from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform 
 from skimage.transform import EssentialMatrixTransform
 from tools import *
+from Map import Map
 
         
 def extractFeatures(img, num_of_features):
@@ -92,7 +93,7 @@ def getPose(EssentailMatrix):
 
 
 class Frame(): 
-    def __init__(self, img, intrinsicMatrix, num_of_features):
+    def __init__(self, img, intrinsicMatrix, num_of_features, map):
                 
         self.K = intrinsicMatrix
         self.Kinv = np.linalg.inv(self.K)
@@ -103,4 +104,6 @@ class Frame():
         
         featurePoints, self.descriptos = extractFeatures(img, num_of_features)
         self.featurePts = normalize(featurePoints, self.Kinv)
+        self.id = len(map.frames)
+        map.frames.append(self)
         
