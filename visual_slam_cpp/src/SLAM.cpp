@@ -83,7 +83,6 @@ namespace mrVSLAM
             }
             
             matcher.matchedKeypoints.clear(); 
-            // features.frame_keypoints.clear(); 
 
             cv::putText(img, "fps: " + std::to_string(fps), 
                         cv::Point(30,50), cv::FONT_HERSHEY_DUPLEX, 2, cv::Scalar(0,0,255),2);
