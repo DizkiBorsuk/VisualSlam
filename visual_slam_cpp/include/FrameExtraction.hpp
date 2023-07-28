@@ -25,7 +25,7 @@ namespace mrVSLAM
         cv::Matx<double, 4, 4> pose;  
 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_32FC1);
+        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_8UC1);
         
         Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept;
     private: 
@@ -36,17 +36,23 @@ namespace mrVSLAM
     {
     public: 
         std::vector<cv::DMatch> goodMatches; 
-        std::vector<std::vector<cv::Point2f>> matchedKeypoints; 
+        std::vector<std::array<cv::Point2f, 2>> matchedKeypoints; 
 
-        FrameMatcher() noexcept; 
+        FrameMatcher(MatcherType) noexcept; 
 
-        void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept; 
-        void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept;
+        void matchFrames(const Frame &frame1, const Frame &frame2, const float& low_ratio = 0.7f) noexcept; 
+
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;
         cv::Ptr<cv::cuda::DescriptorMatcher> gpuMatcher; 
+        cv::Point2f keypoint1, keypoint2; 
+        std::array<cv::Point2f, 2> pointPair; 
 
+        enum _descriptorType {float32, uchar8};
+        _descriptorType descT; 
+        cv::Mat descriptors1; 
+        cv::Mat descriptors2; 
     };
 
 

@@ -20,7 +20,7 @@ namespace mrVSLAM
         std::cout << "baseline = " << baseline << "\n"; 
         std::cout << "\n" << "-------------"<<"\n"; 
 
-        frames.reserve(3000*sizeof(Frame));
+        frames.reserve(500+dataset.ground_truth_poses.size());
         performance.reserve(2000); 
     }
 
@@ -41,6 +41,8 @@ namespace mrVSLAM
             return -1;
         }
 
+        FrameMatcher matcher(MatcherType::BruteForce); 
+
         while(true)
         {
             sequence.read(img);
@@ -58,7 +60,11 @@ namespace mrVSLAM
             // Frame frame(img, camera.K, frame_counter, 500); // create Frame object that holds all information about current frame/img 
             // frames.emplace_back(frame); 
             frames.emplace_back(img, camera.K, frame_counter, 500); 
- 
+            if(frames.size() <= 1)
+                continue;
+            matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); 
+
+            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; 
             //////// ----- Algorithm End ----- //////////
 
             
@@ -68,15 +74,15 @@ namespace mrVSLAM
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
             performance.emplace_back(fps); 
 
-            cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
+            //cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
-            // for(int p = 0; p < features.matched_keypoints.size(); p++)
-            // { 
-            //     cv::circle(img, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
-            //     cv::line(img, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
-            // }
-
-            // features.matched_keypoints.clear(); 
+            for(int p = 0; p < matcher.matchedKeypoints.size(); p++)
+            { 
+                cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(0,255,0));
+                cv::line(img, matcher.matchedKeypoints[p][1], matcher.matchedKeypoints[p][0], cv::Scalar(255,0,0), 1); 
+            }
+            
+            matcher.matchedKeypoints.clear(); 
             // features.frame_keypoints.clear(); 
 
             cv::putText(img, "fps: " + std::to_string(fps), 

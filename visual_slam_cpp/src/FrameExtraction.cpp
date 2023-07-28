@@ -5,7 +5,7 @@ namespace mrVSLAM
     Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept
                 : frameId(frameId), K(cameraMatrix)
     {
-        frameFeaturePoints.reserve(numOfFeatures*sizeof(cv::KeyPoint)); 
+        frameFeaturePoints.reserve(numOfFeatures+100); 
         extraxtFeatures(image, ExtractorType::ORB, numOfFeatures, frameFeaturePoints, frameDescriptors); 
 
         /*
@@ -28,17 +28,17 @@ namespace mrVSLAM
             detector = cv::ORB::create(numberOfFeatures,cv::ORB::HARRIS_SCORE);  
             descriptor = cv::ORB::create(numberOfFeatures, cv::ORB::HARRIS_SCORE);
             break;
-        case ExtractorType::OrbFast:
+        case ExtractorType::ORB:
             detector = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
             descriptor = cv::ORB::create(numberOfFeatures, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
             break; 
-        case ExtractorType::ORB:
-            detector = cv::FastFeatureDetector::create(40); 
+        case ExtractorType::OrbFast:
+            detector = cv::FastFeatureDetector::create(40, true, cv::FastFeatureDetector::TYPE_9_16); 
             descriptor = cv::ORB::create(numberOfFeatures);
             break;
         case ExtractorType::OrbGptt:
-            detector = cv::GFTTDetector::create(); 
-            descriptor = cv::ORB::create(numberOfFeatures);
+            detector = cv::GFTTDetector::create(numberOfFeatures, 0.01, 1.0, 3, false, 0.04); 
+            descriptor = cv::ORB::create(numberOfFeatures, cv::ORB::FAST_SCORE);
             break;
         case ExtractorType::SIFT:
             detector = cv::SIFT::create(numberOfFeatures);  
@@ -71,19 +71,58 @@ namespace mrVSLAM
 
     //###################   
 
-    FrameMatcher::FrameMatcher() noexcept
+    FrameMatcher::FrameMatcher(MatcherType matcherType) noexcept
     {
-
+        switch (matcherType)
+        {
+        case Flann:
+            matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED); 
+            descT = float32;  
+            break;
+        case BruteForce: 
+            matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
+            descT = uchar8;  
+            break; 
+        default:
+            break;
+        }
     }
 
-    void matchFramesFlann(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept
+    void FrameMatcher::matchFrames(const Frame &frame1, const Frame &frame2, const float& low_ratio) noexcept
     {
+        std::vector<std::vector<cv::DMatch>> matches; 
+        switch (descT)
+        {
+        case float32:
 
-    }
-    void matchFramesBF(const Frame &frame1, const Frame &frame2, const float& low_rt = 0.7f) noexcept
-    {
+                frame1.frameDescriptors.convertTo(descriptors1, CV_32F); 
+                frame2.frameDescriptors.convertTo(descriptors2, CV_32F);
+                matcher->knnMatch(descriptors1, descriptors2, matches, 2); 
+            break;
+        case uchar8:
+            matcher->knnMatch(frame1.frameDescriptors,frame2.frameDescriptors, matches, 2);  
+            break; 
         
+        default:
+            break;
+        }
+
+        std::vector<std::vector<cv::DMatch>>::iterator it;
+        for (it= matches.begin(); it!= matches.end(); ++it) 
+        {
+            if ((*it)[0].distance/(*it)[1].distance < low_ratio)
+            {
+                goodMatches.emplace_back((*it)[0]);
+                keypoint1 = frame1.frameFeaturePoints[(*it)[0].queryIdx].pt;  
+                keypoint2 = frame2.frameFeaturePoints[(*it)[0].trainIdx].pt; 
+                pointPair[0] = keypoint1; 
+                pointPair[1] = keypoint2; 
+                matchedKeypoints.emplace_back(pointPair); 
+            }
+        }
     }
+    
+    
 
     // void FrameMatcher::matchFeaturesFlann(const float& low_rt) noexcept
     // {    
