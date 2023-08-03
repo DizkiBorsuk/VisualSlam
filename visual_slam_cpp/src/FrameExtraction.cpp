@@ -6,7 +6,7 @@ namespace mrVSLAM
                 : frameId(frameId), K(cameraMatrix)
     {
         frameFeaturePoints.reserve(numOfFeatures+100); 
-        extraxtFeatures(image, ExtractorType::ORB, numOfFeatures, frameFeaturePoints, frameDescriptors); 
+        extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures, frameFeaturePoints, frameDescriptors); 
 
         /*
         add coordinates normalization, transform from img cordinates to camera coordinates 
@@ -15,7 +15,7 @@ namespace mrVSLAM
 
     //####################
 
-     inline void extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept
+    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept
     {
         cv::Ptr<cv::FeatureDetector> detector; 
         cv::Ptr<cv::DescriptorExtractor>  descriptor; 

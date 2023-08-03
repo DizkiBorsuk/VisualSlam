@@ -28,7 +28,7 @@ namespace mrVSLAM
 
     int SLAM::runMonoSLAM() noexcept
     {
-        cv::Mat img(370, 1226,CV_8UC1); // declare img size and type, super important 
+        cv::Mat img(370, 1226, CV_8UC1); // declare img size and type, super important 
 
         // Create img sequence and get 
         cv::VideoCapture sequence; 
@@ -64,7 +64,7 @@ namespace mrVSLAM
                 continue;
             matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); 
 
-            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; 
+            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; //https://stackoverflow.com/questions/44831793/what-is-the-difference-between-vector-back-and-vector-end
             //////// ----- Algorithm End ----- //////////
 
             
@@ -78,7 +78,7 @@ namespace mrVSLAM
         
             for(int p = 0; p < matcher.matchedKeypoints.size(); p++)
             { 
-                cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(0,255,0));
+                cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(255,255,0));
                 cv::line(img, matcher.matchedKeypoints[p][1], matcher.matchedKeypoints[p][0], cv::Scalar(255,0,0), 1); 
             }
             
