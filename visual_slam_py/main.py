@@ -42,8 +42,6 @@ def mono_slam(img):
     pointsIn4D = pointsIn4D[good4dPts] # discard points without enough parallax
 
     
-    frames[-1].pose = np.dot(Rt, (frames[-2].pose).T) # get real pose of Frame 
-    
     print("Last frame pose : \n", frames[-1].pose)
     
     

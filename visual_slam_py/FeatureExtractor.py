@@ -34,7 +34,7 @@ def matchFrames(Frame1, Frame2):
     
     matches = matcher.knnMatch(Frame1.descriptos, Frame2.descriptos, k = 2)  
     #low's ratio test - basic filtration 
-    for m,n in matches:
+    for m,n in matches: #m features in first frame and n features in second frame
         if m.distance < 0.75*n.distance:
             firstDesIdxs.append(m.queryIdx)
             secondDesIdxs.append(m.trainIdx)
