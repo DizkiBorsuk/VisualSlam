@@ -24,6 +24,9 @@ namespace mrVSLAM
         //std::unique_ptr<Camera> right_camera; 
         Camera right_camera; 
         double baseline = 0;
+
+    // 
+        void getRelativeFramePose(std::vector<cv::Point2f> &frame1points, std::vector<cv::Point2f> &frame2points);
     
     public: 
 
@@ -45,6 +48,8 @@ namespace mrVSLAM
         int runGpuStereoSLAM() noexcept;   
 
         void showResult(); 
+
+        
     }; 
 
 }

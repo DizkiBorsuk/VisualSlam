@@ -57,15 +57,16 @@ namespace mrVSLAM
 
             //////// ----- Algorithm body ------ ///////// 
 
-            // Frame frame(img, camera.K, frame_counter, 500); // create Frame object that holds all information about current frame/img 
-            // frames.emplace_back(frame); 
-            frames.emplace_back(img, camera.K, frame_counter, 500); 
+            frames.emplace_back(img, camera.K, frame_counter, 500); // create Frame object and emplace it in frames vector
             if(frames.size() <= 1)
                 continue;
-            matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); 
-
-            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; //https://stackoverflow.com/questions/44831793/what-is-the-difference-between-vector-back-and-vector-end
+            matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); // get matches //https://stackoverflow.com/questions/44831793/what-is-the-difference-between-vector-back-and-vector-end
+            
+            getRelativeFramePose(); 
+            
             //////// ----- Algorithm End ----- //////////
+
+            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; 
 
             
             loopEnd = cv::getTickCount();
@@ -145,4 +146,18 @@ namespace mrVSLAM
         cv::destroyAllWindows(); 
         return 0; 
     }   
+
+
+     void SLAM::getRelativeFramePose(std::vector<cv::Point2f> &frame1points, std::vector<cv::Point2f> &frame2points)
+     {
+        cv::Mat essentialMatrix; 
+
+        essentialMatrix = cv::findEssentialMat(frame1points, frame2points, camera.K, cv::RANSAC, 0.99, 1.0, 100, cv::noArray()); 
+        //https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=decomposeessentialmat#void%20decomposeEssentialMat(InputArray%20E,%20OutputArray%20R1,%20OutputArray%20R2,%20OutputArray%20t)
+        //cv::decomposeEssentialMat()
+
+        cv::recoverPose(essentialMatrix, frame1points, frame2points, camera.K, R, t); 
+
+     }
+
 }

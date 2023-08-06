@@ -121,4 +121,9 @@ namespace mrVSLAM
             }
         }
     }
+
+    void FrameMatcher::getRelativePose(cv::Mat &cameraMatrix, cv::Mat &R, cv::Mat &t)
+    {
+        cv::findEssentialMat(frame1points, frame2points, cameraMatrix, cv::RANSAC, 0.9989999999999999991, 1, 100);
+    }
 }

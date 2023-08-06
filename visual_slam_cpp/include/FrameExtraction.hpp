@@ -13,7 +13,8 @@ namespace mrVSLAM
     };
 
 
-    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
+    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures, 
+                                std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
     gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept; 
 
 
@@ -25,7 +26,7 @@ namespace mrVSLAM
         cv::Matx<double, 4, 4> pose;  
 
         std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors = cv::Mat(32, 600, CV_8UC1);
+        cv::Mat frameDescriptors = cv::Mat(32, 800, CV_8UC1);
         
         Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept;
     private: 
@@ -39,9 +40,8 @@ namespace mrVSLAM
         std::vector<std::array<cv::Point2f, 2>> matchedKeypoints; 
 
         FrameMatcher(MatcherType) noexcept; 
-
         void matchFrames(const Frame &frame1, const Frame &frame2, const float& low_ratio = 0.7f) noexcept; 
-
+        
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;
@@ -54,9 +54,6 @@ namespace mrVSLAM
         cv::Mat descriptors1; 
         cv::Mat descriptors2; 
     };
-
-
-
 
 
 }
