@@ -45,7 +45,6 @@ namespace mrVSLAM
         FeatureExtractor *extractorPointer = &featureExtractor; 
         FrameMatcher matcher(MatcherType::BruteForce); 
 
-
         while(true)
         {
             sequence.read(img);
@@ -65,13 +64,9 @@ namespace mrVSLAM
             if(frames.size() <= 1)
                 continue;
             matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); // get matches //https://stackoverflow.com/questions/44831793/what-is-the-difference-between-vector-back-and-vector-end
+            getRelativeFramePose(matcher.matchedKeypoints); 
             
-            //getRelativeFramePose(); 
-            
-            //////// ----- Algorithm End ----- //////////
-
-            std::cout << "frame id = " <<frames.end()[-1].frameId << "\n"; 
-
+            //////// ----- Algorithm End ----- /////////
             
             loopEnd = cv::getTickCount();
             fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
@@ -80,11 +75,13 @@ namespace mrVSLAM
             performance.emplace_back(fps); 
 
             //cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
-        
+                
             // for(int p = 0; p < matcher.matchedKeypoints.size(); p++)
             // { 
             //     cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(255,255,0));
             //     cv::line(img, matcher.matchedKeypoints[p][1], matcher.matchedKeypoints[p][0], cv::Scalar(255,0,0), 1); 
+            //     // cv::circle(img, frames.end()[-1].points[p], 3, cv::Scalar(255,255,0));
+            //     // cv::line(img, frames.end()[-2].points[p], frames.end()[-1].points[p], cv::Scalar(255,0,0), 1); 
             // }
             
             matcher.matchedKeypoints.clear(); 
@@ -152,15 +149,23 @@ namespace mrVSLAM
     }   
 
 
-    void SLAM::getRelativeFramePose(std::vector<cv::Point2f> &frame1points, std::vector<cv::Point2f> &frame2points)
+    void SLAM::getRelativeFramePose(const std::vector<std::array<cv::Point2f,2>> &matchedKeypoints)
     {
-        cv::Mat essentialMatrix; 
+        std::vector<cv::Point2f> points1, points2;
+        cv::Mat R, t, mask; 
+        for(int i = 0; i < matchedKeypoints.size(); i++)
+        {
+            points1.emplace_back(matchedKeypoints[i][0]);
+            points2.emplace_back(matchedKeypoints[i][1]);
+        }
 
-        essentialMatrix = cv::findEssentialMat(frame1points, frame2points, camera.K, cv::RANSAC, 0.99, 1.0, 100, cv::noArray()); 
-        //https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html?highlight=decomposeessentialmat#void%20decomposeEssentialMat(InputArray%20E,%20OutputArray%20R1,%20OutputArray%20R2,%20OutputArray%20t)
-        //cv::decomposeEssentialMat()
+        essentialMatrix = cv::findEssentialMat(points1, points2, camera.K, cv::RANSAC, 0.99, 1.0, 100, mask); 
+        //std::cout << "Essential matrix = \n" << essentialMatrix << "\n matrix size = " << essentialMatrix.size() <<"\n";
+        //https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
+        cv::recoverPose(essentialMatrix, points1, points2, camera.K, R, t, mask); 
 
-        //cv::recoverPose(essentialMatrix, frame1points, frame2points, camera.K, R, t); 
+        std::cout << "R = \n" << R << "\n"; 
+        std::cout << "t = \n" << t << "\n"; 
 
     }
 

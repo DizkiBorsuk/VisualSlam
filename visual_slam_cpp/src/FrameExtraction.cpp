@@ -85,9 +85,12 @@ namespace mrVSLAM
         }
     }
 
-    void FrameMatcher::matchFrames(const Frame &frame1, const Frame &frame2, const float& low_ratio) noexcept
+    void FrameMatcher::matchFrames(Frame &frame1,Frame &frame2, const float &low_ratio) noexcept
     {
         std::vector<std::vector<cv::DMatch>> matches; 
+        cv::Point2f keypoint1, keypoint2; 
+        std::array<cv::Point2f, 2> pointPair; 
+        
         switch (descT)
         {
         case float32:
@@ -108,12 +111,12 @@ namespace mrVSLAM
         {
             if ((*it)[0].distance/(*it)[1].distance < low_ratio)
             {
-                goodMatches.emplace_back((*it)[0]);
-                keypoint1 = frame1.frameFeaturePoints[(*it)[0].queryIdx].pt;  
-                keypoint2 = frame2.frameFeaturePoints[(*it)[0].trainIdx].pt; 
-                pointPair[0] = keypoint1; 
-                pointPair[1] = keypoint2; 
-                matchedKeypoints.emplace_back(pointPair); 
+                //goodMatches.emplace_back((*it)[0]);
+                pointPair[0] = frame1.frameFeaturePoints[(*it)[0].queryIdx].pt;  
+                pointPair[1] = frame2.frameFeaturePoints[(*it)[0].trainIdx].pt; 
+                // frame1.points.emplace_back(pointPair[0]); 
+                // frame2.points.emplace_back(pointPair[1]); 
+                matchedKeypoints.emplace_back(std::move(pointPair)); 
             }
         }
     }

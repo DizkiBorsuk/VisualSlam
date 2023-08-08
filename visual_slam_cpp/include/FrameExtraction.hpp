@@ -29,31 +29,32 @@ namespace mrVSLAM
     class Frame
     {
     public: 
-        int frameId; 
-        cv::Matx<double, 3, 3> K, invK;
+        int frameId; // id of a frame
+        cv::Matx<double, 3, 3> K; //invK;
         cv::Matx<double, 4, 4> pose;  
+        bool isKeyFrame = false; 
+        std::shared_ptr<Frame> framePtr; 
 
-        std::vector<cv::KeyPoint> frameFeaturePoints;  
-        cv::Mat frameDescriptors = cv::Mat(32, 800, CV_8UC1);
-        
-        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures, FeatureExtractor *) noexcept;
+        std::vector<cv::Point2f> points; //points after matching 
+        std::vector<cv::KeyPoint> frameFeaturePoints; // keypoints from extractor  
+        cv::Mat frameDescriptors = cv::Mat(32, 800, CV_8UC1); // descriptors
+    
+        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures, FeatureExtractor *) noexcept;    
     };
 
     class FrameMatcher
     {
     public: 
-        std::vector<cv::DMatch> goodMatches; 
+        //std::vector<cv::DMatch> goodMatches; 
         std::vector<std::array<cv::Point2f, 2>> matchedKeypoints; 
 
         FrameMatcher(MatcherType) noexcept; 
-        void matchFrames(const Frame &frame1, const Frame &frame2, const float& low_ratio = 0.7f) noexcept; 
+        void matchFrames(Frame &frame1, Frame &frame2, const float &low_ratio = 0.7f) noexcept; 
         
 
     private:
         cv::Ptr<cv::DescriptorMatcher> matcher;
         cv::Ptr<cv::cuda::DescriptorMatcher> gpuMatcher; 
-        cv::Point2f keypoint1, keypoint2; 
-        std::array<cv::Point2f, 2> pointPair; 
 
         enum _descriptorType {float32, uchar8};
         _descriptorType descT; 

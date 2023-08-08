@@ -16,6 +16,8 @@ namespace mrVSLAM
         int fps = 0, loopStart = 0, loopEnd = 0; 
         std::vector<Frame> frames; 
 
+        cv::Matx33d essentialMatrix; 
+
         KITTI_Dataset dataset;
     // mono 
         //std::unique_ptr<Camera> camera; 
@@ -26,7 +28,7 @@ namespace mrVSLAM
         double baseline = 0;
 
     // 
-        void getRelativeFramePose(std::vector<cv::Point2f> &frame1points, std::vector<cv::Point2f> &frame2points);
+        void getRelativeFramePose(const std::vector<std::array<cv::Point2f,2>> &matchedKeypoints);
     
     public: 
 
