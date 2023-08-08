@@ -81,11 +81,11 @@ namespace mrVSLAM
 
             //cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
         
-            for(int p = 0; p < matcher.matchedKeypoints.size(); p++)
-            { 
-                cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(255,255,0));
-                cv::line(img, matcher.matchedKeypoints[p][1], matcher.matchedKeypoints[p][0], cv::Scalar(255,0,0), 1); 
-            }
+            // for(int p = 0; p < matcher.matchedKeypoints.size(); p++)
+            // { 
+            //     cv::circle(img, matcher.matchedKeypoints[p][0], 3, cv::Scalar(255,255,0));
+            //     cv::line(img, matcher.matchedKeypoints[p][1], matcher.matchedKeypoints[p][0], cv::Scalar(255,0,0), 1); 
+            // }
             
             matcher.matchedKeypoints.clear(); 
 

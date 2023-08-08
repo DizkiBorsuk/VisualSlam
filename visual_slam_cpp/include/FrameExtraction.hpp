@@ -26,7 +26,6 @@ namespace mrVSLAM
     };
     
 
-
     class Frame
     {
     public: 
