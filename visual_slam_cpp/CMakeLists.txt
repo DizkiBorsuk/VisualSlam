@@ -65,5 +65,3 @@ target_link_libraries(${PROJECT_NAME}
                       ${PYTHON_LIBRARIES}
                       Python3::NumPy
                       ) #g2o::core g2o::stuff g2o::types_data g2o::types_icp g2o::types_slam3d g2o::types_slam2d
-
-

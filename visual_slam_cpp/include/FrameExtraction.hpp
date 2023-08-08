@@ -11,11 +11,20 @@ namespace mrVSLAM
         cv::cuda::GpuMat gpuKeypoints; 
         cv::cuda::GpuMat gpuDescriptors;  
     };
-
-
-    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType, const int numberOfFeatures, 
-                                std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
     gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept; 
+
+    class FeatureExtractor
+    {
+    public: 
+        FeatureExtractor(const ExtractorType &extractor, const int &numberOfFeatures) noexcept;
+        void extractFeatures(const cv::Mat &img, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
+        //void (FeatureExtractor::*extraxtFeaturesPointer)(const cv::Mat &img, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) = &FeatureExtractor::extraxtFeatures; 
+
+    private: 
+        cv::Ptr<cv::FeatureDetector> detector; 
+        cv::Ptr<cv::DescriptorExtractor>  descriptor; 
+    };
+    
 
 
     class Frame
@@ -28,9 +37,7 @@ namespace mrVSLAM
         std::vector<cv::KeyPoint> frameFeaturePoints;  
         cv::Mat frameDescriptors = cv::Mat(32, 800, CV_8UC1);
         
-        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept;
-    private: 
-
+        Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures, FeatureExtractor *) noexcept;
     };
 
     class FrameMatcher
@@ -54,6 +61,5 @@ namespace mrVSLAM
         cv::Mat descriptors1; 
         cv::Mat descriptors2; 
     };
-
 
 }

@@ -2,26 +2,19 @@
 
 namespace mrVSLAM 
 {
-    Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures) noexcept
+    Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures, FeatureExtractor *extractor) noexcept
                 : frameId(frameId), K(cameraMatrix)
     {
         frameFeaturePoints.reserve(numOfFeatures+100); 
-        extraxtFeatures(image, ExtractorType::OrbFast, numOfFeatures, frameFeaturePoints, frameDescriptors); 
-
+        extractor->extractFeatures(image, frameFeaturePoints, frameDescriptors); 
         /*
         add coordinates normalization, transform from img cordinates to camera coordinates 
         */
     }
 
     //####################
-
-    inline void extraxtFeatures(const cv::Mat &img, const ExtractorType extractor, const int numberOfFeatures, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept
+    FeatureExtractor::FeatureExtractor(const ExtractorType &extractor, const int &numberOfFeatures) noexcept
     {
-        cv::Ptr<cv::FeatureDetector> detector; 
-        cv::Ptr<cv::DescriptorExtractor>  descriptor; 
-
-        //keypoints.reserve(numberOfFeatures);
-
         switch (extractor)
         {
         case ExtractorType::OrbHarris:
@@ -51,9 +44,13 @@ namespace mrVSLAM
         default: 
             break;
         }
+    }
+
+    void FeatureExtractor::extractFeatures(const cv::Mat &img, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept
+    {
         detector->detect(img, outKeypoint); 
         descriptor->compute(img, outKeypoint, outDescriptors); 
-    }    
+    }   
     
     gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept
     {   
@@ -94,7 +91,6 @@ namespace mrVSLAM
         switch (descT)
         {
         case float32:
-
                 frame1.frameDescriptors.convertTo(descriptors1, CV_32F); 
                 frame2.frameDescriptors.convertTo(descriptors2, CV_32F);
                 matcher->knnMatch(descriptors1, descriptors2, matches, 2); 
@@ -122,8 +118,4 @@ namespace mrVSLAM
         }
     }
 
-    void FrameMatcher::getRelativePose(cv::Mat &cameraMatrix, cv::Mat &R, cv::Mat &t)
-    {
-        cv::findEssentialMat(frame1points, frame2points, cameraMatrix, cv::RANSAC, 0.9989999999999999991, 1, 100);
-    }
 }
