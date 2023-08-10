@@ -22,6 +22,8 @@ namespace mrVSLAM
 
         frames.reserve(500+dataset.ground_truth_poses.size());
         performance.reserve(2000); 
+        trajectory.reserve(500+dataset.ground_truth_poses.size()); 
+
     }
 
 //###################
@@ -76,13 +78,11 @@ namespace mrVSLAM
 
             //cv::drawKeypoints(img, frames.back().frameFeaturePoints, img, cv::Scalar(0,255,0), cv::DrawMatchesFlags::DEFAULT);
                 
-            for(int p = 0; p < matcher.matchedKeypoints[0].size(); p++)
-            { 
-                cv::circle(img, matcher.matchedKeypoints[0][p], 3, cv::Scalar(255,255,0));
-                cv::line(img, matcher.matchedKeypoints[1][p], matcher.matchedKeypoints[0][p], cv::Scalar(0,0,0), 1); 
-                // cv::circle(img, frames.end()[-1].points[p], 3, cv::Scalar(255,255,0));
-                // cv::line(img, frames.end()[-2].points[p], frames.end()[-1].points[p], cv::Scalar(255,0,0), 1); 
-            }
+            // for(int p = 0; p < matcher.matchedKeypoints[0].size(); p++)
+            // { 
+            //     cv::circle(img, matcher.matchedKeypoints[0][p], 3, cv::Scalar(255,255,0));
+            //     cv::line(img, matcher.matchedKeypoints[1][p], matcher.matchedKeypoints[0][p], cv::Scalar(0,0,0), 1); 
+            // }
             
             matcher.matchedKeypoints[0].clear(); // always have to clear them
             matcher.matchedKeypoints[1].clear(); 
@@ -153,9 +153,9 @@ namespace mrVSLAM
     void SLAM::getRelativeFramePose(const std::vector<cv::Point2f> &points1, const std::vector<cv::Point2f> &points2, 
                                     cv::Matx44d &pose)
     {
-        cv::Matx33f R;
-        cv::Matx31f t; 
-        cv::Matx34f Rt; 
+        cv::Matx33d R;
+        cv::Matx31d t; 
+        cv::Matx34d Rt; 
         cv::Mat mask;  
 
         essentialMatrix = cv::findEssentialMat(points1, points2, camera.K, cv::RANSAC, 0.99, 1.0, 100, mask); 

@@ -33,6 +33,7 @@ namespace mrVSLAM
     public: 
 
         std::vector<int> performance; 
+        std::vector<cv::Matx44d> trajectory; 
         //
         SLAM(const std::string sequence_number) noexcept;
         ~SLAM(); 
