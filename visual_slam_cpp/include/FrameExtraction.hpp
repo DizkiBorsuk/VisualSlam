@@ -6,19 +6,13 @@ namespace mrVSLAM
     enum ExtractorType {OrbHarris, OrbFast, ORB, OrbGptt, SIFT, AKAZE}; 
     enum MatcherType {BruteForce, Flann}; 
 
-    struct gpuFeature
-    {
-        cv::cuda::GpuMat gpuKeypoints; 
-        cv::cuda::GpuMat gpuDescriptors;  
-    };
-    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept; 
+    // gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept; 
 
     class FeatureExtractor
     {
     public: 
         FeatureExtractor(const ExtractorType &extractor, const int &numberOfFeatures) noexcept;
         void extractFeatures(const cv::Mat &img, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) noexcept; 
-        //void (FeatureExtractor::*extraxtFeaturesPointer)(const cv::Mat &img, std::vector<cv::KeyPoint> &outKeypoint, cv::Mat &outDescriptors) = &FeatureExtractor::extraxtFeatures; 
 
     private: 
         cv::Ptr<cv::FeatureDetector> detector; 
@@ -31,7 +25,9 @@ namespace mrVSLAM
     public: 
         int frameId; // id of a frame
         cv::Matx<double, 3, 3> K; //invK;
-        cv::Matx<double, 4, 4> pose;  
+        cv::Matx<double, 4, 4> pose;  // frame pose in homogenous
+        Eigen::Matrix4d pose_eigen;  // frame pose in homogenous
+        
         bool isKeyFrame = false; 
         std::shared_ptr<Frame> framePtr; 
 
@@ -46,7 +42,8 @@ namespace mrVSLAM
     {
     public: 
         //std::vector<cv::DMatch> goodMatches; 
-        std::vector<std::array<cv::Point2f, 2>> matchedKeypoints; 
+        std::array<std::vector<cv::Point2f>, 2> matchedKeypoints; 
+        //std::vector<std::array<cv::Point2f, 2>> matchedKeypoints; 
 
         FrameMatcher(MatcherType) noexcept; 
         void matchFrames(Frame &frame1, Frame &frame2, const float &low_ratio = 0.7f) noexcept; 

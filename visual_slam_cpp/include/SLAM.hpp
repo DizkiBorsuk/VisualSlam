@@ -28,7 +28,7 @@ namespace mrVSLAM
         double baseline = 0;
 
     // 
-        void getRelativeFramePose(const std::vector<std::array<cv::Point2f,2>> &matchedKeypoints);
+        void getRelativeFramePose(const std::vector<cv::Point2f> &points1, const std::vector<cv::Point2f> &points2, cv::Matx44d &pose);
     
     public: 
 

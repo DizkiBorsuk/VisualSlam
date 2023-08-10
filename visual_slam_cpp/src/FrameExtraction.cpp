@@ -5,11 +5,9 @@ namespace mrVSLAM
     Frame::Frame(const cv::Mat &image, cv::Matx33d &cameraMatrix, const int frameId, const int numOfFeatures, FeatureExtractor *extractor) noexcept
                 : frameId(frameId), K(cameraMatrix)
     {
+        pose = cv::Matx44d::eye(); 
         frameFeaturePoints.reserve(numOfFeatures+100); 
         extractor->extractFeatures(image, frameFeaturePoints, frameDescriptors); 
-        /*
-        add coordinates normalization, transform from img cordinates to camera coordinates 
-        */
     }
 
     //####################
@@ -52,19 +50,19 @@ namespace mrVSLAM
         descriptor->compute(img, outKeypoint, outDescriptors); 
     }   
     
-    gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept
-    {   
-        cv::cuda::GpuMat descriptors, keypoints; 
-        //cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
-        cv::Ptr<cv::cuda::ORB> gpuOrbExtractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
-        gpuOrbExtractor->detectAndComputeAsync(img,cv::noArray(), keypoints, descriptors, false); 
-        // //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
+    // gpuFeature extraxtGpuFeatures( const cv::cuda::GpuMat &img, const int numberOfFeatures) noexcept
+    // {   
+    //     cv::cuda::GpuMat descriptors, keypoints; 
+    //     //cv::Ptr<cv::cuda::FastFeatureDetector> gpuFastDetector; 
+    //     cv::Ptr<cv::cuda::ORB> gpuOrbExtractor = cv::cuda::ORB::create(500,1.200000048F, 8, 31, 0, 2, 0, 31, 20, true);
+    //     gpuOrbExtractor->detectAndComputeAsync(img,cv::noArray(), keypoints, descriptors, false); 
+    //     // //gpu_ORB->detectAndComputeAsync(frame, cv::noArray(), gpu_keypoints_1, gpu_descriptors_1, false); 
         
-        // gpu_detector->detect(frame, keypoints_1);
-        // //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
+    //     // gpu_detector->detect(frame, keypoints_1);
+    //     // //gpu_ORB->compute(frame, gpu_keypoints_1, descriptors_1_gpu); 
 
-        return {keypoints, descriptors}; 
-    }
+    //     return {keypoints, descriptors}; 
+    // }
 
     //###################   
 
@@ -89,7 +87,7 @@ namespace mrVSLAM
     {
         std::vector<std::vector<cv::DMatch>> matches; 
         cv::Point2f keypoint1, keypoint2; 
-        std::array<cv::Point2f, 2> pointPair; 
+        //std::array<cv::Point2f, 2> pointPair; 
         
         switch (descT)
         {
@@ -111,12 +109,8 @@ namespace mrVSLAM
         {
             if ((*it)[0].distance/(*it)[1].distance < low_ratio)
             {
-                //goodMatches.emplace_back((*it)[0]);
-                pointPair[0] = frame1.frameFeaturePoints[(*it)[0].queryIdx].pt;  
-                pointPair[1] = frame2.frameFeaturePoints[(*it)[0].trainIdx].pt; 
-                // frame1.points.emplace_back(pointPair[0]); 
-                // frame2.points.emplace_back(pointPair[1]); 
-                matchedKeypoints.emplace_back(std::move(pointPair)); 
+                matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
+                matchedKeypoints[1] .emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
             }
         }
     }
