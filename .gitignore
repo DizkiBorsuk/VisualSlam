@@ -8,6 +8,7 @@
 build* 
 *.vscode
 *.json
+*.pyc
 
 CMakeLists.txt.user
 CMakeCache.txt

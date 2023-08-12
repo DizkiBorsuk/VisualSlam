@@ -104,6 +104,7 @@ class Frame():
         
         featurePoints, self.descriptos = extractFeatures(img, num_of_features)
         self.featurePts = normalize(featurePoints, self.Kinv)
-        self.id = len(map.frames)
-        map.frames.append(self)
+        
+        self.id = len(map.frames) #add index based on number of frames in map
+        map.frames.append(self) #add frame to map 
         

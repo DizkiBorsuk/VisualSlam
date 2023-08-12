@@ -13,7 +13,6 @@ P, K, t, P_right, K_right, t_right = dataset.getCameraMatrixies() #get projectio
 gtPoses = dataset.getGTposes() 
 print(gtPoses.shape)
 
-
 map = Map() 
 
 frames = []
@@ -24,43 +23,39 @@ trajectory = []
 def mono_slam(img): 
     
     frame = Frame(img, K, 500, map) # create Frame object 
-    frames.append(frame)
+    #frames.append(frame)
     
     if frame.id == 0:
         return
     
-    frame1DesIdx, frame2DesIdx, matchedPts, Rt = matchFrames(frames[-1], frames[-2]) # match 
-    frames[-1].pose = np.dot(Rt, (frames[-2].pose)) # get real pose of Frame # pose is 4x4 matrix that has rotation and translation in homogenous coordinates
-    trajectory.append(frames[-1].pose) 
+    frame1 = map.frames[-1] # last frame from map 
+    frame2 = map.frames[-2] #pre last frame 
     
-    pointsIn4D = cv2.triangulatePoints(frames[-1].pose[:3],frames[-2].pose[:3], frames[-1].featurePts[frame1DesIdx].T, frames[-2].featurePts[frame2DesIdx].T).T #https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gad3fc9a0c82b08df034234979960b778c
+    frame1DesIdx, frame2DesIdx, matchedPts, Rt = matchFrames(frame1, frame2) # match 
+    frame1.pose = np.dot(Rt, (frame2.pose)) # get real pose of Frame # pose is 4x4 matrix that has rotation and translation in homogenous coordinates
+    trajectory.append(frame1.pose) 
+    
+    pointsIn4D = cv2.triangulatePoints(frame1.pose[:3],frame2.pose[:3], frame1.featurePts[frame1DesIdx].T, frame2.featurePts[frame2DesIdx].T).T #https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gad3fc9a0c82b08df034234979960b778c
     
     pointsIn4D /= pointsIn4D[:,3:] 
     print("Homogenous points \n", pointsIn4D)
     good4dPts = pointsIn4D[:,2] > 0
     # good4dPts = ((np.abs(pointsIn4D[:,3]) > 0.005) & (pointsIn4D[:,2] > 0))
-    pointsIn4D = pointsIn4D[good4dPts] # discard points without enough parallax
-
+    pointsIn4D = pointsIn4D[good4dPts] # discard points behind camera 
     
-    print("Last frame pose : \n", frames[-1].pose)
+    print("Last frame pose : \n", frame1.pose)
     
     
     for i, point in enumerate(pointsIn4D): 
         if not good4dPts[i]:
             continue
         pt = Point(point, map) 
-        pt.addObservation(frames[-1], frame1DesIdx[i])
-        pt.addObservation(frames[-2], frame2DesIdx[i])
+        pt.addObservation(frame1, frame1DesIdx[i])
+        pt.addObservation(frame2, frame2DesIdx[i])
     
     
     for pointsIn1, pointsIn2 in matchedPts: 
-        # u1,v1 = map(lambda x: int(round(x)), matched_point1) # img coordinates of each KeyPoint 
-        # u2,v2 = map(lambda x: int(round(x)), matched_point2)
-        #denormalizacja 
-        # u1 += int(round(cx))
-        # u2 += int(round(cx))
-        # v1 += int(round(cy))
-        # v2 += int(round(cy))
+
         u1,v1 = denormalize(pointsIn1, K)
         u2,v2 = denormalize(pointsIn2, K)
         
@@ -69,7 +64,7 @@ def mono_slam(img):
     
     
     cv2.imshow("vSlam",img)
-    cv.waitKey(33)
+    cv.waitKey(1)
     
     
 def stereo_slam(img1, img2): 

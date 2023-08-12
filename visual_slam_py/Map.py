@@ -9,7 +9,8 @@ class Point(object):
         self.location = location 
         self.descriptor_indexes = [] #indexes of frames tha point was observed in 
         self.id = len(map.points)
-        map.points.append(self)
+        
+        map.points.append(self) #add point to map 
         #
         
     def addObservation(self, frame, idx): 
