@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "system.hpp"
+#include "tools.hpp"
 #include "camera.hpp"
 #include "readDataset.hpp"
 #include "visualize_data.hpp"

@@ -155,7 +155,6 @@ namespace mrVSLAM
     {
         cv::Matx33d R;
         cv::Matx31d t; 
-        cv::Matx34d Rt; 
         cv::Mat mask;  
 
         essentialMatrix = cv::findEssentialMat(points1, points2, camera.K, cv::RANSAC, 0.99, 1.0, 100, mask); 
@@ -163,8 +162,7 @@ namespace mrVSLAM
         //https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
         cv::recoverPose(essentialMatrix, points1, points2, camera.K, R, t, mask); 
 
-        cv::hconcat(R, t, Rt);  
-        std::cout << "pose = \n" << Rt << "\n"; 
+        getTransformationMatrix(R, t, pose); 
         //std::cout << "poza = " << pose <<"\n"; 
     }
 
