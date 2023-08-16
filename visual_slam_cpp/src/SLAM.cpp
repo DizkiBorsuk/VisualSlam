@@ -64,10 +64,18 @@ namespace mrVSLAM
 
             frames.emplace_back(img, camera.K, frame_counter, 800, extractorPointer); // create Frame object and emplace it in frames vector
             if(frames.size() <= 1)
+            {
+                trajectory.emplace_back(frames.end()[-1].pose); 
                 continue;
+            }
+
             matcher.matchFrames(frames.end()[-1], frames.end()[-2], 0.7f); // get matches //https://stackoverflow.com/questions/44831793/what-is-the-difference-between-vector-back-and-vector-end
             getRelativeFramePose(matcher.matchedKeypoints[0],matcher.matchedKeypoints[1], frames.end()[-1].pose); 
-            
+            frames.end()[-1].pose = frames.end()[-2].pose * frames.end()[-1].pose;   
+            std::cout << "last pose = \n" << frames.end()[-1].pose << "\n"; 
+            trajectory.emplace_back(frames.end()[-1].pose); 
+            std::cout << "size of trajectory vector = " << trajectory.size() << "\n"; 
+
             //////// ----- Algorithm End ----- /////////
             
             loopEnd = cv::getTickCount();
@@ -158,12 +166,16 @@ namespace mrVSLAM
         cv::Mat mask;  
 
         essentialMatrix = cv::findEssentialMat(points1, points2, camera.K, cv::RANSAC, 0.99, 1.0, 100, mask); 
-        //std::cout << "Essential matrix = \n" << essentialMatrix << "\n matrix size = " << essentialMatrix.size() <<"\n";
+        std::cout << "Essential matrix = \n" << essentialMatrix << "\n";
         //https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
         cv::recoverPose(essentialMatrix, points1, points2, camera.K, R, t, mask); 
 
         getTransformationMatrix(R, t, pose); 
-        //std::cout << "poza = " << pose <<"\n"; 
+        std::cout << "poza = " << pose <<"\n"; 
     }
 
-}
+    void SLAM::showResult()
+    {
+        plotPoses(trajectory, dataset.ground_truth_poses, frame_counter); 
+    }
+}   

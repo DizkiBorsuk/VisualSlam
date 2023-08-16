@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     //--------------------//
     mrVSLAM::SLAM slam("07"); 
     slam.runMonoSLAM(); 
+    slam.showResult(); 
     mrVSLAM::plotPerformance(slam.performance); 
     
     //-------------------//
