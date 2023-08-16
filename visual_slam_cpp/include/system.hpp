@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <array>
 #include "eigen3/Eigen/Dense"
 #include <cmath>
 #include <memory>

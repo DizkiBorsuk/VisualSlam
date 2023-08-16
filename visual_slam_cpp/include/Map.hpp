@@ -1,6 +1,6 @@
-#pragma once 
-#include <vector>
-#include <memory>
+#pragma once
+#include "system.hpp" 
+
 
 namespace mrVSLAM
 {
@@ -8,6 +8,8 @@ namespace mrVSLAM
     {   
         // 3D point in a world 
         std::shared_ptr<MapPoint> mapPointPtr; 
+        std::array<float, 3> pointXYZ; 
+        cv::Mat pointDescriptor; 
 
     }; 
 

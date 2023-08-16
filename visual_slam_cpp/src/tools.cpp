@@ -2,26 +2,15 @@
 
 namespace mrVSLAM
 {
-    // Eigen::Matrix3d findFundamentalMatrix(const std::vector<std::vector<cv::Point2f>> &matched_points)
-    // {
-    //     Eigen::Matrix3d fundamentalMatrix; 
-    //     std::vector<cv::Point2f> points_frame1, points_frame2; 
+    void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)
+    {
+        cv::Mat Rt, last_row; 
+        cv::hconcat(R, t, Rt); 
 
-    //     for(auto points: matched_points)
-    //     {
-    //         points_frame1.emplace_back(points[0]); 
-    //         points_frame1.emplace_back(points[1]); 
-    //     }
-
-
-
-    //     return fundamentalMatrix; 
-    // }
-    // Eigen::Matrix3d findEssentialMatrix(const Eigen::Matrix3d &intrinsicMatrix, const Eigen::Matrix3d &fundamentalMatrix)
-    // {
-    //     Eigen::Matrix3d essentialMatrix; 
-
-
-    //     return essentialMatrix; 
-    // }
+        last_row.at<double>(0,0) = 0; 
+        last_row.at<double>(0,1) = 0;
+        last_row.at<double>(0,2) = 0;
+        last_row.at<double>(0,3) = 1;
+        cv::vconcat(Rt, last_row, outT); 
+    }
 }
