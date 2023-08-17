@@ -6,9 +6,12 @@
 #include <fstream>
 #include <sstream>
 #include <array>
-#include "eigen3/Eigen/Dense"
+#include <chrono>
+#include <algorithm>
 #include <cmath>
 #include <memory>
+
+#include "eigen3/Eigen/Dense"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -19,8 +22,4 @@
 #include <opencv2/cudafilters.hpp>
 #include <opencv2/cudastereo.hpp>
 #include <opencv2/cudafeatures2d.hpp>
-
-#include <chrono>
-#include <algorithm>
-#include <time.h>
 
