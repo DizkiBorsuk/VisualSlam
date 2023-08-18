@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <thread>
+#include <mutex>
 
 #include "eigen3/Eigen/Dense"
 

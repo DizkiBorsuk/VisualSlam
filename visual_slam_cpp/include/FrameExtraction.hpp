@@ -23,7 +23,7 @@ namespace mrVSLAM
     class Frame
     {
     public: 
-        int frameId; // id of a frame
+        unsigned int frameId; // id of a frame
         cv::Matx<double, 3, 3> K; //invK;
         cv::Matx<double, 4, 4> pose;  // frame pose in homogenous
         Eigen::Matrix4d pose_eigen;  // frame pose in homogenous
@@ -58,5 +58,4 @@ namespace mrVSLAM
         cv::Mat descriptors1; 
         cv::Mat descriptors2; 
     };
-
 }

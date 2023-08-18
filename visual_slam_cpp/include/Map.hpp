@@ -11,8 +11,8 @@ namespace mrVSLAM
         std::array<float, 3> pointXYZ {}; // position of point in x,y,z 
         cv::Mat pointDescriptor; 
 
-        int point_id = 0; 
-        int observed_in = 0; // number of frames that point was observed in 
+        unsigned int point_id = 0; 
+        unsigned int observed_in = 0; // number of frames that point was observed in 
 
         Point(int id, std::array<float,3> position);
 
