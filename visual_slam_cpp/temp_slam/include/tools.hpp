@@ -8,7 +8,6 @@ namespace mrVSLAM
     
     void getTransformationMatrix(const Eigen::Matrix3d &R, const Eigen::Vector4d &t, Eigen::Matrix<double,4,4> &outT); 
 
-
     //### visualization tools ###// 
 
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, 
