@@ -8,6 +8,8 @@
 
 namespace mrVSLAM
 {
+    enum class STATUS {INITIALIZATION, TRACKING, LOST}; 
+
     class StereoDirectSLAM
     {
     public: 

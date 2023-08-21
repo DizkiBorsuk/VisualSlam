@@ -11,7 +11,7 @@ namespace mrVSLAM
 
     void Visualizer::closeVisualizer() 
     {
-        visualizer_thread.join(); // maybe change to pthread 
+        visualizer_thread.join(); //? maybe change to pthread 
     }
 
     void Visualizer::runVisualizer()

@@ -15,8 +15,8 @@ namespace mrVSLAM
     public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW; 
 
-        Visualizer(); // constructor creates visualization thread 
-        void closeVisualizer(); // closes/joints thread 
+        Visualizer(); //* constructor creates visualization thread 
+        void closeVisualizer(); //* closes/joints thread 
 
         void setMapPtr(std::shared_ptr<Map> input_map)
         {
