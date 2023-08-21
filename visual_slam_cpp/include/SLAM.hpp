@@ -9,6 +9,7 @@
 
 namespace mrVSLAM
 {
+    enum class STATE {MAP_INITIALIZATION, TRACKING, LOST}; 
     class SLAM
     {
     private: 

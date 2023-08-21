@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(temp_slam VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,20 +39,15 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
-            src/SLAM.cpp
-            src/visualize_data.cpp 
             src/read_dataset.cpp 
-            src/FrameExtraction.cpp
-            src/tools.cpp
-            src/camera.cpp)
+            src/frame.cpp
+            #src/tools.cpp
+            #src/camera.cpp
+            )
 
-set(Headers include/camera.hpp 
-            include/FrameExtraction.hpp 
+set(Headers #include/camera.hpp 
             include/Map.hpp
             include/read_dataset.hpp
-            include/SLAM.hpp
-            include/system.hpp
-            include/Stereo.hpp
             )
 
 
