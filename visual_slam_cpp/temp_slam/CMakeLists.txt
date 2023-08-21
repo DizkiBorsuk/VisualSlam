@@ -56,6 +56,7 @@ set(Headers include/camera.hpp
             include/map.hpp
             include/read_dataset.hpp
             include/StereoDirectSLAM.hpp 
+            include/visualizer.hpp
             )
 
 

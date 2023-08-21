@@ -1,6 +1,10 @@
 #pragma once 
 #include "common_includes.hpp"
 #include "read_dataset.hpp"
+#include "frame.hpp"
+#include "map.hpp"
+#include "backend_optimization.hpp"
+#include "visualizer.hpp"
 
 namespace mrVSLAM
 {
@@ -19,13 +23,13 @@ namespace mrVSLAM
         unsigned int num_of_features_for_keyframe = 50; //check in orbslam 
         bool initialization_succes = false; 
 
-        cv::Ptr<cv::GGFTTDetector>
+        cv::Ptr<cv::GFTTDetector> featureDetector; 
 
         KITTI_Dataset dataset; 
 
         
         std::shared_ptr<Map> ptr_to_map = nullptr; 
-        std::shared_ptr<Visuzalizer> ptr_to_visuzalizer= nullptr; 
+        std::shared_ptr<Visualizer> ptr_to_visualizer= nullptr; 
         //std::shared_ptr<> ptr_ = nullptr; 
 
 
