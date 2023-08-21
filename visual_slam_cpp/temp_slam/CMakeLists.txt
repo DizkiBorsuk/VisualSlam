@@ -39,15 +39,23 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
-            src/read_dataset.cpp 
+            src/backend_optimization.cpp
+            src/camera.cpp
             src/frame.cpp
-            #src/tools.cpp
-            #src/camera.cpp
+            src/map.cpp
+            src/read_dataset.cpp
+            src/StereoDirectSLAM.cpp
+            src/tools.cpp
+            src/visualizer.cpp
             )
 
-set(Headers #include/camera.hpp 
-            include/Map.hpp
+set(Headers include/camera.hpp 
+            include/backend_optimization.hpp 
+            include/common_includes.hpp
+            include/frame.hpp 
+            include/map.hpp
             include/read_dataset.hpp
+            include/StereoDirectSLAM.hpp 
             )
 
 
