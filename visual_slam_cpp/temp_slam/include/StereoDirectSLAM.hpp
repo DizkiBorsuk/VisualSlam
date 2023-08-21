@@ -25,7 +25,7 @@ namespace mrVSLAM
 
         
         std::shared_ptr<Map> ptr_to_map = nullptr; 
-        std::shared_ptr<Visuzalization> ptr_to_visualization = nullptr; 
+        std::shared_ptr<Visuzalizer> ptr_to_visuzalizer= nullptr; 
         //std::shared_ptr<> ptr_ = nullptr; 
 
 
