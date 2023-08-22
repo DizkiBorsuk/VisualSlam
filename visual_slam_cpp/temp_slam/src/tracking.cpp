@@ -2,5 +2,9 @@
 
 namespace mrVSLAM
 {
+    Tracking::Tracking()
+    {
+        
+    }
     
 }

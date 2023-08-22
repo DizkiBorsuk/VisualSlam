@@ -1,6 +1,5 @@
 #pragma once 
 #include "common_includes.hpp"
-#include "map.hpp"
 
 /*
  Frame and Feature objects. 
@@ -15,6 +14,7 @@
 namespace mrVSLAM
 {
     class Frame; 
+    class MapPoint; //! some stupid shit  
 
     class Feature
     {
@@ -27,6 +27,7 @@ namespace mrVSLAM
         std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame 
         //https://en.cppreference.com/w/cpp/memory/weak_ptr 
 
+        Feature() = default; 
         Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &keypoint) noexcept 
             : frame(frame), featurePoint_position(keypoint)
         {   }

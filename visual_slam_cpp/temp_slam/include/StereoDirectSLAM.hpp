@@ -26,9 +26,6 @@ namespace mrVSLAM
         int fps = 0, loopStart = 0, loopEnd = 0; 
 
 
-        unsigned int num_of_features = 300; 
-        unsigned int num_of_features_init = 100; //i guess? 
-        unsigned int num_of_features_for_keyframe = 50; //check in orbslam 
         bool initialization_succes = false; 
 
         //KITTI_Dataset dataset; 

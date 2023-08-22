@@ -1,6 +1,5 @@
 #pragma once 
 #include "common_includes.hpp"
-#include "frame.hpp"
 
 /*
 Map and MapPoint classes used to creat map
@@ -8,6 +7,9 @@ Map and MapPoint classes used to creat map
 
 namespace mrVSLAM
 {
+    class Frame; 
+    class Feature; 
+
     class MapPoint
     {
     // class representing 3D point in a map 
