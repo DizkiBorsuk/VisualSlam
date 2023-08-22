@@ -1,5 +1,6 @@
 #pragma once 
 #include "common_includes.hpp"
+#include "map.hpp"
 
 namespace mrVSLAM
 {
@@ -7,7 +8,7 @@ namespace mrVSLAM
     {
     public: 
 
-        Backend(); 
+        Backend() noexcept; 
 
         void setMap(); 
         void updateMap(); 

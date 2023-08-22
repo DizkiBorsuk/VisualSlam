@@ -46,6 +46,7 @@ set(Sources src/main.cpp
             src/read_dataset.cpp
             src/StereoDirectSLAM.cpp
             src/tools.cpp
+            src/tracking.cpp
             src/visualizer.cpp
             )
 

@@ -4,32 +4,46 @@
 
 namespace mrVSLAM
 {
-    StereoDirectSLAM::StereoDirectSLAM()
+    StereoDirectSLAM::StereoDirectSLAM(std::string sequence_number)
     {
-        ptr_to_map = std::shared_ptr<Map>(new Map); 
-        ptr_to_visualization = std::shared_ptr<Visualization>(new Visualization); 
+        map = std::shared_ptr<Map>(new Map); 
+        visualizer = std::shared_ptr<Visualizer>(new Visualizer); 
+        tracking = std::shared_ptr<Tracking>(new Tracking); 
+        backend = std::shared_ptr<Backend>(new Backend); 
+        
+        //* Dataset initialization 
+        dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset);
+        dataset->chooseSequence(sequence_number); 
+        dataset->readCalibData(); 
+        dataset->showPmatricies(); 
+        dataset->getGTposes();
     }
 
 
-    StereoDirectSLAM::Run()
+    int StereoDirectSLAM::Run()
     {
-        cv::Mat img(370, 1226, CV_8UC1); // declare img size and type, super important 
+        cv::Mat imgLeft(370, 1226, CV_8UC1); // declare img size and type, super important 
+        cv::Mat imgRight(370, 1226, CV_8UC1);
 
         // Create img sequence and get 
-        cv::VideoCapture sequence; 
-        sequence.open(dataset.left_imgs_path, cv::CAP_IMAGES);
+        cv::VideoCapture sequenceLeft; 
+        cv::VideoCapture sequenceRight; 
+        sequenceLeft.open(dataset->left_imgs_path, cv::CAP_IMAGES);
+        sequenceRight.open(dataset->right_imgs_path, cv::CAP_IMAGES);
 
         cv::namedWindow("Camera Img", cv::WINDOW_AUTOSIZE); 
 
-        if (!sequence.isOpened()) {
+        if (!sequenceLeft.isOpened() || !sequenceRight.isOpened()) {
             std::cerr << "Failed to open Image Sequence!\n"; 
             return -1;
         }
 
         while(true)
         {
-            sequence.read(img);
-            if(img.empty()) {
+            sequenceLeft.read(imgLeft);
+            sequenceRight.read(imgRight);
+
+            if(imgLeft.empty()) {
                 std::cout << "End of sequance \n"; 
                 break;
             }
@@ -41,7 +55,7 @@ namespace mrVSLAM
 
         }
 
-        ptr_to_visualizer->closeVisualizer(); 
+        visualizer->closeVisualizer(); 
 
     }
 }
