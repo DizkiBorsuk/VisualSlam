@@ -7,7 +7,7 @@ Map and MapPoint classes used to creat map
 
 namespace mrVSLAM
 {
-    class Frame; 
+    class Frame;  //! some bullshit with includes https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
     class Feature; 
 
     class MapPoint

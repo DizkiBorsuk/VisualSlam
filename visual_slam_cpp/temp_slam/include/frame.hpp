@@ -14,7 +14,7 @@
 namespace mrVSLAM
 {
     class Frame; 
-    class MapPoint; //! some stupid shit  
+    class MapPoint; //! some bullshit with includes https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
 
     class Feature
     {
@@ -24,8 +24,7 @@ namespace mrVSLAM
         cv::Mat descriptor; // 
 
         std::weak_ptr<Frame> frame; // frame in which feature was observed, it's weak_ptr because ownership of frame belongs to Map and feature can't own frame (it would create a owhnership loop)
-        std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame 
-        //https://en.cppreference.com/w/cpp/memory/weak_ptr 
+        std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame //https://en.cppreference.com/w/cpp/memory/weak_ptr 
 
         Feature() = default; 
         Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &keypoint) noexcept 
