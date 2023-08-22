@@ -42,6 +42,11 @@ namespace mrVSLAM
         bool is_keyframe = false; // setting if frame is a keyframe 
         cv::Matx44d framePose = cv::Matx44d::eye(); // pose of a frame 
 
+        // std::vector<cv::KeyPoint> features; 
+        // std::vector<cv::KeyPoint> featuresFromLeftImg; 
+        // std::vector<cv::KeyPoint> featuresFromRightImg; 
+        // cv::Mat descriptors; // each row correspond to feature point
+
         std::vector<std::shared_ptr<Feature>> features; // features in img/frame (monoSLAM)
         std::vector<std::shared_ptr<Feature>> featuresFromLeftImg; // features in img/frame (stereoSLAM)
         std::vector<std::shared_ptr<Feature>> featuresFromRightImg;
