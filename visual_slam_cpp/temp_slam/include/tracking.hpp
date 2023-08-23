@@ -20,6 +20,7 @@ namespace mrVSLAM
 
         void stereoInitialize(); 
         void track(); 
+        unsigned int detectFeatures(); // detect features in frame left img and return number of found points
         
 
     private: 
@@ -37,6 +38,8 @@ namespace mrVSLAM
         unsigned int num_of_features = 300; 
         unsigned int num_of_features_init = 100; //i guess? 
         unsigned int num_of_features_for_keyframe = 50; //check in orbslam 
+
+        cv::Matx44d transformationMatrix; 
 
 
 
