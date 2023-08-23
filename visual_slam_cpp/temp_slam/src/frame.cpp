@@ -3,7 +3,7 @@
 namespace mrVSLAM
 {
     Frame::Frame(unsigned int id, const cv::Matx44d &pose, const cv::Mat &img_left) noexcept
-    : id(id), framePose(pose)
+    : id(id), framePose(pose), imgLeft(img_left)
     {   }
 
     Frame::Frame(unsigned int id, const cv::Matx44d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept

@@ -64,7 +64,6 @@ namespace mrVSLAM
         unsigned int getNumberOfPointsInMap(); 
         unsigned int getNumberOfFramesInMap(); 
 
-
     private: 
 
     }; 
