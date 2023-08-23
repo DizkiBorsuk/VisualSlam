@@ -16,9 +16,11 @@ namespace mrVSLAM
     public: 
         //### function members ###// 
         Tracking(); 
+        bool addFrameAndTrack(std::shared_ptr<Frame> frame_to_add); 
 
-        bool track(); 
-        bool addFrame(std::shared_ptr<Frame> frame_to_add); 
+        void initialize(); 
+        void track(); 
+        
 
     private: 
 
