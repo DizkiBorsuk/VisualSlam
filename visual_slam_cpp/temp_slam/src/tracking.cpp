@@ -4,11 +4,13 @@ namespace mrVSLAM
 {
     Tracking::Tracking()
     {
-        detector = cv::GFTTDetector::create(num_of_features, 0.01, 5, false, 0.04); 
+        detector = cv::GFTTDetector::create(num_of_features, 0.01, 5, 3, false, 0.04); 
     }
     
     void Tracking::addFrameAndTrack(std::shared_ptr<Frame> frame_to_add)
     {
+        current_frame = frame_to_add; 
+
         switch(tracking_status)
         {
             case STATUS::INITIALIZATION: 
@@ -21,15 +23,24 @@ namespace mrVSLAM
 
                 break; 
         }
+
+        prev_frame = current_frame; 
     }
 
-    void Tracking::initialize()
+    void Tracking::stereoInitialize()
     {
-
+        int num_of
     }
 
     void Tracking::track()
     {
+        if(prev_frame!=nullptr)
+        {
+            current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
+        }
+             
+        
+
 
     }
     
