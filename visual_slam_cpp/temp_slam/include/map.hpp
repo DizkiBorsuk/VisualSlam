@@ -61,6 +61,10 @@ namespace mrVSLAM
         void cleanMap(); 
         void removeOldestKeyFrame(); // function for removing old/unnecessary keyframes 
 
+        unsigned int getNumberOfPointsInMap(); 
+        unsigned int getNumberOfFramesInMap(); 
+
+
     private: 
 
     }; 

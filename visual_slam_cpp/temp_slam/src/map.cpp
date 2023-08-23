@@ -84,5 +84,17 @@ namespace mrVSLAM
 
     }
 
+    unsigned int Map::getNumberOfPointsInMap()
+    {
+        std::lock_guard<std::mutex> lock(point_mutex); 
+        return landmarks.size(); 
+
+    } 
+    unsigned int Map::getNumberOfFramesInMap()
+    {
+        std::lock_guard<std::mutex> lock(point_mutex); 
+        return keyFrames.size();  
+    } 
+
 
 }
