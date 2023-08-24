@@ -70,9 +70,6 @@ namespace mrVSLAM
        // static unsigned int temp_keyframe_id = 0; 
 
     }; 
-
-
-
 }
 
 

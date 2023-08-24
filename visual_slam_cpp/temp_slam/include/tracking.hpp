@@ -18,10 +18,14 @@ namespace mrVSLAM
         Tracking(); 
         void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
+        // 3 state functions 
         void stereoInitialize(); 
         void track(); 
+        void RestartTracking(); 
+
+        //feature detection functions 
         unsigned int detectFeatures(); // detect features in frame left img and return number of found points
-        
+        unsigned int findCorrFeatures(); 
 
     private: 
 

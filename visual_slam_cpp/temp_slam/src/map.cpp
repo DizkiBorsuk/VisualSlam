@@ -39,15 +39,14 @@ namespace mrVSLAM
     void Map::insertKeyFrame(std::shared_ptr<Frame> keyframe)
     {
         currentFrame = keyframe; 
+
         if(keyFrames.contains(keyframe->keyframe_id)) // check if hashmap already contains said frame with that id
         {
             //if hashmap already contains frame with that id replace pointer to it? 
             //? not sure about that 
             
 
-        } 
-        else 
-        {
+        } else {
             //if not, put it in keyframes map 
             keyFrames.insert({keyframe->keyframe_id, keyframe}); 
             enabled_keyframes.insert({keyframe->keyframe_id, keyframe});
@@ -65,10 +64,8 @@ namespace mrVSLAM
         {
             //? 
             landmarks[mappoint->id] = mappoint; 
-            enabled_landmarks[mappoint->id] = mappoint
-        }
-        else 
-        {
+            enabled_landmarks[mappoint->id] = mappoint;
+        } else {
             landmarks.insert({mappoint->id, mappoint});
             enabled_landmarks.insert({mappoint->id, mappoint});
         }
@@ -86,13 +83,13 @@ namespace mrVSLAM
 
     unsigned int Map::getNumberOfPointsInMap()
     {
-        std::lock_guard<std::mutex> lock(point_mutex); 
+        std::lock_guard<std::mutex> lock(map_mutex); 
         return landmarks.size(); 
 
     } 
     unsigned int Map::getNumberOfFramesInMap()
     {
-        std::lock_guard<std::mutex> lock(point_mutex); 
+        std::lock_guard<std::mutex> lock(map_mutex); 
         return keyFrames.size();  
     } 
 
