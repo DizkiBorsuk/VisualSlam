@@ -2,11 +2,11 @@
 #include "common_includes.hpp"
 #include "frame.hpp"
 #include "map.hpp"
+#include "visualizer.hpp"
 
 
 namespace mrVSLAM
 {
-    class Visualizer; 
     class Backend; 
 
     enum class STATUS {INITIALIZATION, TRACKING, LOST}; // status of tracking 
@@ -19,13 +19,16 @@ namespace mrVSLAM
         void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
         // 3 state functions 
-        void stereoInitialize(); 
+        bool stereoInitialize(); 
         void track(); 
         void RestartTracking(); 
 
         //feature detection functions 
         unsigned int detectFeatures(); // detect features in frame left img and return number of found points
         unsigned int findCorrFeatures(); 
+
+        // 
+        bool initializeMap(); 
 
     private: 
 
