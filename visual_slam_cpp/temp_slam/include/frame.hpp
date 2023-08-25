@@ -4,7 +4,7 @@
 /*
  Frame and Feature objects. 
  Frame is representation of observed scene (by camera) at time t_k. It contains all observed features, 
- camera pose at time t_k, frame id and info if frame is keyframe. 
+ camera pose which is rigid body transformation matrix at time t_k, frame id and info if frame is keyframe. 
 
  Feature is representation of observed features/landmarks at some frame, it's mostly use to abstract and clean Frame class.
  Feature contains position of feature point on 2D image plane 
@@ -14,7 +14,7 @@
 namespace mrVSLAM
 {
     class Frame; 
-    class MapPoint; //! some bullshit with includes https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
+    class MapPoint; //?s https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
 
     class Feature
     {
@@ -27,14 +27,18 @@ namespace mrVSLAM
         std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame //https://en.cppreference.com/w/cpp/memory/weak_ptr 
 
         Feature() = default; 
-        Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &keypoint) noexcept 
-            : frame(frame), featurePoint_position(keypoint)
+        Feature(std::shared_ptr<Frame> in_frame, const cv::KeyPoint &keypoint) noexcept 
+            :  featurePoint_position(keypoint), frame(in_frame)
+        {   }
+        Feature(std::shared_ptr<Frame> in_frame, const cv::KeyPoint &keypoint, const cv::Mat &in_descriptor) noexcept 
+            : featurePoint_position(keypoint), descriptor(in_descriptor), frame(in_frame)
         {   }
     }; 
 
     class Frame
     {
     public: 
+    //! add camera intrinsics 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         //### data members ###//
         unsigned int id = 0; // id of a frame 
@@ -62,12 +66,10 @@ namespace mrVSLAM
 
         cv::Matx44d getFramePose();  // get frame pose from thread 
         void SetFramePose(const cv::Matx44d &pose);  // set frame pose in thread 
-        void SetFrameToKeyFrame(); 
-        
-        static std::shared_ptr<Frame> createFrame(); 
+        void SetFrameToKeyframe(); 
 
     private: 
-       // static unsigned int temp_keyframe_id = 0; 
+       static unsigned int keyframe_counter; 
 
     }; 
 }

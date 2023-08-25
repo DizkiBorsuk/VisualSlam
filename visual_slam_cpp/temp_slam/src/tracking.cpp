@@ -5,27 +5,45 @@ namespace mrVSLAM
     Tracking::Tracking()
     {
         detector = cv::GFTTDetector::create(num_of_features, 0.01, 20, 3, false, 0.04); //? big min distance
+
+        // set pointers to map, backend and visualizer 
+    }
+
+    void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend)
+    {
+        map = in_map; 
+        visualizer = in_visualizer; 
+        backend = in_backend; 
     }
     
     void Tracking::addFrameAndTrack(std::shared_ptr<Frame> frame_to_add)
     {
+        // get frame, set logic 
         current_frame = frame_to_add; 
 
         switch(tracking_status)
         {
             case STATUS::INITIALIZATION: 
-                stereoInitialize(); // add 
+                //initialization
+                stereoInitialize(); // add choosing which camera case 
                 break; 
             case STATUS::TRACKING: 
                 track(); 
                 break; 
             case STATUS::LOST: 
-                RestartTracking(); 
+                restartTracking(); 
                 break; 
         }
 
         prev_frame = current_frame; 
     }
+
+    bool Tracking::initialize()
+    {
+        // can't initialize stereo without at least 2 frames //? how to get two frames
+
+    }
+
 
     bool Tracking::stereoInitialize()
     {
@@ -82,7 +100,10 @@ namespace mrVSLAM
     {
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
     }
-    
-    
 
+
+    void restrtTracking()
+    {
+        
+    }
 }

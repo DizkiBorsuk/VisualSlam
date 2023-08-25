@@ -3,7 +3,8 @@
 #include "frame.hpp"
 
 /*
-Map and MapPoint classes used to creat map
+Map and MapPoint classes used to creat map. 
+MapPoint should store: 3D position, representative descriptor and ... 
 */
 
 namespace mrVSLAM
@@ -58,6 +59,10 @@ namespace mrVSLAM
 
         void cleanMap(); 
         void removeOldestKeyFrame(); // function for removing old/unnecessary keyframes 
+
+        // 
+        void getAllKeyframes(); // get frame and landmarks thread safe for bundle adjustment 
+        void getAllMappoints(); 
 
         unsigned int getNumberOfPointsInMap(); 
         unsigned int getNumberOfFramesInMap(); 

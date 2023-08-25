@@ -22,10 +22,10 @@ namespace mrVSLAM
         framePose = pose;  
     }
 
-    void Frame::SetFrameToKeyFrame()
+    void Frame::SetFrameToKeyframe()
     {
         is_keyframe = true; 
-        keyframe_id = tem_keyframe_id++; 
+        keyframe_id = keyframe_counter++; 
     }
     
 

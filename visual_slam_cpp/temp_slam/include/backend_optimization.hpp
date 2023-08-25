@@ -1,6 +1,7 @@
 #pragma once 
 #include "common_includes.hpp"
 #include "map.hpp"
+#include "frame.hpp"
 
 namespace mrVSLAM
 {
@@ -14,6 +15,8 @@ namespace mrVSLAM
         void updateMap(); 
         
         void optimize(); 
+
+        void bundleAdjustment(const std::vector<std::shared_ptr<Frame>> allKeyFrames, const std::vector<std::shared_ptr<MapPoint>>, unsigned int iter); 
 
     private: 
 
