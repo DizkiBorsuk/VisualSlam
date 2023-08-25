@@ -42,8 +42,6 @@ namespace mrVSLAM
             return -1;
         }
 
-
-
         while(true)
         {
             sequenceLeft.read(imgLeft);

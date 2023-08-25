@@ -28,9 +28,13 @@ namespace mrVSLAM
         void track(); 
         void restartTracking(); 
 
+        // 
+        void keyframeInsertion(); 
+
         //feature detection functions 
         unsigned int detectFeatures(); // detect features in frame left img and return number of found points
-        unsigned int findCorrFeatures(); 
+        unsigned int extractFeatures(); // extract keypoints and descriptors
+        unsigned int findCorrespndingStereoFeatures(); 
 
         // 
         bool initializeMap(); 
@@ -54,7 +58,7 @@ namespace mrVSLAM
 
         unsigned int inliers = 0; 
 
-        cv::Matx44d transformationMatrix; 
+        cv::Matx44d transformationMatrix; //? maybe change to eigen or sophus 
 
 
     }; 

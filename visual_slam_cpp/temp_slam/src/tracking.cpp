@@ -1,4 +1,5 @@
 #include "../include/tracking.hpp"
+#include "../include/visualizer.hpp"
 
 namespace mrVSLAM
 {
@@ -74,10 +75,31 @@ namespace mrVSLAM
             //if at least 2 frames exist srt current frame pose by multipling transMatrix with pose matrix (homogenous)
             current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
         }
-             
         
 
 
+        //! decision if frame is new keyframe 
+        if( /*inliers > num_of_features_for_keyframe */ )
+        {
+            keyframeInsertion(); 
+        }
+        
+        transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inv()); 
+
+        if(visualizer!=nullptr)
+        {
+            //visualizer-> ; addFrame to visualization 
+        }
+
+    }
+
+    void Tracking::keyframeInsertion()
+    {
+            current_frame->SetFrameToKeyframe(); 
+            map->insertKeyFrame(current_frame); 
+
+            detectFeatures(); 
+            findCorrespndingStereoFeatures(); 
     }
 
     unsigned int Tracking::detectFeatures()
@@ -96,7 +118,7 @@ namespace mrVSLAM
         return detected_features; 
     }
 
-    unsigned int Tracking::findCorrFeatures()
+    unsigned int Tracking::findCorrespndingStereoFeatures()
     {
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
     }
