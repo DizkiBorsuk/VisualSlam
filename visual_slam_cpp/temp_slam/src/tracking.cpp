@@ -49,7 +49,7 @@ namespace mrVSLAM
     bool Tracking::stereoInitialize()
     {
         int num_of_features_in_left_img = detectFeatures(); 
-        int num_of_corresponding_features_in_right = findCorrFeatures(); 
+        int num_of_corresponding_features_in_right = findCorrespndingStereoFeatures(); 
 
         if(num_of_corresponding_features_in_right < num_of_features_init)
             return false; //initialization failed 

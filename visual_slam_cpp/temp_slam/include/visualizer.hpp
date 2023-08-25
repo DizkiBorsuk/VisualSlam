@@ -18,10 +18,13 @@ namespace mrVSLAM
         Visualizer(); //* constructor creates visualization thread 
         void closeVisualizer(); //* closes/joints thread 
 
-        void setMapPtr(std::shared_ptr<Map> input_map)
+        void setMapPtr(std::shared_ptr<Map> ptr_to_map)
         {
-            ptr_to_map = input_map; 
+            map = ptr_to_map; 
         }
+
+       void addNewFrame(std::shared_ptr<Frame> frame); 
+       void updateMap(); 
 
     private:  
 
@@ -29,19 +32,16 @@ namespace mrVSLAM
         std::mutex visualizer_mutex; 
 
         std::shared_ptr<Frame> current_frame = nullptr;
-        std::shared_ptr<Map> ptr_to_map = nullptr; 
+        std::shared_ptr<Map> map = nullptr; 
 
         void runVisualizer(); 
 
         void drawFrame(std::shared_ptr<Frame> input_frame); 
         void drawPoints(); 
-        void drawFrameTrajectory(); 
+        void drawFrameTrajectory(pangolin::OpenGlRenderState& vis_camera); 
 
-
-
-
-
+        std::unordered_map<unsigned int, std::shared_ptr<Frame>> displayed_keyframes; 
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> displayed_mappoints; 
     }; 
-
 }
 
