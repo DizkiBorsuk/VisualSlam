@@ -13,6 +13,7 @@ namespace mrVSLAM
     {
     // class representing 3D point in a map 
     public: 
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         //### data members ###// 
         unsigned int  id = 0; // map point id 
         unsigned int frames_in = 0; // how many times/frames point was observed during matching 
@@ -63,6 +64,8 @@ namespace mrVSLAM
         // 
         void getAllKeyframes(); // get frame and landmarks thread safe for bundle adjustment 
         void getAllMappoints(); 
+        void getEnabledKeyframes(); 
+        void getEnabledMappoints(); 
 
         unsigned int getNumberOfPointsInMap(); 
         unsigned int getNumberOfFramesInMap(); 

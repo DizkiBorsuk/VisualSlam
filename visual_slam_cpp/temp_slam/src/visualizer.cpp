@@ -15,13 +15,15 @@ namespace mrVSLAM
     void Visualizer::closeVisualizer() 
     {
         visualizer_thread.join(); //? maybe change to pthread 
+          
+        std::cout << "------------------------- \n"; 
+        std::cout << "visualizer ends work \n"; 
+        std::cout << "------------------------- \n";
     }
 
     void Visualizer::runVisualizer()
     {
         //* main visualizer function run by thread 
-        int window_w = 640; 
-        int window_h= 480; 
 
         pangolin::CreateWindowAndBind("slam map",window_w,window_h);
         glEnable(GL_DEPTH_TEST);
@@ -55,21 +57,19 @@ namespace mrVSLAM
 
             if(current_frame != nullptr)
             {
-                drawFrame(current_frame); 
+                drawFrame(current_frame, green); 
                 drawFrameTrajectory(s_cam); 
 
                 cv::imshow("current frame", current_frame->imgLeft); 
                 cv::waitKey(1); 
             }
 
+            drawPoints(red); 
+
             // Swap frames and Process Events
             pangolin::FinishFrame();
             std::this_thread::sleep_for(5000ms); // https://en.cppreference.com/w/cpp/thread/sleep_for //? 
         }
-  
-        std::cout << "------------------------- \n"; 
-        std::cout << "visualizer ends work \n"; 
-        std::cout << "------------------------- \n";
     }
     
 
@@ -84,6 +84,7 @@ namespace mrVSLAM
     void Visualizer::getMapUpdate()
     {
         std::lock_guard<std::mutex> lock(visualizer_mutex); 
+        displayed_keyframes = map->g
     }
 
 
@@ -96,11 +97,59 @@ namespace mrVSLAM
         s_cam.Follow(matrix, true); 
     }
 
-    void Visualizer::drawFrame()
-    {
+    void Visualizer::drawFrame(std::shared_ptr<Frame> input_frame, const std::array<float,3> color)
+    {   
+        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inv(); //Tcw //! find solution or start using eigen //? make Twc class member 
         
+        
+        glPushMatrix(); 
+        glMultMatrixd((GLdouble*)CameraToWorldTransformation.data()); 
+
+        glColor3f(color[0], color[1], color[2]); 
+
+        glLineWidth(line_width);
+        glBegin(GL_LINES);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f(0, 0, 0);
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
+
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+
+        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+
+        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
+
+        glEnd();
+        glPopMatrix();
     }
 
+    void Visualizer::drawPoints(const std::array<float,3> color)
+    {
+        for(auto &keyframe : displayed_keyframes)
+        {
+            drawFrame(keyframe.second, color);  
+        }
 
+        glPointSize(2); 
+        glBegin(GL_POINTS); 
 
+        for(auto &point : displayed_mappoints)
+        {
+            auto point_pos = point.second->getPosition(); 
+            glColor3f(color[0], color[1], color[2]);
+            glVertex3d(point_pos[0], point_pos[1], point_pos[2]);
+        }
+        glEnd(); 
+    }
 }
