@@ -62,10 +62,10 @@ namespace mrVSLAM
         void removeOldestKeyFrame(); // function for removing old/unnecessary keyframes 
 
         // 
-        void getAllKeyframes(); // get frame and landmarks thread safe for bundle adjustment 
-        void getAllMappoints(); 
-        void getEnabledKeyframes(); 
-        void getEnabledMappoints(); 
+        std::unordered_map<unsigned int, std::shared_ptr<Frame>> getAllKeyframes(); // get frame and landmarks thread safe for bundle adjustment 
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> getAllMappoints(); 
+        std::unordered_map<unsigned int, std::shared_ptr<Frame>> getEnabledKeyframes(); 
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> getEnabledMappoints(); 
 
         unsigned int getNumberOfPointsInMap(); 
         unsigned int getNumberOfFramesInMap(); 

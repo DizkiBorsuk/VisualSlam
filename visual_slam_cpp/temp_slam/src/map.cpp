@@ -34,7 +34,7 @@ namespace mrVSLAM
 
     }
 
-    // ########## // 
+    // ################################################################################## // 
 
     void Map::insertKeyFrame(std::shared_ptr<Frame> keyframe)
     {
@@ -91,7 +91,26 @@ namespace mrVSLAM
     {
         std::lock_guard<std::mutex> lock(map_mutex); 
         return keyFrames.size();  
-    } 
+    }
 
-
+    std::unordered_map<unsigned int, std::shared_ptr<Frame>> Map::getAllKeyframes() 
+    {
+        std::lock_guard<std::mutex> lock(map_mutex); 
+        return keyFrames; 
+    }
+    std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> Map::getAllMappoints()
+    {
+        std::lock_guard<std::mutex> lock(map_mutex);
+        return landmarks; 
+    }
+    std::unordered_map<unsigned int, std::shared_ptr<Frame>> Map::getEnabledKeyframes()
+    {
+        std::lock_guard<std::mutex> lock(map_mutex); 
+        return enabled_keyframes; 
+    }
+    std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> Map::getEnabledMappoints()
+    {
+        std::lock_guard<std::mutex> lock(map_mutex); 
+        return enabled_landmarks; 
+    }
 }

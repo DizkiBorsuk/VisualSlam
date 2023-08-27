@@ -4,5 +4,8 @@
 
 int main()
 {
+    mrVSLAM::StereoDirectSLAM slam("07"); 
+    slam.Run(); 
+    
     return 0; 
 }

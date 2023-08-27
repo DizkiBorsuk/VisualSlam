@@ -84,7 +84,8 @@ namespace mrVSLAM
     void Visualizer::getMapUpdate()
     {
         std::lock_guard<std::mutex> lock(visualizer_mutex); 
-        displayed_keyframes = map->g
+        displayed_keyframes = map->getEnabledKeyframes(); 
+        displayed_mappoints = map->getEnabledMappoints(); 
     }
 
 
