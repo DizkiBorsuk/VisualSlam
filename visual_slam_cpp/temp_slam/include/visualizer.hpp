@@ -23,8 +23,8 @@ namespace mrVSLAM
             map = ptr_to_map; 
         }
 
-       void addNewFrame(std::shared_ptr<Frame> frame); 
-       void updateMap(); 
+       void addNewFrame(std::shared_ptr<Frame> in_frame); 
+       
 
     private:  
 
@@ -38,7 +38,8 @@ namespace mrVSLAM
 
         void drawFrame(std::shared_ptr<Frame> input_frame); 
         void drawPoints(); 
-        void drawFrameTrajectory(pangolin::OpenGlRenderState& vis_camera); 
+        void drawFrameTrajectory(pangolin::OpenGlRenderState& s_cam); 
+        void getMapUpdate(); 
 
         std::unordered_map<unsigned int, std::shared_ptr<Frame>> displayed_keyframes; 
         std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> displayed_mappoints; 
