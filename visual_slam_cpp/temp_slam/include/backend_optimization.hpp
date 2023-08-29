@@ -20,7 +20,7 @@ namespace mrVSLAM
 
     private: 
 
-        std::shared_ptr<Map> ptr_to_map; 
+        std::shared_ptr<Map> map; 
         
         std::thread backend_thread; 
         std::mutex backend_mutex; 

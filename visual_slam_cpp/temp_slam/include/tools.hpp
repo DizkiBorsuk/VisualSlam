@@ -17,4 +17,8 @@ namespace mrVSLAM
     void plotPoses(std::vector<cv::Matx44d>& poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, const int num_of_frames);
 
     void plotPerformance(std::vector<int> loopTimes); 
+
+
+    // ######## 
+    inline void triangulation(); 
 }

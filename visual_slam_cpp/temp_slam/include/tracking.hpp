@@ -13,6 +13,7 @@ namespace mrVSLAM
     class Visualizer; 
 
     enum class STATUS {INITIALIZATION, TRACKING, LOST}; // status of tracking 
+    enum class DETECTOR {GFTT, FAST}; 
 
     class Tracking
     {
@@ -20,7 +21,8 @@ namespace mrVSLAM
         //### function members ###// 
         Tracking(); 
         void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend); 
-        void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add); // main function of tracking
+        void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
+        void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
         // 3 state functions 
         bool initialize(); // initialization for monocular case 
@@ -59,7 +61,5 @@ namespace mrVSLAM
         unsigned int inliers = 0; 
 
         cv::Matx44d transformationMatrix; //? maybe change to eigen or sophus 
-
-
     }; 
 }

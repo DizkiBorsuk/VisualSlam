@@ -17,7 +17,7 @@ namespace mrVSLAM
         backend = in_backend; 
     }
     
-    void Tracking::addFrameAndTrack(std::shared_ptr<Frame> frame_to_add)
+    void Tracking::addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add)
     {
         // get frame, set logic 
         current_frame = frame_to_add; 
@@ -42,6 +42,7 @@ namespace mrVSLAM
     bool Tracking::initialize()
     {
         // can't initialize stereo without at least 2 frames //? how to get two frames
+        if
 
     }
 
@@ -60,8 +61,8 @@ namespace mrVSLAM
 
             if(visualizer != nullptr)
             {
-                //visualizer-> add frame or smth 
-                //visualizer-> updateMap 
+                visualizer->addNewFrame(current_frame); 
+                visualizer->getMapUpdate();
             }
             return true; // initiaization succeded 
         }
@@ -122,6 +123,19 @@ namespace mrVSLAM
     {
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
     }
+
+
+    bool Tracking::initializeMap()
+    {
+        // triangulate every corresponding feature points from frame 
+        // then based on that create MapPoint 
+        // insert this map point to map and connect it to frame 
+
+        //? how to give them id? 
+
+        //map->insertPoint(); 
+    }
+
 
 
     void restrtTracking()

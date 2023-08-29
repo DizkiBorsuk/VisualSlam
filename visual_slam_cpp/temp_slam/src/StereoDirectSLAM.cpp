@@ -8,6 +8,20 @@ namespace mrVSLAM
 
     StereoDirectSLAM::StereoDirectSLAM(std::string sequence_number)
     {
+        //* Dataset initialization 
+        dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset);
+        dataset->chooseSequence(sequence_number); 
+        dataset->readCalibData(); 
+        dataset->showPmatricies(); 
+        dataset->getGTposes();
+
+        // camera/s setup 
+        camera_left.setCamera(dataset->P0); 
+        camera_right.setCamera(dataset->P1); 
+        // auto ptr_to_camera_left = std::shared_ptr<Camera>(&camera_left); 
+        // auto ptr_to_camera_right = std::shared_ptr<Camera>(&camera_right); 
+
+        // 
         map = std::shared_ptr<Map>(new Map); 
         visualizer = std::shared_ptr<Visualizer>(new Visualizer); 
         backend = std::shared_ptr<Backend>(new Backend); 
@@ -15,12 +29,7 @@ namespace mrVSLAM
 
         tracking->setTracking(map, visualizer, backend); // setup visualizer 
         
-        //* Dataset initialization 
-        dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset);
-        dataset->chooseSequence(sequence_number); 
-        dataset->readCalibData(); 
-        dataset->showPmatricies(); 
-        dataset->getGTposes();
+
     }
 
 
@@ -54,10 +63,11 @@ namespace mrVSLAM
 
             loopStart = cv::getTickCount(); 
             auto begin = std::chrono::high_resolution_clock::now();
+            // #####################
             cv::Matx44d eye_matrix = cv::Matx44d::eye(); //! temp solution, change later to camera R matrix  
             
             //* create Frame object and pointer to it
-            std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, eye_matrix, imgLeft, imgRight)); 
+            std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, eye_matrix, imgLeft, imgRight)); //? add K to frame class
 
             //* pass frame to tracking and run tracking 
             tracking->addFrameAndTrack(frame); 
@@ -67,14 +77,19 @@ namespace mrVSLAM
 
             frame_counter++; 
 
+            //############
+            loopEnd = cv::getTickCount();
+            fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
+            auto cend = std::chrono::high_resolution_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
+            performance.emplace_back(fps); 
+
         }
         sequenceLeft.release(); 
         sequenceRight.release();
-        cv::destroyAllWindows(); 
-
+    
         visualizer->closeVisualizer(); 
-
-
+        cv::destroyAllWindows(); 
         return 0; 
     }
 }

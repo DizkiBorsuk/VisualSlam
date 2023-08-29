@@ -4,6 +4,13 @@ namespace plt = matplotlibcpp;
 
 namespace mrVSLAM
 {
+
+    inline void triangulation()
+    {
+        Eigen::MatrixXd
+    }
+
+
     void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)
     {
         // function that changes 3x3 rotation matrix and 3x1 ranslation vector to 4x4 homogenouse tranformation/pose matrix 

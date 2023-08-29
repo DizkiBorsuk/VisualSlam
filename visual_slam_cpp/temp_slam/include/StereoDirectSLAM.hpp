@@ -6,6 +6,7 @@
 #include "map.hpp"
 #include "backend_optimization.hpp"
 #include "visualizer.hpp"
+#include "camera.hpp"
 
 namespace mrVSLAM
 {
@@ -15,6 +16,8 @@ namespace mrVSLAM
     public: 
         std::vector<int> performance; 
         std::vector<Eigen::Matrix<double, 3,4>> trajectory; 
+        Camera camera_left; 
+        Camera camera_right; 
 
         StereoDirectSLAM(std::string sequence_number); 
         ~StereoDirectSLAM(); 
@@ -24,7 +27,6 @@ namespace mrVSLAM
     private: 
         int frame_counter = 0; 
         int fps = 0, loopStart = 0, loopEnd = 0; 
-
 
         bool initialization_succes = false; 
 
