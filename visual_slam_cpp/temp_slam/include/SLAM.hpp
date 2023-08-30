@@ -10,6 +10,10 @@
 
 namespace mrVSLAM
 {
+    class MonoSLAM
+    {
+
+    }; 
 
     class StereoDirectSLAM
     {
@@ -38,8 +42,6 @@ namespace mrVSLAM
         std::shared_ptr<Visualizer> visualizer = nullptr; 
         std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
         //std::shared_ptr<> ptr_ = nullptr; 
-
-
     };
 }
 

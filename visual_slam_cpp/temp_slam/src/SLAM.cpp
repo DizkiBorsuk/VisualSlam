@@ -1,4 +1,4 @@
-#include "../include/StereoDirectSLAM.hpp"
+#include "../include/SLAM.hpp"
 
         
 

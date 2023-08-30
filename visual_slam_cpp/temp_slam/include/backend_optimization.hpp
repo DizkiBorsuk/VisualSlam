@@ -11,7 +11,7 @@ namespace mrVSLAM
 
         Backend() noexcept; 
 
-        void setMap(); 
+        void setMapPtr();  
         void updateMap(); 
         
         void optimize(); 
@@ -20,7 +20,7 @@ namespace mrVSLAM
 
     private: 
 
-        std::shared_ptr<Map> map; 
+        std::shared_ptr<Map> map = nullptr; 
         
         std::thread backend_thread; 
         std::mutex backend_mutex; 

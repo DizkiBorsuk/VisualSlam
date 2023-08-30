@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/StereoDirectSLAM.hpp"
+#include "../include/SLAM.hpp"
 #include "../include/tools.hpp"
 
 int main()

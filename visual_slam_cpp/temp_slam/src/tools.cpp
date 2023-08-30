@@ -84,7 +84,6 @@ namespace mrVSLAM
         plt::show();
     }
 
-
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, const int num_of_frames)
     {
         std::vector<double> gt_x(num_of_frames), gt_y(num_of_frames),gt_z(num_of_frames); 

@@ -49,7 +49,7 @@ set(Sources src/main.cpp
             src/frame.cpp
             src/map.cpp
             src/read_dataset.cpp
-            src/StereoDirectSLAM.cpp
+            src/SLAM.cpp
             src/tools.cpp
             src/tracking.cpp
             src/visualizer.cpp
@@ -61,7 +61,7 @@ set(Headers include/camera.hpp
             include/frame.hpp 
             include/map.hpp
             include/read_dataset.hpp
-            include/StereoDirectSLAM.hpp 
+            include/SLAM.hpp 
             include/visualizer.hpp
             )
 

@@ -4,6 +4,7 @@
 #include "map.hpp"
 
 /*
+    Front-end 
     Tracking is responsible for calculating frame's pose based on img/imgs, feature detection, map initalization 
 */
 
