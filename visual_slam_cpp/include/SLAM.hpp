@@ -1,63 +1,48 @@
 #pragma once 
-
-#include "system.hpp"
-#include "tools.hpp"
+#include "common_includes.hpp"
+#include "read_dataset.hpp"
+#include "tracking.hpp"
+#include "frame.hpp"
+#include "map.hpp"
+#include "backend_optimization.hpp"
+#include "visualizer.hpp"
 #include "camera.hpp"
-#include "readDataset.hpp"
-#include "visualize_data.hpp"
-#include "FrameExtraction.hpp"
 
 namespace mrVSLAM
 {
-    enum class STATE {MAP_INITIALIZATION, TRACKING, LOST}; 
-    class SLAM
+    class MonoSLAM
     {
-    private: 
-    // basic 
-        int frame_counter = 0; 
-        int fps = 0, loopStart = 0, loopEnd = 0; 
-        std::vector<Frame> frames; 
 
-        cv::Matx33d essentialMatrix; 
-
-        KITTI_Dataset dataset;
-    // mono 
-        //std::unique_ptr<Camera> camera; 
-        Camera camera; 
-    //stereo 
-        //std::unique_ptr<Camera> right_camera; 
-        Camera right_camera; 
-        double baseline = 0;
-
-    // 
-        void getRelativeFramePose(const std::vector<cv::Point2f> &points1, const std::vector<cv::Point2f> &points2, cv::Matx44d &pose);
-    
-    public: 
-
-        std::vector<int> performance; 
-        std::vector<cv::Matx44d> trajectory; 
-        //
-        SLAM(const std::string sequence_number) noexcept;
-        ~SLAM(); 
-        
-        // delete move and copy constructrs/operators
-        SLAM(const SLAM&) = delete;  
-        SLAM(SLAM&&) = delete;
-        SLAM& operator=(const SLAM&) = delete; 
-        SLAM& operator=(const SLAM&&) = delete; 
-
-        //void initSLAM(); 
-        int runMonoSLAM() noexcept;
-        int runStereoSLAM() noexcept;  
-        int runGpuMonoSLAM() noexcept;
-        int runGpuStereoSLAM() noexcept;   
-
-        void showResult(); 
-
-        
     }; 
 
+    class StereoDirectSLAM
+    {
+    public: 
+        std::vector<int> performance; 
+        std::vector<Eigen::Matrix<double, 3,4>> trajectory; 
+        Camera camera_left; 
+        Camera camera_right; 
+
+        StereoDirectSLAM(std::string sequence_number); 
+        ~StereoDirectSLAM(); 
+
+        int Run(); // main execution loop  
+
+    private: 
+        int frame_counter = 0; 
+        int fps = 0, loopStart = 0, loopEnd = 0; 
+
+        bool initialization_succes = false; 
+
+        //KITTI_Dataset dataset; 
+        // 
+        std::shared_ptr<Tracking> tracking = nullptr; 
+        std::shared_ptr<Map> map = nullptr; 
+        std::shared_ptr<Backend> backend = nullptr; 
+        std::shared_ptr<Visualizer> visualizer = nullptr; 
+        std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
+        //std::shared_ptr<> ptr_ = nullptr; 
+    };
 }
 
-
-
+ 

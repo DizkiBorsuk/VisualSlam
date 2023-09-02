@@ -1,21 +1,11 @@
-
-#include "../include/system.hpp"
+#include <iostream>
 #include "../include/SLAM.hpp"
-#include "../include/visualize_data.hpp"
+#include "../include/tools.hpp"
 
-
-
-int main(int argc, char** argv)
+int main()
 {
-    std::cout << "Visual Slam start \n";  
-    cv::cuda::printCudaDeviceInfo(0); 
-    //cv::cuda::setDevice(0); 
-    //--------------------//
-    mrVSLAM::SLAM slam("07"); 
-    slam.runMonoSLAM(); 
-    slam.showResult(); 
-    mrVSLAM::plotPerformance(slam.performance); 
+    mrVSLAM::StereoDirectSLAM slam("07"); 
+    slam.Run(); 
     
-    //-------------------//
     return 0; 
 }

@@ -1,5 +1,5 @@
 #pragma once 
-#include "common_includes.hpp"
+#include "system.hpp"
 
 namespace mrVSLAM
 {
@@ -20,3 +20,5 @@ namespace mrVSLAM
     double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2) noexcept; 
 
 }
+
+

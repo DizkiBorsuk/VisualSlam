@@ -1,6 +1,5 @@
 #include "../include/camera.hpp"
 
-
 namespace mrVSLAM
 {
     void Camera::setCamera(const Eigen::Matrix<double,3,4> &projectionMatrix) noexcept

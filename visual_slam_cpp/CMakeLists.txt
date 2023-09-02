@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
-project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(temp_slam VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
+
+set(GFLAGS_USE_TARGET_NAMESPACE ON)
 
 
 IF(WIN32)
@@ -19,10 +21,13 @@ ENDIF()
 find_package(OpenCV REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(Eigen3  REQUIRED NO_MODULE)
-#find_package(g2o CONFIG REQUIRED)
+find_package(Ceres REQUIRED)
+find_package(g2o CONFIG REQUIRED)
+find_package(Sophus CONFIG REQUIRED)
+find_package(gflags CONFIG)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
-find_package(PythonLibs 3.0 REQUIRED)
+find_package(PythonLibs 3 REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -39,20 +44,25 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
+            src/backend_optimization.cpp
+            src/camera.cpp
+            src/frame.cpp
+            src/map.cpp
+            src/read_dataset.cpp
             src/SLAM.cpp
-            src/visualize_data.cpp 
-            src/readDataset.cpp 
-            src/FrameExtraction.cpp
             src/tools.cpp
-            src/camera.cpp)
+            src/tracking.cpp
+            src/visualizer.cpp
+            )
 
 set(Headers include/camera.hpp 
-            include/FrameExtraction.hpp 
-            include/Map.hpp
-            include/readDataset.hpp
-            include/SLAM.hpp
-            include/system.hpp
-            include/Stereo.hpp
+            include/backend_optimization.hpp 
+            include/common_includes.hpp
+            include/frame.hpp 
+            include/map.hpp
+            include/read_dataset.hpp
+            include/SLAM.hpp 
+            include/visualizer.hpp
             )
 
 
@@ -61,7 +71,9 @@ target_link_libraries(${PROJECT_NAME}
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
                       ${Pangolin_LIBRARIES}
-                      
+                      Ceres::ceres
+                      Sophus::Sophus
+                      g2o::core g2o::stuff g2o::types_data g2o::types_icp g2o::types_slam3d g2o::types_slam2d
                       ${PYTHON_LIBRARIES}
                       Python3::NumPy
-                      ) #g2o::core g2o::stuff g2o::types_data g2o::types_icp g2o::types_slam3d g2o::types_slam2d
+                      ) #
