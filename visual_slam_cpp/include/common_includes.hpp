@@ -12,8 +12,11 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 #include "eigen3/Eigen/Dense"
+#include "sophus/se3.hpp"
+#include "sophus/so3.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>

@@ -93,14 +93,14 @@ namespace mrVSLAM
     {
         // get Twc - camera pose in world reference transformation matrix and use Pangolin follow  
         //? https://github.com/raulmur/ORB_SLAM2/issues/226
-        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inv(); //Tcw //! find solution or start using eigen 
-        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation); 
+        Sophus::SE3d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
+        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation.matrix()); 
         s_cam.Follow(matrix, true); 
     }
 
     void Visualizer::drawFrame(std::shared_ptr<Frame> input_frame, const std::array<float,3> color)
     {   
-        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inv(); //Tcw //! find solution or start using eigen //? make Twc class member 
+        Sophus::SE3d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
         
         
         glPushMatrix(); 
@@ -111,25 +111,26 @@ namespace mrVSLAM
         glLineWidth(line_width);
         glBegin(GL_LINES);
         glVertex3f(0, 0, 0);
-        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f((0 - cx) / fx, (0 - cy) / fy, 1.0);
         glVertex3f(0, 0, 0);
-        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        
+        glVertex3f( (0 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
         glVertex3f(0, 0, 0);
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f((window_w - 1 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
         glVertex3f(0, 0, 0);
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f((window_w - 1 - cx) / fx, (0 - cy) / fy, 1.0);
 
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f((window_w - 1 - cx) / fx, (0 - cy) / fy, 1.0);
+        glVertex3f((window_w - 1 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
 
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
-        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
+        glVertex3f((window_w - 1 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
+        glVertex3f((0 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
 
-        glVertex3f(sz * (0 - cx) / fx, sz * (window_h - 1 - cy) / fy, sz);
-        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f((0 - cx) / fx, (window_h - 1 - cy) / fy, 1.0);
+        glVertex3f((0 - cx) / fx, (0 - cy) / fy, 1.0);
 
-        glVertex3f(sz * (0 - cx) / fx, sz * (0 - cy) / fy, sz);
-        glVertex3f(sz * (window_w - 1 - cx) / fx, sz * (0 - cy) / fy, sz);
+        glVertex3f((0 - cx) / fx, (0 - cy) / fy, 1.0);
+        glVertex3f((window_w - 1 - cx) / fx, (0 - cy) / fy, 1.0);
 
         glEnd();
         glPopMatrix();

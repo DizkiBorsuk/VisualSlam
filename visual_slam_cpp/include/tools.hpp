@@ -20,5 +20,5 @@ namespace mrVSLAM
 
 
     // ######## 
-    inline void triangulation(); 
+    inline void triangulate(const std::array<Sophus::SE3d, 2> &poses, const std::vector<> &points, ); 
 }

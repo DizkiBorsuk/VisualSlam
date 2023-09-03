@@ -44,7 +44,8 @@ namespace mrVSLAM
         unsigned int id = 0; // id of a frame 
         unsigned int keyframe_id = 0; // id of a frame if it's a keyframe 
         bool is_keyframe = false; // setting if frame is a keyframe 
-        cv::Matx44d framePose = cv::Matx44d::eye(); // pose of a frame 
+        //cv::Matx44d framePose = cv::Matx44d::eye(); // pose of a frame 
+        Sophus::SE3d framePose; 
 
         cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); //? not sure if that is the best way of doing it
         cv::Mat imgRight = cv::Mat(370, 1226, CV_8UC1); 
@@ -59,13 +60,13 @@ namespace mrVSLAM
 
         std::mutex pose_mutex; // mutex for pose to get and set it thread safetly 
 
-        //### member functions ####// 
+        //*### member functions ####// 
 
-        Frame(unsigned int id, const cv::Matx44d &pose, const cv::Mat &img) noexcept;  // Frame for monocular case 
-        Frame(unsigned int id, const cv::Matx44d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept; // Frame for stereo case 
+        Frame(unsigned int id, const Sophus::SE3d &pose, const cv::Mat &img) noexcept;  // Frame for monocular case 
+        Frame(unsigned int id, const Sophus::SE3d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept; // Frame for stereo case 
 
-        cv::Matx44d getFramePose();  // get frame pose from thread 
-        void SetFramePose(const cv::Matx44d &pose);  // set frame pose in thread 
+        Sophus::SE3d getFramePose();  // get frame pose from thread 
+        void SetFramePose(const Sophus::SE3d &pose);  // set frame pose in thread 
         void SetFrameToKeyframe(); 
 
     private: 

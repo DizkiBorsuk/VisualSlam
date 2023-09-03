@@ -5,7 +5,7 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    inline void triangulation()
+    inline void triangulate()
     {
         Eigen::MatrixXd
     }

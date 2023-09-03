@@ -16,7 +16,7 @@ namespace mrVSLAM
         visualizer = in_visualizer; 
         backend = in_backend; 
     }
-    
+
     void Tracking::addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add)
     {
         // get frame, set logic 
@@ -38,6 +38,8 @@ namespace mrVSLAM
 
         prev_frame = current_frame; 
     }
+
+//########################################################
 
     bool Tracking::initialize()
     {
@@ -66,7 +68,7 @@ namespace mrVSLAM
             }
             return true; // initiaization succeded 
         }
-        return false; //initialization failed 
+        return false; //initialization failed  
     }
 
     void Tracking::track()
@@ -78,6 +80,16 @@ namespace mrVSLAM
         }
         
 
+        std::vector<cv::Point2f> keypoints_prev_frame, keypoints_current_frame; 
+        for(auto &keypoint : prev_frame->featuresFromLeftImg)
+        {
+            auto mappoint = keypoint->map_point.lock(); //* https://en.cppreference.com/w/cpp/memory/weak_ptr/lock
+            keypoints_prev_frame.emplace_back(keypoint->featurePoint_position.pt); 
+            keypoints_current_frame.emplace_back(); 
+        }
+
+        cv::calcOpticalFlowPyrLK(prev_frame->imgLeft, current_frame->imgLeft, ); 
+
 
         //! decision if frame is new keyframe 
         if( /*inliers > num_of_features_for_keyframe */ )
@@ -85,11 +97,11 @@ namespace mrVSLAM
             keyframeInsertion(); 
         }
         
-        transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inv()); 
+        transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inverse()); 
 
         if(visualizer!=nullptr)
         {
-            //visualizer-> ; addFrame to visualization 
+            visualizer->addNewFrame(current_frame); 
         }
 
     }
