@@ -29,6 +29,10 @@ namespace mrVSLAM
         int Run(); // main execution loop  
 
     private: 
+
+        cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); // declare img size and type, super important 
+        cv::Mat imgRight = cv::Mat(370, 1226, CV_8UC1);
+
         int frame_counter = 0; 
         int fps = 0, loopStart = 0, loopEnd = 0; 
 
@@ -41,7 +45,6 @@ namespace mrVSLAM
         std::shared_ptr<Backend> backend = nullptr; 
         std::shared_ptr<Visualizer> visualizer = nullptr; 
         std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
-        //std::shared_ptr<> ptr_ = nullptr; 
     };
 }
 

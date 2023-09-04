@@ -14,7 +14,7 @@
 namespace mrVSLAM
 {
     class Frame; 
-    class MapPoint; //?s https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
+    class MapPoint; //? https://stackoverflow.com/questions/32014093/shared-ptr-to-abstract-base-class-member-variable-is-a-an-undeclared-identifie
 
     class Feature
     {
@@ -26,7 +26,6 @@ namespace mrVSLAM
         std::weak_ptr<Frame> frame; // frame in which feature was observed, it's weak_ptr because ownership of frame belongs to Map and feature can't own frame (it would create a owhnership loop)
         std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame //https://en.cppreference.com/w/cpp/memory/weak_ptr 
 
-        Feature() = default; 
         Feature(std::shared_ptr<Frame> in_frame, const cv::KeyPoint &keypoint) noexcept 
             :  featurePoint_position(keypoint), frame(in_frame)
         {   }
@@ -50,10 +49,6 @@ namespace mrVSLAM
         cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); //? not sure if that is the best way of doing it
         cv::Mat imgRight = cv::Mat(370, 1226, CV_8UC1); 
         
-        // std::vector<cv::KeyPoint> features; 
-        // std::vector<cv::KeyPoint> featuresFromLeftImg; 
-        // std::vector<cv::KeyPoint> featuresFromRightImg; 
-        // cv::Mat descriptors; // each row correspond to feature point
         std::vector<std::shared_ptr<Feature>> features; // features in img/frame (monoSLAM)
         std::vector<std::shared_ptr<Feature>> featuresFromLeftImg; // features in img/frame (stereoSLAM)
         std::vector<std::shared_ptr<Feature>> featuresFromRightImg;

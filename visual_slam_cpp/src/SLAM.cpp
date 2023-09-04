@@ -18,26 +18,25 @@ namespace mrVSLAM
         // camera/s setup 
         camera_left.setCamera(dataset->P0); 
         camera_right.setCamera(dataset->P1); 
-        // auto ptr_to_camera_left = std::shared_ptr<Camera>(&camera_left); 
-        // auto ptr_to_camera_right = std::shared_ptr<Camera>(&camera_right); 
+        camera_left.baseline = 0; 
+        camera_right.baseline = getStereoBaseline(camera_left.t, camera_right.t); 
 
-        // 
+        auto ptr_to_camera_left = std::shared_ptr<Camera>(&camera_left); 
+        auto ptr_to_camera_right = std::shared_ptr<Camera>(&camera_right); 
+
+        // setup of main components 
         map = std::shared_ptr<Map>(new Map); 
         visualizer = std::shared_ptr<Visualizer>(new Visualizer); 
         backend = std::shared_ptr<Backend>(new Backend); 
         tracking = std::shared_ptr<Tracking>(new Tracking); 
 
         tracking->setTracking(map, visualizer, backend); // setup visualizer 
-        
-
+        visualizer->setMapPtr(map); 
     }
 
 
     int StereoDirectSLAM::Run()
     {
-        cv::Mat imgLeft(370, 1226, CV_8UC1); // declare img size and type, super important 
-        cv::Mat imgRight(370, 1226, CV_8UC1);
-
         // Create img sequence and get 
         cv::VideoCapture sequenceLeft; 
         cv::VideoCapture sequenceRight; 

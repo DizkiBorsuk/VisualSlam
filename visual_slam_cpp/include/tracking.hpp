@@ -20,7 +20,7 @@ namespace mrVSLAM
     {
     public: 
         //### function members ###// 
-        Tracking(); 
+        Tracking(DETECTOR); 
         void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend); 
         void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
         void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
@@ -56,7 +56,7 @@ namespace mrVSLAM
         std::shared_ptr<Backend> backend = nullptr; 
 
         unsigned int num_of_features = 300; 
-        unsigned int num_of_features_init = 100; // numbers of features needed to be found in both imgs for initalization success 
+        unsigned int num_of_features_for_initialization = 100; // numbers of features needed to be found in both imgs for initalization success 
         unsigned int num_of_features_for_keyframe = 50; //? check in orbslam 
 
         unsigned int inliers = 0; 

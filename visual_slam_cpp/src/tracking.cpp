@@ -3,15 +3,24 @@
 
 namespace mrVSLAM
 {
-    Tracking::Tracking()
+    Tracking::Tracking(DETECTOR detector_type)
     {
-        detector = cv::GFTTDetector::create(num_of_features, 0.01, 20, 3, false, 0.04); //? big min distance
-
-        // set pointers to map, backend and visualizer 
+        switch (detector_type)
+        {
+        case DETECTOR::GFTT:
+            detector = cv::GFTTDetector::create(num_of_features, 0.01, 20, 3, false, 0.04); //? big min distance
+            break;
+        case DETECTOR::FAST: 
+            detector = cv::FastFeatureDetector::create(40, true, cv::FastFeatureDetector::TYPE_9_16); 
+            break; 
+        default:
+            break;
+        }
     }
 
     void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend)
     {
+        // set pointers to map, visualizer and backend 
         map = in_map; 
         visualizer = in_visualizer; 
         backend = in_backend; 
@@ -35,7 +44,6 @@ namespace mrVSLAM
                 restartTracking(); 
                 break; 
         }
-
         prev_frame = current_frame; 
     }
 
@@ -44,17 +52,17 @@ namespace mrVSLAM
     bool Tracking::initialize()
     {
         // can't initialize stereo without at least 2 frames //? how to get two frames
-        if
+        
 
     }
 
-
     bool Tracking::stereoInitialize()
     {
+        // initialize stereo tracking //!DONE
         int num_of_features_in_left_img = detectFeatures(); 
         int num_of_corresponding_features_in_right = findCorrespndingStereoFeatures(); 
 
-        if(num_of_corresponding_features_in_right < num_of_features_init)
+        if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
         
         if(initializeMap()) //create map and change status to tracking 
@@ -70,6 +78,30 @@ namespace mrVSLAM
         }
         return false; //initialization failed  
     }
+
+    unsigned int Tracking::detectFeatures()
+    {
+        // function detects keypoints in main(left) img and pushes Features to Frame object //!DONE
+        std::vector<cv::KeyPoint> keypoints; 
+        detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
+        unsigned int detected_features = 0; 
+
+        for(auto &point : keypoints)
+        {
+            current_frame->featuresFromLeftImg.emplace_back(new Feature{current_frame, point}); 
+            detected_features++; 
+        }
+
+        return detected_features; 
+    }
+
+    unsigned int Tracking::findCorrespndingStereoFeatures()
+    {
+        std::vector<cv::Point2f> keypoints_left, keypoints_right; 
+    }
+
+
+
 
     void Tracking::track()
     {
@@ -115,26 +147,9 @@ namespace mrVSLAM
             findCorrespndingStereoFeatures(); 
     }
 
-    unsigned int Tracking::detectFeatures()
-    {
-        // function detects keypoints in main(left) img and pushes Features to Frame object 
-        std::vector<cv::KeyPoint> keypoints; 
-        detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
-        unsigned int detected_features = 0; 
 
-        for(auto &point : keypoints)
-        {
-            current_frame->featuresFromLeftImg.emplace_back(new Feature{current_frame, point}); 
-            detected_features++; 
-        }
 
-        return detected_features; 
-    }
 
-    unsigned int Tracking::findCorrespndingStereoFeatures()
-    {
-        std::vector<cv::Point2f> keypoints_left, keypoints_right; 
-    }
 
 
     bool Tracking::initializeMap()
@@ -150,7 +165,7 @@ namespace mrVSLAM
 
 
 
-    void restrtTracking()
+    void restartTracking()
     {
         
     }
