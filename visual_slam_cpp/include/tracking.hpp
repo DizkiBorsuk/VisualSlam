@@ -15,12 +15,14 @@ namespace mrVSLAM
 
     enum class STATUS {INITIALIZATION, TRACKING, LOST}; // status of tracking 
     enum class DETECTOR {GFTT, FAST}; 
+    enum class EXTRACTOR {ORB, SIFT, AKAZE}; 
 
     class Tracking
     {
     public: 
         //### function members ###// 
         Tracking(DETECTOR); 
+        Tracking(EXTRACTOR); 
         void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend); 
         void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
         void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking

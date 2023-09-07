@@ -41,6 +41,7 @@ namespace mrVSLAM
     class Map
     {
     public: 
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         //### data members ###// 
         std::mutex map_mutex; 
         std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> landmarks; // map points in map 

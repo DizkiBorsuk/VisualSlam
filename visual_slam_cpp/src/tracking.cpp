@@ -18,6 +18,23 @@ namespace mrVSLAM
         }
     }
 
+    Tracking::Tracking(EXTRACTOR extractor_type)
+    {
+        switch (extractor_type)
+        {
+        case EXTRACTOR::ORB:
+            detector = cv::GFTTDetector::create(num_of_features, 0.01, 20, 3, false, 0.04); //? big min distance
+            break;
+        case EXTRACTOR::SIFT: 
+            detector = cv::FastFeatureDetector::create(40, true, cv::FastFeatureDetector::TYPE_9_16); 
+            break; 
+        case EXTRACTOR::AKAZE: 
+            break; 
+        default:
+            break;
+        }
+    }
+
     void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend)
     {
         // set pointers to map, visualizer and backend 
