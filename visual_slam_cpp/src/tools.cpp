@@ -5,7 +5,7 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    inline bool triangulate(std::vector<Eigen::Matrix<double,2,1>> &points, Eigen::Matrix<double,3,4> &P_matrix, std::array<float,3> &point_pos)
+    inline bool triangulate(const std::vector<Eigen::Matrix<double,2,1>> &points,const Eigen::Matrix<double,3,4> &P_matrix, std::array<float,3> &point_pos)
     {
         /* triangulate one point, 
         points - corresponding points  
@@ -33,7 +33,7 @@ namespace mrVSLAM
     }
 
 
-    void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)
+    inline void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)
     {
         // function that changes 3x3 rotation matrix and 3x1 ranslation vector to 4x4 homogenouse tranformation/pose matrix 
         cv::Matx34d Rt;  

@@ -5,7 +5,6 @@
 namespace mrVSLAM
 {
     void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT); 
-    
     void getTransformationMatrix(const Eigen::Matrix3d &R, const Eigen::Vector4d &t, Eigen::Matrix<double,4,4> &outT); 
 
     //### visualization tools ###// 
@@ -20,5 +19,5 @@ namespace mrVSLAM
 
 
     // ######## 
-    inline void triangulate(const std::array<Sophus::SE3d, 2> &poses, const std::vector<> &points, ); 
+    inline bool triangulate(const std::vector<Eigen::Matrix<double,2,1>> &points,const Eigen::Matrix<double,3,4> &P_matrix, std::array<float,3> &point_pos); //!change pos to Eigen
 }
