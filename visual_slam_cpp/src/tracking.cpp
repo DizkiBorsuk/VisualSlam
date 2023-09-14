@@ -82,7 +82,7 @@ namespace mrVSLAM
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
         
-        if(initializeMap()) //create map and change status to tracking 
+        if(buildMap()) //create map and change status to tracking 
         {
             tracking_status = STATUS::TRACKING; 
 
@@ -117,7 +117,25 @@ namespace mrVSLAM
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
     }
 
+    bool Tracking::buildMap()
+    {
+        /* triangulate every corresponding feature points from frame 
+         then based on that create MapPoint,  // ? how to give them id? 
+         insert this map point to map and connect it to frame 
+        */
 
+        for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
+        {
+
+        }
+
+        cv::triangulatePoints()
+
+        map->insertPoint(); 
+
+
+        return true; 
+    }
 
 
     void Tracking::track()
@@ -163,23 +181,6 @@ namespace mrVSLAM
             detectFeatures(); 
             findCorrespndingStereoFeatures(); 
     }
-
-
-
-
-
-
-    bool Tracking::initializeMap()
-    {
-        // triangulate every corresponding feature points from frame 
-        // then based on that create MapPoint 
-        // insert this map point to map and connect it to frame 
-
-        //? how to give them id? 
-
-        //map->insertPoint(); 
-    }
-
 
 
     void restartTracking()

@@ -42,7 +42,7 @@ namespace mrVSLAM
         unsigned int findCorrespndingStereoFeatures(); 
 
         // 
-        bool initializeMap(); 
+        bool buildMap(); 
 
     private: 
 

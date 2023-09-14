@@ -5,9 +5,31 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    inline void triangulate()
+    inline bool triangulate(std::vector<Eigen::Matrix<double,2,1>> &points, Eigen::Matrix<double,3,4> &P_matrix, std::array<float,3> &point_pos)
     {
-        Eigen::MatrixXd
+        /* triangulate one point, 
+        points - corresponding points  
+        P - projection matrix matrix 
+        K * [R|t] = [fx 0 cx; 0 fy cy; 0 0 1] * [R11 R12 R13; ...] [x; y; z ] 
+        */
+
+        Eigen::Matrix4d A; 
+        Eigen::Vector4d b; 
+        b.setZero(); 
+
+        for(int i = 0; i < 2; i++)
+        {
+            A.block<1,4>(2*i, 0) = points[i][0]*P_matrix.row(2) - P_matrix.row(0); 
+            A.block<1,4>(2*i+1, 0) = points[i][1]*P_matrix.row(2) - P_matrix.row(1); 
+        }
+
+        auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
+        point_pos = (svd.matrixV().col(3) / svd.matrixV()(3,3)).head<3>(); //! change point pos to Eigen::Vector3d
+
+        if(svd.singularValues()[3] / svd.singularValues()[2] > 1e-2)
+            return false;
+        else 
+            return true;
     }
 
 
