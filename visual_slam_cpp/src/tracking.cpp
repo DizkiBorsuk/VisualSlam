@@ -157,11 +157,10 @@ namespace mrVSLAM
 
         cv::calcOpticalFlowPyrLK(prev_frame->imgLeft, current_frame->imgLeft, ); 
 
-
-        //! decision if frame is new keyframe 
+        //! decision if current frame is new keyframe 
         if( /*inliers > num_of_features_for_keyframe */ )
         {
-            keyframeInsertion(); 
+            newKeyframeInsertion(); 
         }
         
         transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inverse()); 
@@ -173,13 +172,26 @@ namespace mrVSLAM
 
     }
 
-    void Tracking::keyframeInsertion()
+    void Tracking::newKeyframeInsertion()
     {
-            current_frame->SetFrameToKeyframe(); 
-            map->insertKeyFrame(current_frame); 
+        current_frame->SetFrameToKeyframe(); 
+        map->insertKeyFrame(current_frame); 
 
-            detectFeatures(); 
-            findCorrespndingStereoFeatures(); 
+        // add features from keyframe to observed mappoints
+        for(auto &feature : current_frame->featuresFromLeftImg)
+        {
+            auto mappoint = feature->map_point.lock(); 
+            if(mappoint != nullptr)
+            {
+                mappoint->addFeature(feature); 
+            }
+        }
+
+        std::cout << " added keyframe \n"; 
+
+        detectFeatures(); 
+
+        findCorrespndingStereoFeatures(); 
     }
 
 

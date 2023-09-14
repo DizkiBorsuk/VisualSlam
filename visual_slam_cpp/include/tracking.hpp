@@ -35,7 +35,7 @@ namespace mrVSLAM
         void restartTracking(); 
 
         // 
-        void keyframeInsertion(); 
+        void newKeyframeInsertion(); 
 
         //feature detection functions 
         unsigned int detectFeatures(); // detect features in frame left img and return number of found points

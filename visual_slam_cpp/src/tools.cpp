@@ -5,24 +5,48 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    inline bool triangulate(const std::vector<Eigen::Matrix<double,2,1>> &points,const Eigen::Matrix<double,3,4> &P_matrix, std::array<float,3> &point_pos)
+    inline bool triangulate(const std::vector<Eigen::Matrix<double,2,1>> &points,const Eigen::Matrix<double,3,4> &P1, const Eigen::Matrix<double,3,4> &P2, std::array<float,3> &point_pos)
     {
         /* triangulate one point, 
-        points - corresponding points  
+        In: 
+        points - corresponding points expressed in camera coardinate system //https://www.youtube.com/watch?v=UZlRhEUWSas&list=PLgnQpQtFTOGQEXN2Qo571uvwIGNGAM8uf&index=11&t=371s
         P - projection matrix matrix 
         K * [R|t] = [fx 0 cx; 0 fy cy; 0 0 1] * [R11 R12 R13; ...] [x; y; z ] 
+        Out: 
+        position of point in 3d 
         */
+       //? https://www.cs.cmu.edu/~16385/s17/Slides/11.4_Triangulation.pdf
 
-        Eigen::Matrix4d A; 
-        Eigen::Vector4d b; 
-        b.setZero(); 
+        Eigen::Matrix4d A; // 
+        /*
+        A = [y1p2^T - p1^T; p0^T - x1p2^T; y2p2^T - p1^T; p0^T - x2p2^T]
+        */
+    
+        A.block<1,4>(0, 0) = points[0][0]*P1.row(2) - P1.row(0); 
+        A.block<1,4>(1, 0) = points[0][1]*P1.row(2) - P1.row(1); 
+        A.block<1,4>(2, 0) = points[1][0]*P2.row(2) - P2.row(0); 
+        A.block<1,4>(3, 0) = points[1][1]*P2.row(2) - P2.row(1); 
+    
+        //* svd decomposition of A matrix 
+        auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
+        point_pos = (svd.matrixV().col(3) / svd.matrixV()(3,3)).head<3>(); //! change point pos to Eigen::Vector3d
 
-        for(int i = 0; i < 2; i++)
-        {
-            A.block<1,4>(2*i, 0) = points[i][0]*P_matrix.row(2) - P_matrix.row(0); 
-            A.block<1,4>(2*i+1, 0) = points[i][1]*P_matrix.row(2) - P_matrix.row(1); 
-        }
+        if(svd.singularValues()[3] / svd.singularValues()[2] > 1e-2)
+            return false;
+        else 
+            return true;
+    }
 
+    inline bool triangulate(const std::vector<Eigen::Matrix<double,2,1>> &points,const Eigen::Matrix<double,3,4> &P, std::array<float,3> &point_pos)
+    {
+        Eigen::Matrix4d A; // 
+    
+        A.block<1,4>(0, 0) = points[0][0]*P.row(2) - P.row(0); 
+        A.block<1,4>(1, 0) = points[0][1]*P.row(2) - P.row(1); 
+        A.block<1,4>(2, 0) = points[1][0]*P.row(2) - P.row(0); 
+        A.block<1,4>(3, 0) = points[1][1]*P.row(2) - P.row(1); 
+    
+        //* svd decomposition of A matrix 
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
         point_pos = (svd.matrixV().col(3) / svd.matrixV()(3,3)).head<3>(); //! change point pos to Eigen::Vector3d
 
