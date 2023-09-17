@@ -3,6 +3,8 @@
 
 namespace mrVSLAM
 {
+
+    //---- Constructors and main functions ----- //
     Tracking::Tracking(DETECTOR detector_type)
     {
         switch (detector_type)
@@ -52,7 +54,11 @@ namespace mrVSLAM
         {
             case STATUS::INITIALIZATION: 
                 //initialization
-                stereoInitialize(); // add choosing which camera case 
+
+                if(stereoInitialize() == true) // add choosing which camera case 
+                {  
+                    tracking_status = STATUS::TRACKING; 
+                }
                 break; 
             case STATUS::TRACKING: 
                 track(); 
@@ -65,6 +71,7 @@ namespace mrVSLAM
     }
 
 //########################################################
+//---- Initialization ----- //
 
     bool Tracking::initialize()
     {
@@ -75,17 +82,16 @@ namespace mrVSLAM
 
     bool Tracking::stereoInitialize()
     {
-        // initialize stereo tracking //!DONE
+        //!DONE
+        // initialize stereo tracking 
         int num_of_features_in_left_img = detectFeatures(); 
-        int num_of_corresponding_features_in_right = findCorrespndingStereoFeatures(); 
+        int num_of_corresponding_features_in_right = findCorrespondingStereoFeatures(); 
 
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
         
         if(buildMap()) //create map and change status to tracking 
         {
-            tracking_status = STATUS::TRACKING; 
-
             if(visualizer != nullptr)
             {
                 visualizer->addNewFrame(current_frame); 
@@ -96,10 +102,16 @@ namespace mrVSLAM
         return false; //initialization failed  
     }
 
+//########################################################
+//----  ----- //
+
     unsigned int Tracking::detectFeatures()
     {
-        // function detects keypoints in main(left) img and pushes Features to Frame object //!DONE
+        //!DONE
+        // function detects keypoints in main(left) img and pushes Features to Frame object 
+
         std::vector<cv::KeyPoint> keypoints; 
+
         detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
         unsigned int detected_features = 0; 
 
@@ -112,9 +124,38 @@ namespace mrVSLAM
         return detected_features; 
     }
 
-    unsigned int Tracking::findCorrespndingStereoFeatures()
+    unsigned int Tracking::findCorrespondingStereoFeatures()
     {
+        //? in work 
+        /*
+            find corresponding features in rigth image using LK optical flow 
+        */
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
+        for(auto &point :current_frame->featuresFromLeftImg)
+        {
+            keypoints_left.emplace_back(point->featurePoint_position); 
+            auto ptr_to_mappoint = point->map_point.lock(); 
+
+            if(ptr_to_mappoint != nullptr)
+            {
+                //if observed point already exist in map then project this point from world to image and use it as initial guess 
+                auto projected_point = camera_right->world2pixelTransformation(ptr_to_mappoint->position, current_frame->getFramePose()); 
+                keypoints_right.emplace_back(projected_point[0], projected_point[1]); 
+            } 
+            else
+            {
+                //if map doesn't exit (initialization) that use the same pixel as in left image 
+                keypoints_right.emplace_back(point->featurePoint_position.pt);
+            } 
+        }
+
+        std::vector<uchar> status; // output status vector (of unsigned chars); each element of the vector is set to 1 if the flow for the corresponding features has been found, otherwise, it is set to 0.
+        cv::Mat err; 
+        cv::calcOpticalFlowPyrLK(current_frame->imgLeft, current_frame->imgRight, keypoints_left, keypoints_right, status, err, cv::Size(11,11), 3, 
+                                cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,0.01), cv::OPTFLOW_USE_INITIAL_FLOW); 
+        int 
+
+
     }
 
     bool Tracking::buildMap()
@@ -129,7 +170,7 @@ namespace mrVSLAM
 
         }
 
-        cv::triangulatePoints()
+        cv::triangulatePoints(); 
 
         map->insertPoint(); 
 
@@ -195,7 +236,7 @@ namespace mrVSLAM
     }
 
 
-    void restartTracking()
+    void Tracking::restartTracking()
     {
         
     }

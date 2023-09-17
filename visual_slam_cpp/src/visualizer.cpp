@@ -77,12 +77,18 @@ namespace mrVSLAM
 
     void Visualizer::addNewFrame(std::shared_ptr<Frame> in_frame)
     {
+        /*
+        get current frame to visualizer 
+        */
         std::lock_guard<std::mutex> lock(visualizer_mutex); 
         current_frame = in_frame; 
     }
 
     void Visualizer::getMapUpdate()
     {
+        /*
+        gets nabled Keyframes and MapPoints to visualizer
+        */
         std::lock_guard<std::mutex> lock(visualizer_mutex); 
         displayed_keyframes = map->getEnabledKeyframes(); 
         displayed_mappoints = map->getEnabledMappoints(); 
