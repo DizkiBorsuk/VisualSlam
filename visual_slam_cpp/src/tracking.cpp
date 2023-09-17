@@ -129,7 +129,7 @@ namespace mrVSLAM
 
     unsigned int Tracking::findCorrespondingStereoFeatures()
     {
-        //? in work 
+        //? in work // almost finished 
         /*
             find corresponding features in rigth image using LK optical flow 
         */
@@ -156,14 +156,30 @@ namespace mrVSLAM
         cv::Mat err; 
         cv::calcOpticalFlowPyrLK(current_frame->imgLeft, current_frame->imgRight, keypoints_left, keypoints_right, status, err, cv::Size(11,11), 3, 
                                 cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,0.01), cv::OPTFLOW_USE_INITIAL_FLOW); 
-        int 
-
-
+        unsigned int foundCorrespondences = 0; 
+        for(int i = 0; i < status.size(); i++)
+        {
+            if(status[i] == 1)
+            {
+                cv::KeyPoint keypoint_in_right(keypoints_right[i], 7); // keypoint pos and size 
+                current_frame->featuresFromRightImg.emplace_back(new Feature(current_frame, keypoint_in_right)); 
+                foundCorrespondences++; 
+            }
+            else
+            {
+                current_frame->featuresFromRightImg.emplace_back(nullptr); 
+            }
+        }
+        return foundCorrespondences; 
     }
 
     bool Tracking::buildMap()
     {
-        /* triangulate every corresponding feature points from frame 
+        //? in work 
+        /* 
+        create initial map 
+        
+        triangulate every corresponding feature points from frame 
          then based on that create MapPoint,  // ? how to give them id? 
          insert this map point to map and connect it to frame 
         */
@@ -184,6 +200,8 @@ namespace mrVSLAM
 
     void Tracking::track()
     {
+        //? in work 
+
         if(prev_frame!=nullptr)
         {
             //if at least 2 frames exist srt current frame pose by multipling transMatrix with pose matrix (homogenous)
@@ -218,8 +236,19 @@ namespace mrVSLAM
 
     void Tracking::newKeyframeInsertion()
     {
+        //? in work 
+        /*
+        make current frame a keyframe, insert keyframe to map and visualizer, add 
+        */
         current_frame->SetFrameToKeyframe(); 
+        std::cout << "new keyframe id = " << current_frame->keyframe_id << "\n"; 
         map->insertKeyFrame(current_frame); 
+
+
+
+        detectFeatures();
+        findCorrespondingStereoFeatures();
+        createNewMapPoints(); 
 
         // add features from keyframe to observed mappoints
         for(auto &feature : current_frame->featuresFromLeftImg)
@@ -235,7 +264,14 @@ namespace mrVSLAM
 
         detectFeatures(); 
 
-        findCorrespndingStereoFeatures(); 
+        findCorrespondingStereoFeatures(); 
+    }
+
+    void Tracking::createNewMapPoints()
+    {
+        /*
+        triangulate new map points 
+        */
     }
 
 
