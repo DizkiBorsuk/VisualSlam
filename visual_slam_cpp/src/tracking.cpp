@@ -37,12 +37,15 @@ namespace mrVSLAM
         }
     }
 
-    void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend)
+    void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend, 
+                        std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right)
     {
         // set pointers to map, visualizer and backend 
         map = in_map; 
         visualizer = in_visualizer; 
         backend = in_backend; 
+        camera_right = in_camera_right; 
+        camera_left = in_camera_left; 
     }
 
     void Tracking::addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add)

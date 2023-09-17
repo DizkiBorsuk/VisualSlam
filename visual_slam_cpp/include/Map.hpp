@@ -34,6 +34,7 @@ namespace mrVSLAM
 
         static std::shared_ptr<MapPoint> createMapPoint(); 
 
+        static unsigned int mappoint_counter;
     private:
 
     }; 
@@ -69,7 +70,7 @@ namespace mrVSLAM
         std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> getEnabledMappoints(); 
 
         unsigned int getNumberOfPointsInMap(); 
-        unsigned int getNumberOfFramesInMap(); 
+        unsigned int getNumberOfFramesInMap();  
 
     private: 
 

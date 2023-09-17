@@ -2,6 +2,7 @@
 #include "common_includes.hpp"
 #include "frame.hpp"
 #include "map.hpp"
+#include "camera.hpp"
 #include "tools.hpp"
 
 /*
@@ -24,7 +25,8 @@ namespace mrVSLAM
         //### function members ###// 
         Tracking(DETECTOR); 
         Tracking(EXTRACTOR); 
-        void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend); 
+        void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend, 
+                        std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right);
         void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
         void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
@@ -57,6 +59,9 @@ namespace mrVSLAM
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<Visualizer> visualizer = nullptr; 
         std::shared_ptr<Backend> backend = nullptr; 
+        std::shared_ptr<Camera> camera_left = nullptr; 
+        std::shared_ptr<Camera> camera_right = nullptr; 
+
 
         unsigned int num_of_features = 300; 
         unsigned int num_of_features_for_initialization = 100; // numbers of features needed to be found in both imgs for initalization success 

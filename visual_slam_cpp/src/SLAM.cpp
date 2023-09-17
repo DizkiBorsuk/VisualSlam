@@ -5,6 +5,7 @@
 namespace mrVSLAM
 {
     unsigned int Frame::keyframe_counter = 0; // well, that's stupid but i don't have better idea 
+    unsigned int MapPoint::mappoint_counter = 0; 
 
     StereoDirectSLAM::StereoDirectSLAM(std::string sequence_number)
     {
@@ -28,9 +29,9 @@ namespace mrVSLAM
         map = std::shared_ptr<Map>(new Map); 
         visualizer = std::shared_ptr<Visualizer>(new Visualizer); 
         backend = std::shared_ptr<Backend>(new Backend); 
-        tracking = std::shared_ptr<Tracking>(new Tracking); 
+        tracking = std::shared_ptr<Tracking>(new Tracking(DETECTOR::GFTT)); 
 
-        tracking->setTracking(map, visualizer, backend); // setup visualizer 
+        tracking->setTracking(map, visualizer, backend, ptr_to_camera_left, ptr_to_camera_right); // setup visualizer 
         visualizer->setMapPtr(map); 
     }
 
