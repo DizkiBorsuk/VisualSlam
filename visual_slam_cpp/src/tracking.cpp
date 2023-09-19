@@ -272,6 +272,17 @@ namespace mrVSLAM
         /*
         triangulate new map points 
         */
+
+       Eigen::Matrix4d currentPose_Twc = current_frame->framePose.inverse(); //camera to world Tra
+       unsigned int number_of_triangulatedPoints = 0; 
+
+       for(int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+       {
+            if(current_frame->featuresFromLeftImg[i]->map_point.expired() )
+            {
+                
+            }
+       }
     }
 
 

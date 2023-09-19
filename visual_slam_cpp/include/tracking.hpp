@@ -43,9 +43,10 @@ namespace mrVSLAM
         unsigned int detectFeatures(); // detect features in frame left img and return number of found points
         unsigned int extractFeatures(); // extract keypoints and descriptors
         unsigned int findCorrespondingStereoFeatures(); 
-
+        
         // 
         bool buildMap(); 
+        void createNewMapPoints(); 
 
     private: 
 
