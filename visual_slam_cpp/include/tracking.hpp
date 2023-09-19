@@ -70,6 +70,6 @@ namespace mrVSLAM
 
         unsigned int inliers = 0; 
 
-        Sophus::SE3d transformationMatrix; //? maybe change to eigen or sophus 
+        Eigen::Matrix4d transformationMatrix; //? maybe change to eigen or sophus 
     }; 
 }

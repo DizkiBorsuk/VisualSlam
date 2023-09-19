@@ -64,7 +64,7 @@ namespace mrVSLAM
             loopStart = cv::getTickCount(); 
             auto begin = std::chrono::high_resolution_clock::now();
             // #####################
-            cv::Matx44d eye_matrix = cv::Matx44d::eye(); //! temp solution, change later to camera R matrix  
+            Eigen::Matrix4d eye_matrix = Eigen::Matrix4d::Identity(); //! temp solution, change later to camera R matrix  
             
             //* create Frame object and pointer to it
             std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, eye_matrix, imgLeft, imgRight)); //? add K to frame class

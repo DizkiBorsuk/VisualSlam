@@ -25,7 +25,8 @@ namespace mrVSLAM
         Eigen::Vector3d camera2world(const Eigen::Vector3d &point_in_camera, const Eigen::Matrix4d Twc); // std::array<double,3> camera2world();
 
         Eigen::Vector2d camera2pixel(const Eigen::Vector3d &point_in_camera);// std::array<double,2> camera2pixel(); 
-        Eigen::Vector3d pixel2camera(const Eigen::Vector2d &pixel_positon, double alfa); // std::array<double,3> pixel2camera(); 
+        Eigen::Vector3d pixel2camera(const Eigen::Vector2d &pixel_positon, double alfa = 1); // std::array<double,3> pixel2camera(); 
+        Eigen::Vector3d pixel2camera(const cv::KeyPoint &pixel_positon, double alfa = 1); 
         Eigen::Vector2d world2pixel(const Eigen::Vector3d &point_in_world, const Eigen::Matrix4d &Tcw) // std::array<double,2> world2pixel(); 
         {
             return camera2pixel(world2camera(point_in_world, Tcw)); 

@@ -93,7 +93,7 @@ namespace mrVSLAM
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
         
-        if(buildMap()) //create map and change status to tracking 
+        if(buildMap() == true) //create map and change status to tracking 
         {
             if(visualizer != nullptr)
             {
@@ -129,9 +129,9 @@ namespace mrVSLAM
 
     unsigned int Tracking::findCorrespondingStereoFeatures()
     {
-        //? in work // almost finished 
+        //!DONE
         /*
-            find corresponding features in rigth image using LK optical flow 
+            find in rigth image features corresponding to features detected in left img using LK optical flow 
         */
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
         for(auto &point :current_frame->featuresFromLeftImg)
@@ -183,10 +183,12 @@ namespace mrVSLAM
          then based on that create MapPoint,  // ? how to give them id? 
          insert this map point to map and connect it to frame 
         */
+        std::vector<Eigen::Vector3d> featurePoints_in_camera; 
 
         for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
-
+            
+            featurePoints_in_camera.emplace_back(camera_left->pixel2camera())
         }
 
         cv::triangulatePoints(); 
