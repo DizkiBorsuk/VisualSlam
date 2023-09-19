@@ -17,22 +17,21 @@ namespace mrVSLAM
         //### data members ###// 
         unsigned int  id = 0; // map point id 
         unsigned int frames_in = 0; // how many times/frames point was observed during matching 
-        std::array<float, 3> position {}; // position of point in X,Y,Z 
+        Eigen::Vector3d position;  //std::array<float, 3> position {}; // position of point in X,Y,Z 
         //? maybe std::list instead of vector? // bjourne says noo 
         std::vector<std::weak_ptr<Feature>> point_features; // features that describe point, set of features in which point was seen 
 
         std::mutex point_mutex; 
 
         //### function members ###// 
-        MapPoint(unsigned int id, std::array<float,3> point_position) noexcept; 
+        MapPoint(unsigned int id, Eigen::Vector3d point_position) noexcept; 
 
-        std::array<float, 3> getPosition(); 
-        void setPosition(const std::array<float, 3> &point_position); 
+        Eigen::Vector3d getPosition(); //std::array<float, 3> getPosition(); 
+        void setPosition(const Eigen::Vector3d &point_position); //void setPosition(const std::array<float, 3> &point_position); 
 
         void addFeature(std::shared_ptr<Feature> feature); // add feature in wich point was observed, can be more that one 
         void removeFeature(std::shared_ptr<Feature> feature); 
 
-        static std::shared_ptr<MapPoint> createMapPoint(); 
 
         static unsigned int mappoint_counter;
     private:

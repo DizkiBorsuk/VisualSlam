@@ -142,7 +142,7 @@ namespace mrVSLAM
             if(ptr_to_mappoint != nullptr)
             {
                 //if observed point already exist in map then project this point from world to image and use it as initial guess 
-                auto projected_point = camera_right->world2pixelTransformation(ptr_to_mappoint->position, current_frame->getFramePose()); 
+                auto projected_point = camera_right->world2pixel(ptr_to_mappoint->position, current_frame->getFramePose()); 
                 keypoints_right.emplace_back(projected_point[0], projected_point[1]); 
             } 
             else

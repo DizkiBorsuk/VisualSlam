@@ -2,19 +2,19 @@
 
 namespace mrVSLAM
 {
-    MapPoint::MapPoint(unsigned int id, std::array<float,3> point_position) noexcept
+    MapPoint::MapPoint(unsigned int id, Eigen::Vector3d point_position) noexcept
         : id(id), position(point_position)
     {
-
+        mappoint_counter++; 
     }
 
-    std::array<float,3> MapPoint::getPosition()
+    Eigen::Vector3d MapPoint::getPosition()
     {
         std::lock_guard<std::mutex> lock(point_mutex); 
         return position; 
     }
 
-    void MapPoint::setPosition(const std::array<float, 3> &point_position)
+    void MapPoint::setPosition(const Eigen::Vector3d &point_position)
     {
         std::lock_guard<std::mutex> lock(point_mutex); 
         position = point_position; 
