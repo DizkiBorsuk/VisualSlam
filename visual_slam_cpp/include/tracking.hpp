@@ -45,7 +45,7 @@ namespace mrVSLAM
         unsigned int findCorrespondingStereoFeatures(); 
         
         // 
-        bool buildMap(); 
+        void buildMap(); 
         void createNewMapPoints(); 
 
     private: 

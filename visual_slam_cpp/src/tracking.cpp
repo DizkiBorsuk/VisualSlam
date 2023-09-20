@@ -1,5 +1,6 @@
 #include "../include/tracking.hpp"
 #include "../include/visualizer.hpp"
+#include "../include/backend_optimization.hpp"
 
 namespace mrVSLAM
 {
@@ -57,8 +58,7 @@ namespace mrVSLAM
         {
             case STATUS::INITIALIZATION: 
                 //initialization
-
-                if(stereoInitialize() == true) // add choosing which camera case 
+                if(stereoInitialize() == true) 
                 {  
                     tracking_status = STATUS::TRACKING; 
                 }
@@ -93,13 +93,12 @@ namespace mrVSLAM
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
         
-        if(buildMap() == true) //create map and change status to tracking 
+        buildMap(); 
+        if(visualizer != nullptr || backend !=nullptr)
         {
-            if(visualizer != nullptr)
-            {
-                visualizer->addNewFrame(current_frame); 
-                visualizer->getMapUpdate();
-            }
+            backend->updateMap(); 
+            visualizer->addNewFrame(current_frame); 
+            visualizer->getMapUpdate();
             return true; // initiaization succeded 
         }
         return false; //initialization failed  
@@ -173,9 +172,9 @@ namespace mrVSLAM
         return foundCorrespondences; 
     }
 
-    bool Tracking::buildMap()
+    void Tracking::buildMap()
     {
-        //? in work 
+        //!DONE
         /* 
         create initial map 
         
@@ -183,30 +182,45 @@ namespace mrVSLAM
          then based on that create MapPoint,  // ? how to give them id? 
          insert this map point to map and connect it to frame 
         */
-        std::vector<Eigen::Vector3d> featurePoints_in_camera; 
+        std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
+        unsigned int number_of_points_in_map = 0; 
 
         for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
-            
-            featurePoints_in_camera.emplace_back(camera_left->pixel2camera())
+            //convert feature points to camera coordinate system
+            left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
+            left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
+            Eigen::Vector3d point_in_3D = Eigen::Vector3d::Zero(); 
+
+            bool triSuccess = triangulate(left_right_featurePoints_in_camera, camera_left->Rt, camera_right->Rt, point_in_3D); //triangulate features to get point in 3d
+
+            if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
+            {
+                auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
+                MapPoint::mappoint_counter++; // mappoint id counter 
+                number_of_points_in_map++; 
+
+                new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
+                new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
+
+                current_frame->featuresFromLeftImg[i]->map_point = new_mappoint; 
+                current_frame->featuresFromRightImg[i]->map_point = new_mappoint; 
+
+                map->insertPoint(new_mappoint);
+            }
         }
+        std::cout << "Map created with " << number_of_points_in_map << "point in map \n"; 
 
-        cv::triangulatePoints(); 
-
-        map->insertPoint(); 
-
-
-        return true; 
+        current_frame->SetFrameToKeyframe(); 
+        map->insertKeyFrame(current_frame); 
     }
 
 
     void Tracking::track()
     {
         //? in work 
-
-        if(prev_frame!=nullptr)
-        {
-            //if at least 2 frames exist srt current frame pose by multipling transMatrix with pose matrix (homogenous)
+        if(prev_frame!=nullptr){
+            //if at least 2 frames exist set current frame pose by multipling transMatrix with pose matrix (homogenous)
             current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
         }
         

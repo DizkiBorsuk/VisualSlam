@@ -12,7 +12,7 @@ namespace mrVSLAM
         cv::Point2d principialPoint = {0,0}; 
         // camera intrinsic and extrinsic 
         Eigen::Matrix3d K_eigen;  
-        Eigen::Matrix4d extrinsics; //homogenous extrinsic matrix
+        Eigen::Matrix4d Rt; //homogenous extrinsic matrix
 
         cv::Matx<double,3, 3> K, R; // K - intrinsic matrix, R - camera rotation matrix 
         cv::Matx<double, 3, 1> t;// t - camera translation vector 
