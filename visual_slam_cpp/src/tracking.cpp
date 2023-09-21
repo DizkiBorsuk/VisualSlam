@@ -224,7 +224,6 @@ namespace mrVSLAM
             current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
         }
         
-
         std::vector<cv::Point2f> keypoints_prev_frame, keypoints_current_frame; 
         for(auto &keypoint : prev_frame->featuresFromLeftImg)
         {
