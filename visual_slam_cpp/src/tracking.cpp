@@ -261,9 +261,10 @@ namespace mrVSLAM
         std::cout << "nymber of matched/tracked points = " << number_of_matched_points << "\n"; 
 
         unsigned int num_of_inliers = estimatePose(); 
+        std::cout << "Number of inliers " << num_of_inliers << "\n"; 
 
         //! decision if current frame is new keyframe 
-        if( num_of_inliers > num_of_features_for_keyframe  )
+        if( num_of_inliers < num_of_features_for_keyframe )
         {
             newKeyframeInsertion(); 
         }
@@ -287,6 +288,15 @@ namespace mrVSLAM
         std::cout << "new keyframe id = " << current_frame->keyframe_id << "\n"; 
         map->insertKeyFrame(current_frame); 
 
+        for (auto &feature : current_frame->featuresFromLeftImg) 
+        {
+            auto mappoint = feature->map_point.lock();
+            if(mappoint !=nullptr)
+            {
+                mappoint->addFeature(feature);
+            }
+            
+        }
 
 
         detectFeatures();
