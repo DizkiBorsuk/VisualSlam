@@ -32,7 +32,8 @@ namespace mrVSLAM
         tracking = std::shared_ptr<Tracking>(new Tracking(DETECTOR::GFTT)); 
 
         tracking->setTracking(map, visualizer, backend, ptr_to_camera_left, ptr_to_camera_right); // setup visualizer 
-        visualizer->setMapPtr(map); 
+        visualizer->setVisualizer(map, ptr_to_camera_left->K_eigen); 
+        backend->setBackend(map, ptr_to_camera_left, ptr_to_camera_right); 
     }
 
 
@@ -71,9 +72,6 @@ namespace mrVSLAM
 
             //* pass frame to tracking and run tracking 
             tracking->addFrameAndTrack(frame); 
-
-            
-
 
             frame_counter++; 
 

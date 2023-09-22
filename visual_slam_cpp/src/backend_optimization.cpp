@@ -4,6 +4,7 @@ namespace mrVSLAM
 {
     Backend::Backend()
     {
+        // std::bind generates a call wrapper for function, calling wrapper is like invokeing function //works like function pointer
         backend_thread = std::thread(std::bind(&Backend::runBackend, this)); // start bakcend thread
         std::cout << "started optimization thread \n"; 
     }
@@ -18,7 +19,7 @@ namespace mrVSLAM
 
     void Backend::endBackendThread()
     {
-        backend_thread.join(); 
+        backend_thread.join(); // join to main thread
         std::cout << "end of optimization thread \n"; 
     }
 

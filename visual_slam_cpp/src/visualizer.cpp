@@ -10,11 +10,12 @@ namespace mrVSLAM
     {
         // create thread and run visualizer 
         visualizer_thread = std::thread(std::bind(&Visualizer::runVisualizer, this)); //? change it to lambda   
+        std::cout << "start of visualizer thread \n"; 
     }
 
     void Visualizer::closeVisualizer() 
     {
-        visualizer_thread.join(); //? maybe change to pthread 
+        visualizer_thread.join(); //end work and join to main thread 
           
         std::cout << "------------------------- \n"; 
         std::cout << "visualizer ends work \n"; 
@@ -99,14 +100,14 @@ namespace mrVSLAM
     {
         // get Twc - camera pose in world reference transformation matrix and use Pangolin follow  
         //? https://github.com/raulmur/ORB_SLAM2/issues/226
-        Sophus::SE3d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
-        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation.matrix()); 
+        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
+        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation); 
         s_cam.Follow(matrix, true); 
     }
 
     void Visualizer::drawFrame(std::shared_ptr<Frame> input_frame, const std::array<float,3> color)
     {   
-        Sophus::SE3d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
+        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
         
         
         glPushMatrix(); 

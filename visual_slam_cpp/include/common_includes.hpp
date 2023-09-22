@@ -13,6 +13,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 #include "eigen3/Eigen/Dense"
 #include "sophus/se3.hpp"
