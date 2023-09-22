@@ -241,7 +241,6 @@ namespace mrVSLAM
 
         std::vector<uchar> status;
         cv::Mat err;
-
         cv::calcOpticalFlowPyrLK(prev_frame->imgLeft, current_frame->imgLeft, keypoints_prev_frame, keypoints_current_frame, status, err, cv::Size(11,11), 3, 
                                 cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,0.01), cv::OPTFLOW_USE_INITIAL_FLOW); 
 
@@ -264,18 +263,15 @@ namespace mrVSLAM
         std::cout << "Number of inliers " << num_of_inliers << "\n"; 
 
         //! decision if current frame is new keyframe 
-        if( num_of_inliers < num_of_features_for_keyframe )
+        if( num_of_inliers < num_of_features_for_keyframe ) // work on this 
         {
             newKeyframeInsertion(); 
         }
         
         transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inverse()); 
 
-        if(visualizer!=nullptr)
-        {
-            visualizer->addNewFrame(current_frame); 
-        }
-
+       
+        visualizer->addNewFrame(current_frame); 
     }
 
     void Tracking::newKeyframeInsertion()
@@ -288,54 +284,65 @@ namespace mrVSLAM
         std::cout << "new keyframe id = " << current_frame->keyframe_id << "\n"; 
         map->insertKeyFrame(current_frame); 
 
+        // add features from keyframe to observed mappoints
         for (auto &feature : current_frame->featuresFromLeftImg) 
         {
             auto mappoint = feature->map_point.lock();
             if(mappoint !=nullptr)
             {
                 mappoint->addFeature(feature);
-            }
-            
+            }  
         }
-
 
         detectFeatures();
         findCorrespondingStereoFeatures();
         createNewMapPoints(); 
 
-        // add features from keyframe to observed mappoints
-        for(auto &feature : current_frame->featuresFromLeftImg)
-        {
-            auto mappoint = feature->map_point.lock(); 
-            if(mappoint != nullptr)
-            {
-                mappoint->addFeature(feature); 
-            }
-        }
-
+      
         std::cout << " added keyframe \n"; 
-
-        detectFeatures(); 
-
-        findCorrespondingStereoFeatures(); 
     }
 
     void Tracking::createNewMapPoints()
     {
         /*
-        triangulate new map points 
+        triangulate new map points //basiclly the same stuff as in buildMap //?maybe use this function in buildMap()?
         */
 
-       Eigen::Matrix4d currentPose_Twc = current_frame->framePose.inverse(); //camera to world Tra
+       Eigen::Matrix4d currentPose_Twc = current_frame->framePose.inverse(); //camera to world transformation matrix 
        unsigned int number_of_triangulatedPoints = 0; 
+       std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera;
 
        for(int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
        {
-            if(current_frame->featuresFromLeftImg[i]->map_point.expired() )
+        // check if feature has any owners https://en.cppreference.com/w/cpp/memory/weak_ptr/expired and if feature from right were found 
+            if(current_frame->featuresFromLeftImg[i]->map_point.expired() && current_frame->featuresFromRightImg[i] != nullptr)   
             {
-                
+                left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
+                left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
+                Eigen::Vector3d point_in_3D = Eigen::Vector3d::Zero();
+
+                bool triSuccess = triangulate(left_right_featurePoints_in_camera, camera_left->Rt, camera_right->Rt, point_in_3D); //triangulate features to get point in 3d
+
+                if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
+                {
+                    point_in_3D = point_in_3D * currentPose_Twc; 
+
+                    auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
+                    MapPoint::mappoint_counter++; // mappoint id counter 
+                    number_of_triangulatedPoints++; 
+
+                    new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
+                    new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
+
+                    current_frame->featuresFromLeftImg[i]->map_point = new_mappoint; 
+                    current_frame->featuresFromRightImg[i]->map_point = new_mappoint; 
+
+                    map->insertPoint(new_mappoint);
+                }
             }
        }
+
+       std::cout << "triangulated : " << number_of_triangulatedPoints << "new points \n"; 
     }
 
 
