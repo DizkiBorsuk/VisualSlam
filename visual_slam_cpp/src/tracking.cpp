@@ -219,23 +219,51 @@ namespace mrVSLAM
     void Tracking::track()
     {
         //? in work 
+        /*
+        
+        */
+
         if(prev_frame!=nullptr){
             //if at least 2 frames exist set current frame pose by multipling transMatrix with pose matrix (homogenous)
             current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
-        }
-        
+        } else {
+            std::cerr << "tracking needs two frames, prev_frame doesn't exist \n";  //!have to add smth to happen if there is not prev frame but i don't thing it's even possible  
+        } 
+
         std::vector<cv::Point2f> keypoints_prev_frame, keypoints_current_frame; 
-        for(auto &keypoint : prev_frame->featuresFromLeftImg)
+        for(auto &feature : prev_frame->featuresFromLeftImg )
         {
-            auto mappoint = keypoint->map_point.lock(); //* https://en.cppreference.com/w/cpp/memory/weak_ptr/lock
-            keypoints_prev_frame.emplace_back(keypoint->featurePoint_position.pt); 
-            keypoints_current_frame.emplace_back(); 
+            keypoints_prev_frame.emplace_back(feature->featurePoint_position.pt); 
+
+            auto point_in_world = feature->map_point.lock(); 
+            keypoints_current_frame.emplace_back(camera_left->world2pixel(point_in_world->getPosition(), current_frame->getFramePose())); // transpose observed mappoint from previosu point to current frame img coordinates
         }
 
-        cv::calcOpticalFlowPyrLK(prev_frame->imgLeft, current_frame->imgLeft, ); 
+        std::vector<uchar> status;
+        cv::Mat err;
+
+        cv::calcOpticalFlowPyrLK(prev_frame->imgLeft, current_frame->imgLeft, keypoints_prev_frame, keypoints_current_frame, status, err, cv::Size(11,11), 3, 
+                                cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,0.01), cv::OPTFLOW_USE_INITIAL_FLOW); 
+
+        unsigned int number_of_matched_points = 0; 
+
+        for(int i = 0; i < status.size();i++ )
+        {
+            if(status[i] == 1)
+            {
+                cv::KeyPoint current_frame_new_kp(keypoints_current_frame[i], 7); // keypoint pos and size 
+                // auto new_feature = std::shared_ptr<Feature>(new Feature(current_frame, current_frame_new_kp)); 
+                current_frame->featuresFromLeftImg.emplace_back(new Feature(current_frame, current_frame_new_kp));
+                number_of_matched_points++;
+            }
+        }
+
+        std::cout << "nymber of matched/tracked points = " << number_of_matched_points << "\n"; 
+
+        unsigned int num_of_inliers = estimatePose(); 
 
         //! decision if current frame is new keyframe 
-        if( /*inliers > num_of_features_for_keyframe */ )
+        if( num_of_inliers > num_of_features_for_keyframe  )
         {
             newKeyframeInsertion(); 
         }

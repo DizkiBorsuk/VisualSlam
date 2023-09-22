@@ -39,7 +39,7 @@ namespace mrVSLAM
         std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
     }; 
 
-    class StereoDirectSLAM
+    class StereoSLAM
     {
     public: 
         std::vector<int> performance; 
@@ -47,8 +47,8 @@ namespace mrVSLAM
         Camera camera_left; 
         Camera camera_right; 
 
-        StereoDirectSLAM(std::string sequence_number); 
-        ~StereoDirectSLAM(); 
+        StereoSLAM(std::string sequence_number); 
+        ~StereoSLAM(); 
 
         int Run(); // main execution loop  
 

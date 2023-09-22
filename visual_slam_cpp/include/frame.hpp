@@ -57,8 +57,12 @@ namespace mrVSLAM
 
         //*### member functions ####// 
 
-        Frame(unsigned int id, const Eigen::Matrix4d &pose, const cv::Mat &img) noexcept;  // Frame for monocular case 
-        Frame(unsigned int id, const Eigen::Matrix4d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept; // Frame for stereo case 
+        Frame(unsigned int id_in, const Eigen::Matrix4d &pose, const cv::Mat &img) noexcept  // Frame for monocular case 
+        : id(id_in), framePose(pose), imgLeft(img)
+        {   }
+        Frame(unsigned int id_in, const Eigen::Matrix4d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept // Frame for stereo case 
+        : id(id_in), framePose(pose), imgLeft(img_left), imgRight(img_right) 
+        {   }
 
         Eigen::Matrix4d getFramePose(); //Sophus::SE3d getFramePose();  // get frame pose from thread 
         void SetFramePose(const Eigen::Matrix4d &pose); //void SetFramePose(const Sophus::SE3d &pose);  // set frame pose in thread 

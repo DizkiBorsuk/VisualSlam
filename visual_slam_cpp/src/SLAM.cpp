@@ -7,7 +7,7 @@ namespace mrVSLAM
     unsigned int Frame::keyframe_counter = 0; // well, that's stupid but i don't have better idea 
     unsigned int MapPoint::mappoint_counter = 0; 
 
-    StereoDirectSLAM::StereoDirectSLAM(std::string sequence_number)
+    StereoSLAM::StereoSLAM(std::string sequence_number)
     {
         //* Dataset initialization 
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset);
@@ -37,7 +37,7 @@ namespace mrVSLAM
     }
 
 
-    int StereoDirectSLAM::Run()
+    int StereoSLAM::Run()
     {
         // Create img sequence and get 
         cv::VideoCapture sequenceLeft; 

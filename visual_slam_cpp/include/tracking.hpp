@@ -44,6 +44,9 @@ namespace mrVSLAM
         unsigned int extractFeatures(); // extract keypoints and descriptors
         unsigned int findCorrespondingStereoFeatures(); 
         
+        unsigned int estimatePose(); 
+
+
         // 
         void buildMap(); 
         void createNewMapPoints(); 
@@ -67,8 +70,6 @@ namespace mrVSLAM
         unsigned int num_of_features = 300; 
         unsigned int num_of_features_for_initialization = 100; // numbers of features needed to be found in both imgs for initalization success 
         unsigned int num_of_features_for_keyframe = 50; //? check in orbslam 
-
-        unsigned int inliers = 0; 
 
         Eigen::Matrix4d transformationMatrix; //? maybe change to eigen or sophus 
     }; 
