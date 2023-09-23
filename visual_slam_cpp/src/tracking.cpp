@@ -80,7 +80,7 @@ namespace mrVSLAM
     {
         // can't initialize stereo without at least 2 frames //? how to get two frames
         
-
+        return false; 
     }
 
     bool Tracking::stereoInitialize()
@@ -135,7 +135,7 @@ namespace mrVSLAM
         std::vector<cv::Point2f> keypoints_left, keypoints_right; 
         for(auto &point :current_frame->featuresFromLeftImg)
         {
-            keypoints_left.emplace_back(point->featurePoint_position); 
+            keypoints_left.emplace_back(point->featurePoint_position.pt); 
             auto ptr_to_mappoint = point->map_point.lock(); 
 
             if(ptr_to_mappoint != nullptr)
@@ -236,7 +236,8 @@ namespace mrVSLAM
             keypoints_prev_frame.emplace_back(feature->featurePoint_position.pt); 
 
             auto point_in_world = feature->map_point.lock(); 
-            keypoints_current_frame.emplace_back(camera_left->world2pixel(point_in_world->getPosition(), current_frame->getFramePose())); // transpose observed mappoint from previosu point to current frame img coordinates
+            auto point_in_image = camera_left->world2pixel(point_in_world->position, current_frame->getFramePose()); 
+            keypoints_current_frame.emplace_back(point_in_image[0], point_in_image[1]);  // transpose observed mappoint from previosu point to current frame img coordinates
         }
 
         std::vector<uchar> status;
@@ -325,7 +326,7 @@ namespace mrVSLAM
 
                 if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
                 {
-                    point_in_3D = point_in_3D * currentPose_Twc; 
+                    point_in_3D = currentPose_Twc.block<3,3>(0,0) * point_in_3D; 
 
                     auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
                     MapPoint::mappoint_counter++; // mappoint id counter 
@@ -345,6 +346,13 @@ namespace mrVSLAM
        std::cout << "triangulated : " << number_of_triangulatedPoints << "new points \n"; 
     }
 
+
+    unsigned int Tracking::estimatePose()
+    {
+        unsigned int good_points = 0; //inliers 
+        unsigned int bad_points = 0; 
+        return good_points; 
+    } 
 
     void Tracking::restartTracking()
     {

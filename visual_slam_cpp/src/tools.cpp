@@ -5,7 +5,7 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    inline bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix<double,3,4> &T1, const Eigen::Matrix<double,3,4> &T2, Eigen::Vector3d &out_point_pos)
+    inline bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos)
     {
         /* triangulate one point, 
         In: 

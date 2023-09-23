@@ -21,13 +21,14 @@ namespace mrVSLAM
 
     class Tracking
     {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
     public: 
         //### function members ###// 
         Tracking(DETECTOR); 
         Tracking(EXTRACTOR); 
         void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend, 
                         std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right);
-        void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
+        //void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
         void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
         // 3 state functions 

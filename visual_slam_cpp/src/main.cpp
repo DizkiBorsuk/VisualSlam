@@ -4,7 +4,7 @@
 
 int main()
 {
-    mrVSLAM::StereoDirectSLAM slam("07"); 
+    mrVSLAM::StereoSLAM slam("07"); 
     slam.Run(); 
     
     return 0; 

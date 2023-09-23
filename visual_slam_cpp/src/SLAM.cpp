@@ -71,7 +71,7 @@ namespace mrVSLAM
             std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, eye_matrix, imgLeft, imgRight)); //? add K to frame class
 
             //* pass frame to tracking and run tracking 
-            tracking->addFrameAndTrack(frame); 
+            tracking->addFrameAndTrackStereo(frame); 
 
             frame_counter++; 
 
