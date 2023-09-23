@@ -62,6 +62,8 @@ set(Headers include/camera.hpp
             include/map.hpp
             include/read_dataset.hpp
             include/SLAM.hpp 
+            include/tools.hpp
+            include/tracking.hpp
             include/visualizer.hpp
             )
 

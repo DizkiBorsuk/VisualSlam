@@ -3,7 +3,6 @@
 #include "frame.hpp"
 #include "map.hpp"
 #include "camera.hpp"
-#include "tools.hpp"
 
 /*
     Front-end 

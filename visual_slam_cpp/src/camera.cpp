@@ -61,12 +61,12 @@ namespace mrVSLAM
                                 (pixel_positon(1,0) - cy)*alfa/fy, 
                                 alfa); 
     }
-    // Eigen::Vector3d Camera::pixel2camera(const cv::KeyPoint &pixel_positon, double alfa)
-    // {
-    //     return Eigen::Vector3d( (pixel_positon.pt.x - cx)*alfa/fx, 
-    //                             (pixel_positon.pt.y - cy)*alfa/fy, 
-    //                             alfa);
-    // }       
+    Eigen::Vector3d Camera::pixel2camera(const cv::KeyPoint &pixel_positon, double alfa)
+    {
+        return Eigen::Vector3d( (pixel_positon.pt.x - cx)*alfa/fx, 
+                                (pixel_positon.pt.y - cy)*alfa/fy, 
+                                alfa);
+    }       
 
     double getStereoBaseline(const cv::Matx<double, 3, 1> &t1, const cv::Matx<double, 3, 1> &t2) noexcept
     {

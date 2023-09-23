@@ -28,4 +28,10 @@ namespace mrVSLAM
         
     }
 
+
+    void Backend::updateMap()
+    {
+       std::lock_guard<std::mutex> lock(backend_mutex); 
+       map_update_var.notify_one(); //https://en.cppreference.com/w/cpp/thread/condition_variable/notify_one
+    }
 }

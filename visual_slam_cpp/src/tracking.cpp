@@ -1,6 +1,7 @@
 #include "../include/tracking.hpp"
 #include "../include/visualizer.hpp"
 #include "../include/backend_optimization.hpp"
+#include "../include/tools.hpp"
 
 namespace mrVSLAM
 {

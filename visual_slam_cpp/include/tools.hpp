@@ -20,6 +20,6 @@ namespace mrVSLAM
 
     // ######## 
     // for stereo 
-    inline bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos); 
+    bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos); 
     // for mon
 }

@@ -10,34 +10,34 @@
 
 namespace mrVSLAM
 {
-    class MonoSLAM
-    {
-    public: 
-        std::vector<int> performance; 
-        std::vector<Eigen::Matrix<double, 3,4>> trajectory; 
-        Camera camera_left; 
-        Camera camera_right; 
+    // class MonoSLAM
+    // {
+    // public: 
+    //     std::vector<int> performance; 
+    //     std::vector<Eigen::Matrix<double, 3,4>> trajectory; 
+    //     Camera camera_left; 
+    //     Camera camera_right; 
 
-        MonoSLAM(std::string sequence_number); 
-        ~MonoSLAM(); 
+    //     MonoSLAM(std::string sequence_number); 
+    //     ~MonoSLAM(); 
 
-        int Run(); // main execution loop  
+    //     int Run(); // main execution loop  
 
-    private: 
+    // private: 
 
-        cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); // declare img size and type, super important 
-        int frame_counter = 0; 
-        int fps = 0, loopStart = 0, loopEnd = 0; 
+    //     cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); // declare img size and type, super important 
+    //     int frame_counter = 0; 
+    //     int fps = 0, loopStart = 0, loopEnd = 0; 
 
-        bool initialization_succes = false; 
+    //     bool initialization_succes = false; 
 
-        //KITTI_Dataset dataset; 
-        std::shared_ptr<Tracking> tracking = nullptr; 
-        std::shared_ptr<Map> map = nullptr; 
-        std::shared_ptr<Backend> backend = nullptr; 
-        std::shared_ptr<Visualizer> visualizer = nullptr; 
-        std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
-    }; 
+    //     //KITTI_Dataset dataset; 
+    //     std::shared_ptr<Tracking> tracking = nullptr; 
+    //     std::shared_ptr<Map> map = nullptr; 
+    //     std::shared_ptr<Backend> backend = nullptr; 
+    //     std::shared_ptr<Visualizer> visualizer = nullptr; 
+    //     std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
+    // }; 
 
     class StereoSLAM
     {
@@ -48,7 +48,7 @@ namespace mrVSLAM
         Camera camera_right; 
 
         StereoSLAM(std::string sequence_number); 
-        ~StereoSLAM(); 
+        ~StereoSLAM() = default; 
 
         int Run(); // main execution loop  
 
