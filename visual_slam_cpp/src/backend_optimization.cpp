@@ -25,7 +25,10 @@ namespace mrVSLAM
 
     void Backend::runBackend()
     {
-        
+        while(true)
+        {
+            
+        }
     }
 
 

@@ -43,13 +43,9 @@ namespace mrVSLAM
     {
     public: 
         std::vector<int> performance; 
-        std::vector<Eigen::Matrix<double, 3,4>> trajectory; 
-        Camera camera_left; 
-        Camera camera_right; 
+        std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
 
         StereoSLAM(std::string sequence_number); 
-        ~StereoSLAM() = default; 
-
         int Run(); // main execution loop  
 
     private: 
@@ -69,6 +65,8 @@ namespace mrVSLAM
         std::shared_ptr<Backend> backend = nullptr; 
         std::shared_ptr<Visualizer> visualizer = nullptr; 
         std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
+        std::shared_ptr<Camera> camera_left = nullptr; 
+        std::shared_ptr<Camera> camera_right = nullptr; 
     };
 }
 

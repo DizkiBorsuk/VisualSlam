@@ -32,7 +32,6 @@ namespace mrVSLAM
         void addFeature(std::shared_ptr<Feature> feature); // add feature in wich point was observed, can be more that one 
         void removeFeature(std::shared_ptr<Feature> feature); 
 
-
         static unsigned int mappoint_counter;
     private:
 

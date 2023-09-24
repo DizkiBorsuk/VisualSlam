@@ -42,6 +42,7 @@ namespace mrVSLAM
         //### data members ###//
         unsigned int id = 0; // id of a frame 
         unsigned int keyframe_id = 0; // id of a frame if it's a keyframe 
+        static unsigned int keyframe_counter; 
         bool is_keyframe = false; // setting if frame is a keyframe 
         //cv::Matx44d framePose = cv::Matx44d::eye(); // pose of a frame 
         Eigen::Matrix4d framePose; //Sophus::SE3d framePose; 
@@ -69,7 +70,6 @@ namespace mrVSLAM
         void SetFrameToKeyframe(); 
 
     private: 
-       static unsigned int keyframe_counter; 
 
     }; 
 }

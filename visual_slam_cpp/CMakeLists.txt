@@ -20,10 +20,12 @@ ENDIF()
 
 find_package(OpenCV REQUIRED)
 find_package(Pangolin REQUIRED)
+find_package(glad CONFIG REQUIRED)
 find_package(Eigen3  REQUIRED NO_MODULE)
 find_package(Ceres REQUIRED)
 find_package(g2o CONFIG REQUIRED)
 find_package(Sophus CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 find_package(gflags CONFIG)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
@@ -68,14 +70,15 @@ set(Headers include/camera.hpp
             )
 
 
-add_executable(${PROJECT_NAME} ${Sources} ${Headers})
+add_executable(${PROJECT_NAME} ${Sources} )
 target_link_libraries(${PROJECT_NAME} 
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
-                      ${Pangolin_LIBRARIES}
+                      ${Pangolin_LIBRARIES} glad::glad glfw
                       Ceres::ceres
                       Sophus::Sophus
-                      g2o::core g2o::stuff g2o::types_data g2o::types_icp g2o::types_slam3d g2o::types_slam2d
+                      g2o::core g2o::stuff g2o::types_sba g2o::solver_csparse g2o::csparse_extension g2o::types_icp g2o::types_slam3d g2o::types_slam2d g2o::types_data
                       ${PYTHON_LIBRARIES}
+                      #pthread
                       Python3::NumPy
                       ) #

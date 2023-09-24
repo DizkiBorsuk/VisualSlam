@@ -54,6 +54,7 @@ namespace mrVSLAM
     {
         // get frame, set logic 
         current_frame = frame_to_add; 
+        std::cout << "added " << current_frame->id << " frame \n";
 
         switch(tracking_status)
         {
@@ -71,6 +72,7 @@ namespace mrVSLAM
                 restartTracking(); 
                 break; 
         }
+         
         prev_frame = current_frame; 
     }
 
@@ -86,10 +88,13 @@ namespace mrVSLAM
 
     bool Tracking::stereoInitialize()
     {
+        std::cout << "started initialization \n";  
         //!DONE
         // initialize stereo tracking 
         int num_of_features_in_left_img = detectFeatures(); 
         int num_of_corresponding_features_in_right = findCorrespondingStereoFeatures(); 
+        std::cout << "found some corresponding points" << num_of_corresponding_features_in_right << "\n"; 
+
 
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
@@ -100,8 +105,10 @@ namespace mrVSLAM
             backend->updateMap(); 
             visualizer->addNewFrame(current_frame); 
             visualizer->getMapUpdate();
+            std::cout << "succesful initialization"; 
             return true; // initiaization succeded 
         }
+        std::cout << "not succesful initialization"; 
         return false; //initialization failed  
     }
 
@@ -183,6 +190,7 @@ namespace mrVSLAM
          then based on that create MapPoint,  // ? how to give them id? 
          insert this map point to map and connect it to frame 
         */
+       std::cout << "start of map building \n";
         std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
 
