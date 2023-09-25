@@ -45,8 +45,7 @@ namespace mrVSLAM
         unsigned int findCorrespondingStereoFeatures(); 
         
         unsigned int estimatePose(); 
-
-
+        
         // 
         void buildMap(); 
         void createNewMapPoints(); 

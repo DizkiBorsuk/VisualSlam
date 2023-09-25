@@ -184,18 +184,17 @@ namespace mrVSLAM
     {
         //!DONE
         /* 
-        create initial map 
-        
-        triangulate every corresponding feature points from frame 
-         then based on that create MapPoint,  // ? how to give them id? 
-         insert this map point to map and connect it to frame 
+            create initial map 
         */
-       std::cout << "start of map building \n";
         std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
 
+        std::cout << "num of features " << current_frame->featuresFromLeftImg.size() << "\n"; 
         for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
+            if (current_frame->featuresFromRightImg[i] == nullptr) 
+                continue; 
+            
             //convert feature points to camera coordinate system
             left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
             left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
@@ -206,8 +205,9 @@ namespace mrVSLAM
             if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
             {
                 auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
-                MapPoint::mappoint_counter++; // mappoint id counter 
+                //MapPoint::mappoint_counter++; //! counter addition is in constructor
                 number_of_points_in_map++; 
+                std::cout << "mappoibnt id = " << MapPoint::mappoint_counter << "\n"; 
 
                 new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
                 new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
