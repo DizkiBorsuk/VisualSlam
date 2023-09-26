@@ -2,6 +2,7 @@
 #include "../include/visualizer.hpp"
 #include "../include/backend_optimization.hpp"
 #include "../include/tools.hpp"
+#include "../include/graph_optimization.hpp"
 
 namespace mrVSLAM
 {
@@ -54,7 +55,6 @@ namespace mrVSLAM
     {
         // get frame, set logic 
         current_frame = frame_to_add; 
-        std::cout << "added " << current_frame->id << " frame \n";
 
         switch(tracking_status)
         {
@@ -63,6 +63,7 @@ namespace mrVSLAM
                 if(stereoInitialize() == true) 
                 {  
                     tracking_status = STATUS::TRACKING; 
+                    std::cout << "status changed to Tracking\n";
                 }
                 break; 
             case STATUS::TRACKING: 
@@ -93,8 +94,7 @@ namespace mrVSLAM
         // initialize stereo tracking 
         int num_of_features_in_left_img = detectFeatures(); 
         int num_of_corresponding_features_in_right = findCorrespondingStereoFeatures(); 
-        std::cout << "found some corresponding points" << num_of_corresponding_features_in_right << "\n"; 
-
+        std::cout << "found " << num_of_corresponding_features_in_right <<" corresponding points \n"; 
 
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
             return false; //initialization failed 
@@ -105,7 +105,8 @@ namespace mrVSLAM
             backend->updateMap(); 
             visualizer->addNewFrame(current_frame); 
             visualizer->getMapUpdate();
-            std::cout << "succesful initialization"; 
+            std::cout << "succesful initialization \n";
+            std::cout << "-------------------------- \n"; 
             return true; // initiaization succeded 
         }
         std::cout << "not succesful initialization"; 
@@ -121,7 +122,6 @@ namespace mrVSLAM
         // function detects keypoints in main(left) img and pushes Features to Frame object 
 
         std::vector<cv::KeyPoint> keypoints; 
-
         detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
         unsigned int detected_features = 0; 
 
@@ -132,6 +132,27 @@ namespace mrVSLAM
         }
 
         return detected_features; 
+    }
+
+    unsigned int Tracking::extractFeatures()
+    {
+        //? have to check if correct
+        /*
+        */
+        std::vector<cv::KeyPoint> keypoints; 
+        cv::Mat descriptors; 
+        unsigned int detected_features = 0; 
+
+        detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
+        descriptorExtractor->compute(current_frame->imgLeft, keypoints, descriptors); 
+
+        for(int i = 0; i < keypoints.size(); i++)
+        {
+            current_frame->featuresFromLeftImg.emplace_back(new Feature{current_frame, keypoints[i], descriptors.row(i)}); //? have to check that 
+            detected_features++; 
+        }
+
+        return detected_features;
     }
 
     unsigned int Tracking::findCorrespondingStereoFeatures()
@@ -189,7 +210,6 @@ namespace mrVSLAM
         std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
 
-        std::cout << "num of features " << current_frame->featuresFromLeftImg.size() << "\n"; 
         for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
             if (current_frame->featuresFromRightImg[i] == nullptr) 
@@ -207,7 +227,7 @@ namespace mrVSLAM
                 auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
                 //MapPoint::mappoint_counter++; //! counter addition is in constructor
                 number_of_points_in_map++; 
-                std::cout << "mappoibnt id = " << MapPoint::mappoint_counter << "\n"; 
+                //std::cout << "mappoibnt id = " << MapPoint::mappoint_counter << "\n"; 
 
                 new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
                 new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
@@ -218,7 +238,7 @@ namespace mrVSLAM
                 map->insertPoint(new_mappoint);
             }
         }
-        std::cout << "Map created with " << number_of_points_in_map << "point in map \n"; 
+        std::cout << "Map created with " << number_of_points_in_map << " points in map \n"; 
 
         current_frame->SetFrameToKeyframe(); 
         map->insertKeyFrame(current_frame); 
@@ -229,11 +249,12 @@ namespace mrVSLAM
     {
         //? in work 
         /*
-        
+        main tracking function 
         */
 
         if(prev_frame!=nullptr){
             //if at least 2 frames exist set current frame pose by multipling transMatrix with pose matrix (homogenous)
+            std::cout << "in tracking \n";
             current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
         } else {
             std::cerr << "tracking needs two frames, prev_frame doesn't exist \n";  //!have to add smth to happen if there is not prev frame but i don't thing it's even possible  
@@ -308,7 +329,6 @@ namespace mrVSLAM
         findCorrespondingStereoFeatures();
         createNewMapPoints(); 
 
-      
         std::cout << " added keyframe \n"; 
     }
 
@@ -338,7 +358,7 @@ namespace mrVSLAM
                     point_in_3D = currentPose_Twc.block<3,3>(0,0) * point_in_3D; 
 
                     auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
-                    MapPoint::mappoint_counter++; // mappoint id counter 
+                    //MapPoint::mappoint_counter++; // mappoint id counter 
                     number_of_triangulatedPoints++; 
 
                     new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
@@ -360,6 +380,28 @@ namespace mrVSLAM
     {
         unsigned int good_points = 0; //inliers 
         unsigned int bad_points = 0; 
+
+        //https://www.wangxinliu.com/slam/optimization/research&study/g2o-1/
+        //? https://github.com/RainerKuemmerle/g2o/blob/master/g2o/examples/tutorial_slam2d/tutorial_slam2d.cpp
+        typedef g2o::BlockSolver_6_3 BlockSolverType;
+        typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;\
+
+        g2o::SparseOptimizer optimizer; 
+
+        auto linearSolver = std::make_unique<LinearSolverType>(); 
+        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
+
+        optimizer.setAlgorithm(solver); 
+
+        
+
+        // g2o::BaseVertex<6, Eigen::Matrix4d> vertex; 
+        
+        std::vector<std::shared_ptr<Feature>> features; 
+        std::vector<> edges; 
+
+        for(int i = 0)
+
         return good_points; 
     } 
 

@@ -56,8 +56,8 @@ namespace mrVSLAM
                 break;
             }
 
-            loopStart = cv::getTickCount(); 
-            auto begin = std::chrono::high_resolution_clock::now();
+            // loopStart = cv::getTickCount(); 
+            auto beginT = std::chrono::high_resolution_clock::now();
             // #####################
             Eigen::Matrix4d eye_matrix = Eigen::Matrix4d::Identity(); //! temp solution, change later to camera R matrix  
             
@@ -71,13 +71,15 @@ namespace mrVSLAM
             std::cout << "frame counter " << frame_counter << "\n";
 
             //############
-            loopEnd = cv::getTickCount();
-            fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
-            auto cend = std::chrono::high_resolution_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(cend - begin);
-            performance.emplace_back(fps); 
+            // loopEnd = cv::getTickCount();
+            // fps = 1/((loopEnd - loopStart)/cv::getTickFrequency()); 
+            auto endT = std::chrono::high_resolution_clock::now();
+            auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+            // performance.emplace_back(fps); 
+            std::cout << "Loop time is " << elapsedT.count() << "ms \n"; 
 
         }
+        
         sequenceLeft.release(); 
         sequenceRight.release();
     

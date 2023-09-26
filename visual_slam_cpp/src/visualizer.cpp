@@ -2,10 +2,10 @@
 
 #include <pangolin/pangolin.h>
 
-#include <pangolin/display/display.h>
-#include <pangolin/display/view.h>
-#include <pangolin/handler/handler.h>
-#include <pangolin/gl/gldraw.h> 
+// #include <pangolin/display/display.h>
+// #include <pangolin/display/view.h>
+// #include <pangolin/handler/handler.h>
+// #include <pangolin/gl/gldraw.h> 
 
 using namespace std::chrono_literals;
 
@@ -32,9 +32,8 @@ namespace mrVSLAM
     void Visualizer::runVisualizer()
     {
         //* main visualizer function run by thread 
-        std::cout << "Running visualizer thread \n"; 
 
-        // pangolin::CreateWindowAndBind("slam map",window_w,window_h);
+        pangolin::CreateWindowAndBind("slamMap_viewer",1024,768);
         // glEnable(GL_DEPTH_TEST);
         // glEnable(GL_BLEND);
         // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -49,8 +48,6 @@ namespace mrVSLAM
         // pangolin::View& d_cam = pangolin::CreateDisplay()
         //     .SetBounds(0.0, 1.0, 0, 1.0, -1024.0f/768.0f)
         //     .SetHandler(new pangolin::Handler3D(s_cam));
-
-        std::cout << "dupaa"; 
 
         while(true){
         //while( !pangolin::ShouldQuit() )
