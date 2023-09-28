@@ -384,7 +384,7 @@ namespace mrVSLAM
         //https://www.wangxinliu.com/slam/optimization/research&study/g2o-1/
         //? https://github.com/RainerKuemmerle/g2o/blob/master/g2o/examples/tutorial_slam2d/tutorial_slam2d.cpp
         typedef g2o::BlockSolver_6_3 BlockSolverType;
-        typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;\
+        typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
 
         g2o::SparseOptimizer optimizer; 
 
@@ -392,8 +392,13 @@ namespace mrVSLAM
         auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
 
         optimizer.setAlgorithm(solver); 
+        //optimizer.setVerbose(false); 
 
-        
+        auto vertex_SE3 = new g2o::VertexCam()
+        vertex_SE3->setId(0); 
+        // vertex_SE3->setEstimate() 
+        optimizer.addVertex(vertex_SE3); 
+
 
         // g2o::BaseVertex<6, Eigen::Matrix4d> vertex; 
         
