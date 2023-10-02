@@ -77,23 +77,31 @@ public:
    : position_in_3D(position), K(camera_matrix)
    {}
 
-   virtual void computeError() override
+   void computeError() override
    {
       const Pose3DVertex* vertex = static_cast<Pose3DVertex*>(_vertices[0]); //_verticies - g2o variable
-      Eigen::Matrix4d T = vertex->estimate(); 
+      Sophus::SE3d T = vertex->estimate(); 
       Eigen::Vector3d homogenous_pixel_pos = K*(T*position_in_3D); // do point projection to img 
       homogenous_pixel_pos = homogenous_pixel_pos/homogenous_pixel_pos[2]; // convert to non homogenous by dividing by w/scale factor
       Eigen::Vector2d pixel_position = homogenous_pixel_pos.head<2>(); 
       _error = _measurement - pixel_position; // calculate error of estimation 
    }
 
-   virtual void linearizeOplus() override
+   void linearizeOplus() override
    {
       const Pose3DVertex* vertex = static_cast<Pose3DVertex*>(_vertices[0]);
-      Eigen::Matrix4d T = vertex->estimate();
+      Sophus::SE3d T = vertex->estimate();
       Eigen::Vector3d camera_position = T*position_in_3D; 
+      double x = camera_position[0]; 
+      double y = camera_position[1]; 
+      double z = camera_position[2]; 
+      double z_inv = 1 / (z + 1e-18); 
+      double z2_inv = z_inv*z_inv; 
 
-      _jacobianOplusXi << -
+      _jacobianOplusXi << -K(0,0)*z_inv, 0, K(0,0)*x*z2_inv, K(0,0)*x*y*z2_inv,
+                          -K(0,0) - K(0,0)*x*x*z2_inv, K(0,0)*y*z_inv, 0, -K(1,1)*z2_inv, 
+                          K(1,1)*y
+                          -K(1,1)*x*z_inv; 
 
    }
 
@@ -102,7 +110,7 @@ private:
    Eigen::Matrix3d K; 
 }; 
 
-class PointPoseEdge : public g2o::BaseBinaryEdge<2,Eigen::Vector2d, PoseVertex, PointVertex>
+class PointPoseEdge : public g2o::BaseBinaryEdge<2,Eigen::Vector2d, Pose3DVertex, PointVertex>
 {
 
 }; 
