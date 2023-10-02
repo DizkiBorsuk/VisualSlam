@@ -394,10 +394,12 @@ namespace mrVSLAM
         optimizer.setAlgorithm(solver); 
         //optimizer.setVerbose(false); 
 
-        auto vertex_SE3 = new g2o::VertexCam()
+        auto vertex_SE3 = new g2o::VertexSE3Expmap(); // vertex is a graph node so a pose in this situation 
         vertex_SE3->setId(0); 
-        // vertex_SE3->setEstimate() 
+        vertex_SE3->setEstimate(eigenToSE3quat(current_frame->getFramePose())); /////! add convertion
         optimizer.addVertex(vertex_SE3); 
+
+        g2o::VertexSE3 
 
 
         // g2o::BaseVertex<6, Eigen::Matrix4d> vertex; 

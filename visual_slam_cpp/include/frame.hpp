@@ -37,7 +37,6 @@ namespace mrVSLAM
     class Frame
     {
     public: 
-    //! add camera intrinsics 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         //### data members ###//
         unsigned int id = 0; // id of a frame 
