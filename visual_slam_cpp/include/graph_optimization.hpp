@@ -27,25 +27,53 @@ g2o::SE3Quat eigenToSE3quat(const Eigen::Matrix4d &T)
    return g2o::SE3Quat(R, t); //http://docs.ros.org/en/fuerte/api/re_vision/html/classg2o_1_1SE3Quat.html 
 }
 
-class Pose3DVertex : public g2o::BaseVertex<6, Eigen::Matrix4d>
+
+class Pose3DVertex : public g2o::BaseVertex<6, Sophus::SE3d> // class Pose3DVertex : public g2o::BaseVertex<6, Eigen::Matrix4d>
 {
+//! vertex that represents pose node in a pose graph 
 public: 
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+   void setToOriginImpl() override
+   {
+      _estimate = Sophus::SE3d(); // set to identity matrix 
+   }
+
+   void oplusImpl(const double* update) override
+   {
+      Eigen::Vector<double,6> update_vector; 
+      update_vector << update[0], update[1], update[2], update[3], update[4], update[5]; 
+      _estimate = Sophus::SE3d::exp(update_vector) *_estimate;
+   }
 
 };
 
-class VectorVertex : public g2o::BaseVertex<3, Eigen::Vector3d>
+class PointVertex : public g2o::BaseVertex<3, Eigen::Vector3d>
 {
+//! vertex that represents an observed point in a world 
 public: 
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+   void setToOriginImpl() override
+   {
+      _estimate = Eigen::Vector3d::Zero(); 
+   }
+
+   void oplusImpl(const double* update) override
+   {
+      _estimate[0] += update[0]; 
+      _estimate[1] += update[1];
+      _estimate[2] += update[2];
+   }
 }; 
 
-class PoseProjectionEdge : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, Pose3DVertex>
+class PoseEdge : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, Pose3DVertex>
 {
+//! this class represents edge between two poses in a graph 
 public: 
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-   PoseProjectionEdge(const Eigen::Vector3d &position, Eigen::Matrix3d camera_matrix) 
+   PoseEdge(const Eigen::Vector3d &position, Eigen::Matrix3d camera_matrix) 
    : position_in_3D(position), K(camera_matrix)
    {}
 
@@ -56,11 +84,26 @@ public:
       Eigen::Vector3d homogenous_pixel_pos = K*(T*position_in_3D); // do point projection to img 
       homogenous_pixel_pos = homogenous_pixel_pos/homogenous_pixel_pos[2]; // convert to non homogenous by dividing by w/scale factor
       Eigen::Vector2d pixel_position = homogenous_pixel_pos.head<2>(); 
-      _error = _measurement - homogenous_pixel_pos
+      _error = _measurement - pixel_position; // calculate error of estimation 
+   }
+
+   virtual void linearizeOplus() override
+   {
+      const Pose3DVertex* vertex = static_cast<Pose3DVertex*>(_vertices[0]);
+      Eigen::Matrix4d T = vertex->estimate();
+      Eigen::Vector3d camera_position = T*position_in_3D; 
+
+      _jacobianOplusXi << -
+
    }
 
 private: 
    Eigen::Vector3d position_in_3D; 
    Eigen::Matrix3d K; 
+}; 
+
+class PointPoseEdge : public g2o::BaseBinaryEdge<2,Eigen::Vector2d, PoseVertex, PointVertex>
+{
 
 }; 
+
