@@ -2,7 +2,7 @@
 #include "../include/visualizer.hpp"
 #include "../include/backend_optimization.hpp"
 #include "../include/tools.hpp"
-#include "../include/graph_optimization.hpp"
+#include "../include/graph_structure.hpp"
 
 namespace mrVSLAM
 {

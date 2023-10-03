@@ -46,6 +46,16 @@ public:
       _estimate = Sophus::SE3d::exp(update_vector) *_estimate;
    }
 
+   bool read(std::istream &in) override 
+   { 
+      return true; 
+   }
+
+   bool write(std::ostream &out) const override 
+   { 
+      return true; 
+   }
+
 };
 
 class PointVertex : public g2o::BaseVertex<3, Eigen::Vector3d>
@@ -65,6 +75,16 @@ public:
       _estimate[1] += update[1];
       _estimate[2] += update[2];
    }
+   
+   bool read(std::istream &in) override 
+   { 
+      return true; 
+   }
+
+   bool write(std::ostream &out) const override 
+   { 
+      return true; 
+   }
 }; 
 
 class PoseEdge : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, Pose3DVertex>
@@ -81,7 +101,7 @@ public:
    {
       const Pose3DVertex* vertex = static_cast<Pose3DVertex*>(_vertices[0]); //_verticies - g2o variable
       Sophus::SE3d T = vertex->estimate(); 
-      Eigen::Vector3d homogenous_pixel_pos = K*(T*position_in_3D); // do point projection to img 
+      Eigen::Vector3d homogenous_pixel_pos = (T*position_in_3D)*K; // do point projection to img // 
       homogenous_pixel_pos = homogenous_pixel_pos/homogenous_pixel_pos[2]; // convert to non homogenous by dividing by w/scale factor
       Eigen::Vector2d pixel_position = homogenous_pixel_pos.head<2>(); 
       _error = _measurement - pixel_position; // calculate error of estimation 
@@ -97,12 +117,21 @@ public:
       double z = camera_position[2]; 
       double z_inv = 1 / (z + 1e-18); 
       double z2_inv = z_inv*z_inv; 
+      double f = K(0,0); 
 
-      _jacobianOplusXi << -K(0,0)*z_inv, 0, K(0,0)*x*z2_inv, K(0,0)*x*y*z2_inv,
-                          -K(0,0) - K(0,0)*x*x*z2_inv, K(0,0)*y*z_inv, 0, -K(1,1)*z2_inv, 
-                          K(1,1)*y
-                          -K(1,1)*x*z_inv; 
+      _jacobianOplusXi << -f*z_inv, 0 , f*x*z2_inv, f*x*y*z2_inv,
+                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z2_inv, 
+                          f*y*z2_inv, f + f*y*y*z2_inv, -f*x*y*z2_inv, 
+                          -f*x*z_inv; 
+   }
+   bool read(std::istream &in) override 
+   { 
+      return true; 
+   }
 
+   bool write(std::ostream &out) const override 
+   { 
+      return true; 
    }
 
 private: 
@@ -112,6 +141,61 @@ private:
 
 class PointPoseEdge : public g2o::BaseBinaryEdge<2,Eigen::Vector2d, Pose3DVertex, PointVertex>
 {
+public: 
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+   PointPoseEdge(const Eigen::Matrix3d &camera_matrix, const Sophus::SE3d &camera_extrinsics)
+   :K(camera_matrix), cam_extrinsics(camera_extrinsics) 
+   {}
+
+   void computeError() override
+   {
+      const Pose3DVertex* pose_vertex = static_cast<Pose3DVertex*>(_vertices[0]); //_verticies - g2o variable
+      const PointVertex* point_vertex = static_cast<PointVertex*>(_vertices[1]);
+      Sophus::SE3d T = pose_vertex->estimate(); 
+      
+      Eigen::Vector3d homogenous_pixel_pos = (cam_extrinsics*(T*point_vertex->estimate()))*K; 
+      homogenous_pixel_pos = homogenous_pixel_pos/homogenous_pixel_pos[2]; // convert to non homogenous by dividing by w/scale factor
+      Eigen::Vector2d pixel_position = homogenous_pixel_pos.head<2>(); 
+      _error = _measurement - pixel_position; // calculate error of estimation 
+   }
+
+   void linearizeOplus() override
+   {
+      const Pose3DVertex* pose_vertex = static_cast<Pose3DVertex*>(_vertices[0]); //_verticies - g2o variable
+      const PointVertex* point_vertex = static_cast<PointVertex*>(_vertices[1]);
+      Sophus::SE3d T = pose_vertex->estimate(); 
+      Eigen::Vector3d point_in_world = point_vertex->estimate(); 
+
+      Eigen::Vector3d camera_pos = cam_extrinsics*T*point_in_world; 
+
+      double x = camera_pos[0]; 
+      double y = camera_pos[1]; 
+      double z = camera_pos[2]; 
+      double z_inv = 1 / (z + 1e-18); 
+      double z2_inv = z_inv*z_inv; 
+      double f = K(0,0); 
+
+      _jacobianOplusXi << -f*z_inv, 0 , f*x*z2_inv, f*x*y*z2_inv,
+                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z2_inv, 
+                          f*y*z2_inv, f + f*y*y*z2_inv, -f*x*y*z2_inv, 
+                          -f*x*z_inv; 
+      _jacobianOplusXj << _jacobianOplusXi.block<2, 3>(0, 0) *cam_extrinsics.rotationMatrix() * T.rotationMatrix(); 
+   }
+
+   bool read(std::istream &in) override 
+   { 
+      return true; 
+   }
+
+   bool write(std::ostream &out) const override 
+   { 
+      return true; 
+   }
+
+private: 
+   Eigen::Matrix3d K; 
+   Sophus::SE3d cam_extrinsics; 
 
 }; 
 

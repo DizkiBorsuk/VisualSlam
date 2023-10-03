@@ -67,7 +67,7 @@ set(Headers include/camera.hpp
             include/tools.hpp
             include/tracking.hpp
             include/visualizer.hpp
-            include/graph_optimization.hpp
+            include/graph_structure.hpp
             )
 
 
