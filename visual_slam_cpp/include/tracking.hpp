@@ -72,6 +72,6 @@ namespace mrVSLAM
 
         Eigen::Matrix4d transformationMatrix; //? maybe change to eigen or sophus 
 
-        static constexpr double chi_squared_treshold = 5.99; 
+        static constexpr double chi_squared_treshold = 5.991; // {9.210,7.378,5.991,5.991};
     }; 
 }

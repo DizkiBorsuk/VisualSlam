@@ -26,6 +26,8 @@ namespace mrVSLAM
         std::weak_ptr<Frame> frame; // frame in which feature was observed, it's weak_ptr because ownership of frame belongs to Map and feature can't own frame (it would create a owhnership loop)
         std::weak_ptr<MapPoint> map_point; // point in map that coresponds to said feature, same as with frame //https://en.cppreference.com/w/cpp/memory/weak_ptr 
 
+        bool outlier = false; //
+
         Feature(std::shared_ptr<Frame> in_frame, const cv::KeyPoint &keypoint) noexcept 
             :  featurePoint_position(keypoint), frame(in_frame)
         {   }

@@ -429,9 +429,42 @@ namespace mrVSLAM
             }
         }
 
-        //chi squared outlier detection 
+        //chi squared outlier detection from  
+        for (int j = 0; j < 4; j++) 
+        {
+            pose_vertex->setEstimate(current_frame->getSophusFramePose());
+            optimizer.initializeOptimization();
+            optimizer.optimize(10);
+            bad_points = 0;
 
-        
+            // count the outliers
+            for (size_t i = 0; i < pose_edges.size(); ++i) 
+            {
+                auto edge = pose_edges[i];
+                if (features[i]->outlier == true) 
+                {
+                    edge->computeError();
+                }
+                if (edge->chi2() > chi_squared_treshold) 
+                {
+                    features[i]->outlier = true;
+                    edge->setLevel(1);
+                    bad_points++;
+                } else {
+                    features[i]->outlier = false;
+                    edge->setLevel(0);
+                };
+
+                if (j == 2) {
+                    edge->setRobustKernel(nullptr);
+                }
+            }
+        }
+
+        std::cout << "detected " << bad_points << "outliers from " << features.size() << "feature points \n"; 
+        good_points = features.size() - bad_points;  
+
+        current_frame->SetFramePose(pose_vertex->estimate()); 
 
         return good_points; 
     } 
