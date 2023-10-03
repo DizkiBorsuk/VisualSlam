@@ -387,27 +387,51 @@ namespace mrVSLAM
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
 
         g2o::SparseOptimizer optimizer; 
-
         auto linearSolver = std::make_unique<LinearSolverType>(); 
         auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
-
         optimizer.setAlgorithm(solver); 
         //optimizer.setVerbose(false); 
 
-        auto vertex_SE3 = new g2o::VertexSE3Expmap(); // vertex is a graph node so a pose in this situation 
-        vertex_SE3->setId(0); 
-        vertex_SE3->setEstimate(eigenToSE3quat(current_frame->getFramePose())); /////! add convertion
-        optimizer.addVertex(vertex_SE3); 
+        //add first pose vertex 
+        auto pose_vertex = new Pose3DVertex(); 
+        pose_vertex->setId(0); 
+        pose_vertex->setEstimate(current_frame->getSophusFramePose()); 
+        optimizer.addVertex(pose_vertex); //add vertex to graph 
 
-        g2o::VertexSE3 
-
-
-        // g2o::BaseVertex<6, Eigen::Matrix4d> vertex; 
-        
+        //create graph 
+        std::vector<PoseEdge*> pose_edges; 
         std::vector<std::shared_ptr<Feature>> features; 
-        std::vector<> edges; 
 
-        for(int i = 0)
+        auto K = camera_left->K_eigen; 
+        unsigned int edge_id = 1; 
+
+        for(int i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+        {
+            auto map_point = current_frame->featuresFromLeftImg[i]->map_point.lock(); 
+
+            if(map_point != nullptr)
+            {
+                features.emplace_back(current_frame->featuresFromLeftImg[i]); 
+                auto edge = new PoseEdge(map_point->getPosition(), K); 
+                edge->setId(edge_id);
+                edge->setVertex(0,pose_vertex); 
+
+                auto pointxy = current_frame->featuresFromLeftImg[i]->featurePoint_position.pt; 
+                Eigen::Vector2d measurment(pointxy.x, pointxy.y);
+                edge->setMeasurement(measurment); 
+
+                edge->setInformation(Eigen::Matrix2d::Identity()); 
+                edge->setRobustKernel(new g2o::RobustKernelHuber);
+
+                pose_edges.emplace_back(edge); 
+                optimizer.addEdge(edge);
+                edge_id++; 
+            }
+        }
+
+        //chi squared outlier detection 
+
+        
 
         return good_points; 
     } 

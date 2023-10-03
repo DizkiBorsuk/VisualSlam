@@ -71,5 +71,7 @@ namespace mrVSLAM
         unsigned int num_of_features_for_keyframe = 50; //? check in orbslam 
 
         Eigen::Matrix4d transformationMatrix; //? maybe change to eigen or sophus 
+
+        static constexpr double chi_squared_treshold = 5.99; 
     }; 
 }
