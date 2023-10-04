@@ -21,6 +21,12 @@ namespace mrVSLAM
         framePose = pose;  
     }
 
+    void Frame::SetFramePose(const Sophus::SE3d &pose)
+    {
+        std::lock_guard<std::mutex> lock(pose_mutex);
+        framePose = pose.matrix();  
+    }
+
     void Frame::SetFrameToKeyframe()
     {
         is_keyframe = true; 

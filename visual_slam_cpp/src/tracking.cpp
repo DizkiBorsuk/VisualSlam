@@ -334,6 +334,7 @@ namespace mrVSLAM
 
     void Tracking::createNewMapPoints()
     {
+        //!DONE
         /*
         triangulate new map points //basiclly the same stuff as in buildMap //?maybe use this function in buildMap()?
         */
@@ -378,6 +379,7 @@ namespace mrVSLAM
 
     unsigned int Tracking::estimatePose()
     {
+        //!DONE 
         unsigned int good_points = 0; //inliers 
         unsigned int bad_points = 0; 
 
@@ -465,6 +467,14 @@ namespace mrVSLAM
         good_points = features.size() - bad_points;  
 
         current_frame->SetFramePose(pose_vertex->estimate()); 
+
+        for(auto &feature : features)
+        {
+            if(feature->outlier == true)
+            {
+                feature->map_point.reset();  //Releases the reference to the managed object https://en.cppreference.com/w/cpp/memory/weak_ptr/reset
+            }
+        }
 
         return good_points; 
     } 

@@ -69,6 +69,7 @@ namespace mrVSLAM
         Eigen::Matrix4d getFramePose(); //Sophus::SE3d getFramePose();  // get frame pose from thread 
         Sophus::SE3d getSophusFramePose();
         void SetFramePose(const Eigen::Matrix4d &pose); //void SetFramePose(const Sophus::SE3d &pose);  // set frame pose in thread 
+        void SetFramePose(const Sophus::SE3d &pose); 
         void SetFrameToKeyframe(); 
 
     private: 
