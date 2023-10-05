@@ -60,6 +60,52 @@ namespace mrVSLAM
     {
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
+
+        auto linearSolver = std::make_unique<LinearSolverType>(); 
+        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
+        g2o::SparseOptimizer optimizer; 
+        optimizer.setAlgorithm(solver); 
+
+        std::map<unsigned long int, Pose3DVertex*> pose_verticies; 
+        unsigned int max_keyframe_id = 0; //? maybe change to long 
+
+        for(auto &kf_map_entry : keyframes)
+        {
+            auto keyframe = kf_map_entry.second; 
+            Pose3DVertex* pose_vertex = new Pose3DVertex; 
+            pose_vertex->setId(keyframe->keyframe_id); //set pose vertex id to keyframe id 
+            pose_vertex->setEstimate(keyframe->getSophusFramePose()); // set initiall guess for pose 
+            optimizer.addVertex(pose_vertex); 
+            if(keyframe->keyframe_id > max_keyframe_id)
+            {
+                max_keyframe_id = keyframe->keyframe_id; 
+            }
+            pose_verticies.insert({keyframe->keyframe_id, pose_vertex});
+        }
+
+        //set verticies for mappoints 
+        std::map<unsigned int, PointVertex*> mapppoint_verticies; 
+        std::map<PointPoseEdge*, std::shared_ptr<Feature>> observation_edges; // map that assigns edge to the feature that it represents 
+
+        //get camera intrinsics and extrinsics 
+        Eigen::Matrix3d K = camera_left->K_eigen; 
+        Sophus::SE3 left_camera_Rt = Sophus::SE3d(camera_left->Rt);
+        Sophus::SE3 right_camera_Rt = Sophus::SE3d(camera_right->Rt);
+
+        unsigned int id = 1; 
+
+        for(auto &observed_point : mappoints) // observed point is hash map entry of mappoints 
+        {
+            if(observed_point.second->outlier == true)
+            {
+                continue; 
+            }
+
+            auto observe_point_features = observed_point.second->
+
+        }
+
     }
-    
+
+  //Enf of local mapping   
 }

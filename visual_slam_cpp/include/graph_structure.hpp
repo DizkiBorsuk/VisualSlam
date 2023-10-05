@@ -141,6 +141,7 @@ private:
 
 class PointPoseEdge : public g2o::BaseBinaryEdge<2,Eigen::Vector2d, Pose3DVertex, PointVertex>
 {
+//! this class represents graph edge between a mappoint and 
 public: 
    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 

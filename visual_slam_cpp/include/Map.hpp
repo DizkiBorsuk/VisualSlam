@@ -20,6 +20,7 @@ namespace mrVSLAM
         Eigen::Vector3d position;  //std::array<float, 3> position {}; // position of point in X,Y,Z 
         //? maybe std::list instead of vector? // bjourne says noo 
         std::vector<std::weak_ptr<Feature>> point_features; // features that describe point, set of features in which point was seen 
+        bool outlier = false; 
 
         std::mutex point_mutex; 
 
