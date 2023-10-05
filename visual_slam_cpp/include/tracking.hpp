@@ -11,7 +11,7 @@
 
 namespace mrVSLAM
 {
-    class Backend; 
+    class LocalMapping; 
     class Visualizer; 
 
     enum class STATUS {INITIALIZATION, TRACKING, LOST}; // status of tracking 
@@ -25,7 +25,7 @@ namespace mrVSLAM
         //### function members ###// 
         Tracking(DETECTOR); 
         Tracking(EXTRACTOR); 
-        void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend, 
+        void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<LocalMapping> in_lMapping, 
                         std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right);
         //void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
         void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
@@ -61,7 +61,7 @@ namespace mrVSLAM
         std::shared_ptr<Frame> prev_frame = nullptr;
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<Visualizer> visualizer = nullptr; 
-        std::shared_ptr<Backend> backend = nullptr; 
+        std::shared_ptr<LocalMapping> l_mapping = nullptr; 
         std::shared_ptr<Camera> camera_left = nullptr; 
         std::shared_ptr<Camera> camera_right = nullptr; 
 

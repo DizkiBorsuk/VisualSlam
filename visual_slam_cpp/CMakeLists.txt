@@ -46,7 +46,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotli
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
-            src/backend_optimization.cpp
+            src/local_mapping.cpp
             src/camera.cpp
             src/frame.cpp
             src/map.cpp
@@ -58,7 +58,7 @@ set(Sources src/main.cpp
             )
 
 set(Headers include/camera.hpp 
-            include/backend_optimization.hpp 
+            include/local_mapping.hpp 
             include/common_includes.hpp
             include/frame.hpp 
             include/map.hpp

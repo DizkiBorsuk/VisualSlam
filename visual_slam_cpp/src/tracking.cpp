@@ -1,6 +1,6 @@
 #include "../include/tracking.hpp"
 #include "../include/visualizer.hpp"
-#include "../include/backend_optimization.hpp"
+#include "../include/local_mapping.hpp"
 #include "../include/tools.hpp"
 #include "../include/graph_structure.hpp"
 
@@ -40,13 +40,13 @@ namespace mrVSLAM
         }
     }
 
-    void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<Backend> in_backend, 
+    void Tracking::setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<LocalMapping> in_lMapping, 
                         std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right)
     {
         // set pointers to map, visualizer and backend 
         map = in_map; 
         visualizer = in_visualizer; 
-        backend = in_backend; 
+        l_mapping = in_lMapping; 
         camera_right = in_camera_right; 
         camera_left = in_camera_left; 
     }
@@ -97,12 +97,16 @@ namespace mrVSLAM
         std::cout << "found " << num_of_corresponding_features_in_right <<" corresponding points \n"; 
 
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
+        {
+            std::cout << "not succesful initialization"; 
             return false; //initialization failed 
+        }
+            
         
         buildMap(); 
-        if(visualizer != nullptr || backend !=nullptr)
+        if(visualizer != nullptr || l_mapping !=nullptr)
         {
-            backend->updateMap(); 
+            l_mapping->updateMap(); 
             visualizer->addNewFrame(current_frame); 
             visualizer->getMapUpdate();
             std::cout << "succesful initialization \n";
@@ -300,14 +304,13 @@ namespace mrVSLAM
         }
         
         transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inverse()); 
-
        
         visualizer->addNewFrame(current_frame); 
     }
 
     void Tracking::newKeyframeInsertion()
     {
-        //? in work 
+        //! DONE
         /*
         make current frame a keyframe, insert keyframe to map and visualizer, add 
         */
@@ -328,6 +331,9 @@ namespace mrVSLAM
         detectFeatures();
         findCorrespondingStereoFeatures();
         createNewMapPoints(); 
+
+        l_mapping->updateMap(); 
+        visualizer->getMapUpdate(); 
 
         std::cout << " added keyframe \n"; 
     }
@@ -431,7 +437,7 @@ namespace mrVSLAM
             }
         }
 
-        //chi squared outlier detection from  
+        //chi squared outlier detection 
         for (int j = 0; j < 4; j++) 
         {
             pose_vertex->setEstimate(current_frame->getSophusFramePose());
