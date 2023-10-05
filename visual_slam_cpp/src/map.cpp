@@ -31,7 +31,22 @@ namespace mrVSLAM
     void MapPoint::removeFeature(std::shared_ptr<Feature> feature)
     {
         std::lock_guard<std::mutex> lock(point_mutex); 
+        for(auto it = point_features.begin(); it != point_features.end(); it++)
+        {
+            if(it->lock() == feature)
+            {
+                point_features.erase(it); 
+                feature->map_point.reset(); 
+                frames_in--; 
+                break; 
+            }
+        }
+    }
 
+    std::list<std::weak_ptr<Feature>> MapPoint::getFeatures()
+    {
+        std::lock_guard<std::mutex> lock(point_mutex);
+        return point_features; 
     }
 
     // ################################################################################## // 
@@ -60,20 +75,35 @@ namespace mrVSLAM
 
     void Map::insertPoint(std::shared_ptr<MapPoint> mappoint)
     {
-        if(landmarks.contains(mappoint->id))
+        if(mappoints.contains(mappoint->id))
         {
             //? 
-            landmarks[mappoint->id] = mappoint; 
-            enabled_landmarks[mappoint->id] = mappoint;
+            mappoints[mappoint->id] = mappoint; 
+            enabled_mappoints[mappoint->id] = mappoint;
         } else {
-            landmarks.insert({mappoint->id, mappoint});
-            enabled_landmarks.insert({mappoint->id, mappoint});
+            mappoints.insert({mappoint->id, mappoint});
+            enabled_mappoints.insert({mappoint->id, mappoint});
         }
     }
 
     void Map::cleanMap()
     {
+        /*
+        remove mappoints from active mappoints
+        */
+        unsigned int mappoints_removed = 0;
 
+        for (auto it = enabled_mappoints.begin(); it != enabled_mappoints.end();) 
+        {
+            if (it->second->frames_in == 0) 
+            {
+                it = enabled_mappoints.erase(it);
+                mappoints_removed++; 
+            } else {
+                it++; 
+            }
+        }
+        std::cout << "Removed " << mappoints_removed << " active landmarks";
     }
 
     void Map::removeOldestKeyFrame()

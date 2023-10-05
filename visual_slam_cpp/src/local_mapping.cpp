@@ -96,12 +96,12 @@ namespace mrVSLAM
 
         for(auto &observed_point : mappoints) // observed point is hash map entry of mappoints 
         {
-            if(observed_point.second->outlier == true)
-            {
-                continue; 
-            }
+            // if(observed_point.second->outlier == true)
+            // {
+            //     continue; 
+            // }
 
-            auto observe_point_features = observed_point.second->
+            auto observe_point_features = observed_point.second->getFeatures(); 
 
         }
 
