@@ -114,7 +114,7 @@ namespace mrVSLAM
     unsigned int Map::getNumberOfPointsInMap()
     {
         std::lock_guard<std::mutex> lock(map_mutex); 
-        return landmarks.size(); 
+        return mappoints.size(); 
 
     } 
     unsigned int Map::getNumberOfFramesInMap()
@@ -131,7 +131,7 @@ namespace mrVSLAM
     std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> Map::getAllMappoints()
     {
         std::lock_guard<std::mutex> lock(map_mutex);
-        return landmarks; 
+        return mappoints; 
     }
     std::unordered_map<unsigned int, std::shared_ptr<Frame>> Map::getEnabledKeyframes()
     {
@@ -141,6 +141,6 @@ namespace mrVSLAM
     std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> Map::getEnabledMappoints()
     {
         std::lock_guard<std::mutex> lock(map_mutex); 
-        return enabled_landmarks; 
+        return enabled_mappoints; 
     }
 }
