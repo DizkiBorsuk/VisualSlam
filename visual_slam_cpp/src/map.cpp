@@ -53,14 +53,13 @@ namespace mrVSLAM
 
     void Map::insertKeyFrame(std::shared_ptr<Frame> keyframe)
     {
-        currentFrame = keyframe; 
+        currentKeyFrame = keyframe; 
 
         if(keyFrames.contains(keyframe->keyframe_id)) // check if hashmap already contains said frame with that id
         {
-            //if hashmap already contains frame with that id replace pointer to it? 
-            //? not sure about that 
+            keyFrames[keyframe->keyframe_id] = keyframe; 
+            enabled_keyframes[keyframe->keyframe_id] = keyframe; 
             
-
         } else {
             //if not, put it in keyframes map 
             keyFrames.insert({keyframe->keyframe_id, keyframe}); 
@@ -77,7 +76,6 @@ namespace mrVSLAM
     {
         if(mappoints.contains(mappoint->id))
         {
-            //? 
             mappoints[mappoint->id] = mappoint; 
             enabled_mappoints[mappoint->id] = mappoint;
         } else {
@@ -108,7 +106,62 @@ namespace mrVSLAM
 
     void Map::removeOldestKeyFrame()
     {
+        std::shared_ptr<Frame> oldest_frame = nullptr; 
 
+        auto Tmatrix_wc = currentKeyFrame->getFramePose().inverse(); 
+        double max_kf_distance = 0; 
+        unsigned int max_dis_kf_id = 0; 
+        double min_kf_distance = 10000; //some big valuse  
+        unsigned int min_dis_kf_id = 0; 
+
+        for(auto &frame : enabled_keyframes)
+        {
+            if(frame.second == currentKeyFrame)
+            {
+                continue; // don't want to remove current frame 
+            }
+            else 
+            {
+                double distance = (frame.second->getFramePose()*Tmatrix_wc).log().norm(); 
+
+                if(distance > max_kf_distance)
+                {
+                    max_kf_distance = distance; //find max distance of keyframe form current frame
+                    max_dis_kf_id = frame.first; 
+                } 
+
+                if(distance < min_kf_distance)
+                {
+                    min_kf_distance = distance; 
+                    min_dis_kf_id = frame.first; 
+                }
+            }
+        }
+
+        double dist_treshold = 0.2; // to be checked 
+        if(min_kf_distance < dist_treshold)
+        {
+            oldest_frame = keyFrames.at(min_dis_kf_id); 
+        }
+        else 
+        {
+            oldest_frame = keyFrames.at(max_dis_kf_id); 
+        }
+
+        std::cout << "remove frame : " << oldest_frame->keyframe_id << "\n"; 
+
+        enabled_keyframes.erase(oldest_frame->keyframe_id); 
+
+        for(auto &feature : oldest_frame->featuresFromLeftImg) 
+        {
+            auto point = feature->map_point.lock(); 
+            if(point != nullptr)
+            {
+                point->removeFeature(feature); 
+            }
+        }
+
+        cleanMap(); 
     }
 
     unsigned int Map::getNumberOfPointsInMap()

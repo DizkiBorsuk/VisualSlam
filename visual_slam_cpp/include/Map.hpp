@@ -32,7 +32,7 @@ namespace mrVSLAM
 
         void addFeature(std::shared_ptr<Feature> feature); // add feature in wich point was observed, can be more that one 
         void removeFeature(std::shared_ptr<Feature> feature); 
-        std::vector<std::weak_ptr<Feature>> getFeatures(); 
+        std::list<std::weak_ptr<Feature>> getFeatures(); 
 
         static unsigned int mappoint_counter;
     private:
@@ -45,13 +45,13 @@ namespace mrVSLAM
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         //### data members ###// 
         std::mutex map_mutex; 
-        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> landmarks; // map points in map 
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> mappoints; // map points in map 
         std::unordered_map<unsigned int, std::shared_ptr<Frame>> keyFrames; // frames in map 
         
-        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> enabled_landmarks; //?maybe active? 
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> enabled_mappoints; //?maybe active? 
         std::unordered_map<unsigned int, std::shared_ptr<Frame>> enabled_keyframes; 
 
-        std::shared_ptr<Frame> currentFrame = nullptr; 
+        std::shared_ptr<Frame> currentKeyFrame = nullptr; 
         unsigned int num_of_enabled_keyframes = 5; 
 
         //### function members ###// 
