@@ -6,8 +6,6 @@
 
 namespace mrVSLAM
 {
-
-
     class LocalMapping
     {
     public: 
