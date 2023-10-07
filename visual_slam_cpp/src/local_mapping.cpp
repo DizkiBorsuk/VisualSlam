@@ -101,7 +101,11 @@ namespace mrVSLAM
 
             for(auto &feature : observed_point_features)
             {
-
+                if(feature.lock() == nullptr)
+                {
+                    continue;
+                }
+                
             }
 
         }
