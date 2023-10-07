@@ -92,24 +92,67 @@ namespace mrVSLAM
         Sophus::SE3 left_camera_Rt = Sophus::SE3d(camera_left->Rt);
         Sophus::SE3 right_camera_Rt = Sophus::SE3d(camera_right->Rt);
 
-        unsigned int id = 1; 
+        unsigned int edge_id = 1; 
 
         for(auto &observed_point : mappoints) // observed point is hash map entry of mappoints 
         {
             unsigned int point_id = observed_point.second->id; 
             auto observed_point_features = observed_point.second->getFeatures(); 
 
-            for(auto &feature : observed_point_features)
+            for(auto &observation : observed_point_features)
             {
-                if(feature.lock() == nullptr)
+                auto feature = observation.lock(); // convert weak ptr to shared ptr 
+                
+                if( (feature==nullptr) || (feature->outlier==true) || (feature->frame.lock()==nullptr)) //?hmmm smth didn't work here but now it does? 
                 {
                     continue;
                 }
-                
-            }
 
+                auto frame = feature->frame.lock(); 
+
+                PointPoseEdge* edge = nullptr; 
+
+                if(feature->on_leftImg == true) //if feature is on left img give edge left camera Rt matrix 
+                {
+                    edge = new PointPoseEdge(K, left_camera_Rt); 
+                } 
+                else  //else give it right camera Rt
+                {
+                    edge = new PointPoseEdge(K, right_camera_Rt); 
+                }
+
+                if( !mapppoint_verticies.contains(point_id)) //check if verticies contain 
+                {
+                    PointVertex* p_vertex = new PointVertex; 
+                    p_vertex->setEstimate(observed_point.second->getPosition()); 
+                    p_vertex->setId(point_id+max_keyframe_id+1); 
+                    p_vertex->setMarginalized(true);
+                    mapppoint_verticies.insert({point_id, p_vertex}); 
+                    optimizer.addVertex(p_vertex); 
+                }
+                const double chi_squared_treshold = 5.991; // {9.210,7.378,5.991,5.991};
+
+                edge->setId(edge_id); 
+                edge->setVertex(0, pose_verticies.at(frame->keyframe_id)); // set pose Vertex of the edge 
+                edge->setVertex(1,mapppoint_verticies.at(point_id)); //set mappoint node of edge 
+                Eigen::Vector2d feature_pt;
+                feature_pt << feature->featurePoint_position.pt.x, feature->featurePoint_position.pt.y; 
+                edge->setMeasurement(feature_pt); 
+                edge->setInformation(Eigen::Matrix2d::Identity()); 
+
+                auto kernel = new g2o::RobustKernelHuber(); 
+                kernel->setDelta(chi_squared_treshold); 
+                edge->setRobustKernel(kernel); 
+
+                observation_edges.insert({edge, feature}); 
+                optimizer.addEdge(edge); 
+
+                edge_id++; 
+            }
         }
 
+        optimizer.initializeOptimization(); //don't have fixed control points so i don't need .fixed() //? why is it used in orbslam thou
+        optimizer.optimize(10); //! set to 10, will change later 
     }
 
   //Enf of local mapping   
