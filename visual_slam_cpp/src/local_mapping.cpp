@@ -60,6 +60,7 @@ namespace mrVSLAM
     {
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
+        double chi_squared_treshold = 5.991; // {9.210,7.378,5.991,5.991};
 
         auto linearSolver = std::make_unique<LinearSolverType>(); 
         auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
@@ -130,7 +131,6 @@ namespace mrVSLAM
                     mapppoint_verticies.insert({point_id, p_vertex}); 
                     optimizer.addVertex(p_vertex); 
                 }
-                const double chi_squared_treshold = 5.991; // {9.210,7.378,5.991,5.991};
 
                 edge->setId(edge_id); 
                 edge->setVertex(0, pose_verticies.at(frame->keyframe_id)); // set pose Vertex of the edge 
@@ -153,6 +153,63 @@ namespace mrVSLAM
 
         optimizer.initializeOptimization(); //don't have fixed control points so i don't need .fixed() //? why is it used in orbslam thou
         optimizer.optimize(10); //! set to 10, will change later 
+    
+        //optimize based on inliers/outliers ratio 
+        unsigned int outliers = 0;
+        unsigned int inliers = 0;
+
+        int iter = 0; 
+        while(iter < 5)
+        {
+            for(auto &obs_edge : observation_edges)
+            {
+                if(obs_edge.first->chi2() > chi_squared_treshold)
+                {
+                    outliers++; 
+                } 
+                else 
+                {
+                    inliers++; 
+                }
+            }
+            
+            double good_bad_ratio = inliers/ double(inliers + outliers); 
+
+            if(good_bad_ratio > 0.5)
+            {
+                break; 
+            } 
+            else 
+            {
+                chi_squared_treshold*=2; 
+                iter++; 
+            }    
+        }
+
+        //outlier rejection 
+        for(auto &obs_edge : observation_edges)
+        {
+            if(obs_edge.first->chi2() > chi_squared_treshold)
+            {
+                obs_edge.second->outlier=true; 
+                obs_edge.second->map_point.lock()->removeFeature(obs_edge.second); 
+            } 
+            else 
+            {
+                obs_edge.second->outlier=false; //not sure if needed, better safe than sorry 
+            }
+        }
+
+        for(auto &p_vertex : pose_verticies)
+        {
+            keyframes.at(p_vertex.first)->SetFramePose(p_vertex.second->estimate()); 
+        }
+
+        for(auto &mappoint_vertex : mapppoint_verticies)
+        {
+            mappoints.at(mappoint_vertex.first)->setPosition(mappoint_vertex.second->estimate()); 
+        }
+    
     }
 
   //Enf of local mapping   
