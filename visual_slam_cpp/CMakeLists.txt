@@ -75,7 +75,7 @@ target_link_libraries(${PROJECT_NAME}
                       ${Pangolin_LIBRARIES} 
                     #   Ceres::ceres
                       Sophus::Sophus
-                      g2o::core g2o::stuff g2o::types_sba g2o_solver_csparse g2o_csparse_extension g2o::types_icp g2o::types_slam3d g2o::types_slam2d
+                      g2o::core g2o::stuff g2o::types_sba g2o_solver_csparse g2o_csparse_extension g2o::types_icp
                       ${PYTHON_LIBRARIES}
                       #pthread
                       Python3::NumPy
