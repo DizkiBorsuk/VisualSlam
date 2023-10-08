@@ -108,7 +108,7 @@ namespace mrVSLAM
     {
         std::shared_ptr<Frame> oldest_frame = nullptr; 
 
-        auto Tmatrix_wc = currentKeyFrame->getFramePose().inverse(); 
+        auto Tmatrix_wc = currentKeyFrame->getSophusFramePose().inverse(); 
         double max_kf_distance = 0; 
         unsigned int max_dis_kf_id = 0; 
         double min_kf_distance = 10000; //some big valuse  
@@ -122,7 +122,7 @@ namespace mrVSLAM
             }
             else 
             {
-                double distance = (frame.second->getFramePose()*Tmatrix_wc).log().norm(); 
+                double distance = (frame.second->getSophusFramePose()*Tmatrix_wc).log().norm(); 
 
                 if(distance > max_kf_distance)
                 {

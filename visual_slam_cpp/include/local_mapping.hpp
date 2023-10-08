@@ -9,7 +9,7 @@ namespace mrVSLAM
     class LocalMapping
     {
     public: 
-
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         LocalMapping() noexcept; 
         void setLocalMapping(std::shared_ptr<Map> in_map, std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right); 
         void runLocalMapping(); 

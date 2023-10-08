@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.20)
 project(visual_slam_cpp VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -21,11 +21,9 @@ ENDIF()
 find_package(OpenCV REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(Eigen3  REQUIRED NO_MODULE)
-find_package(Ceres REQUIRED)
+# find_package(Ceres REQUIRED)
 find_package(g2o CONFIG REQUIRED)
 find_package(Sophus CONFIG REQUIRED)
-find_package(gflags CONFIG)
-
 find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
 find_package(PythonLibs 3 REQUIRED)
 
@@ -40,7 +38,8 @@ FetchContent_GetProperties(matplotlib)
 if(NOT matplotlib_POPULATED)
     FetchContent_Populate(matplotlib)
 endif()
-include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${matplotlib_SOURCE_DIR})
+
+include_directories( ${OpenCV_INCLUDE_DIRS} ${Pangolin_INCLUDE_DIRS} ${Sophus_INCLUDE_DIRS} ${matplotlib_SOURCE_DIR} ${G2O_INCLUDE_DIRS})
 #include_directories(SYSTEM ${matplotlib_SOURCE_DIR})
 
 set(Sources src/main.cpp 
@@ -74,9 +73,9 @@ target_link_libraries(${PROJECT_NAME}
                       ${OpenCV_LIBS} 
                       Eigen3::Eigen 
                       ${Pangolin_LIBRARIES} 
-                      Ceres::ceres
+                    #   Ceres::ceres
                       Sophus::Sophus
-                      g2o::core g2o::stuff g2o::types_sba g2o::solver_csparse g2o::csparse_extension g2o::types_icp g2o::types_slam3d g2o::types_slam2d g2o::types_data
+                      g2o::core g2o::stuff g2o::types_sba g2o_solver_csparse g2o_csparse_extension g2o::types_icp g2o::types_slam3d g2o::types_slam2d
                       ${PYTHON_LIBRARIES}
                       #pthread
                       Python3::NumPy

@@ -23,12 +23,12 @@ namespace mrVSLAM
         // setup of main components 
         map = std::shared_ptr<Map>(new Map); 
         visualizer = std::shared_ptr<Visualizer>(new Visualizer); 
-        backend = std::shared_ptr<Backend>(new Backend); 
+        local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping); 
         tracking = std::shared_ptr<Tracking>(new Tracking(DETECTOR::GFTT)); 
 
-        tracking->setTracking(map, visualizer, backend, camera_left, camera_right); // setup visualizer 
+        tracking->setTracking(map, visualizer, local_mapping, camera_left, camera_right); // setup visualizer 
         visualizer->setVisualizer(map, camera_left->K_eigen); 
-        backend->setBackend(map, camera_left, camera_right); 
+        local_mapping->setLocalMapping(map, camera_left, camera_right); 
     }
 
 
