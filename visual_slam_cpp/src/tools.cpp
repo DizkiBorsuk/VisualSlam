@@ -18,15 +18,15 @@ namespace mrVSLAM
         */
        //? https://www.cs.cmu.edu/~16385/s17/Slides/11.4_Triangulation.pdf
 
-        Eigen::Matrix4d A; // 
+        Eigen::MatrixXd A(4,4); //! it can't be static size  matrix ?thou i think it worked on windows
         /*
         A = [y1p2^T - p1^T; p0^T - x1p2^T; y2p2^T - p1^T; p0^T - x2p2^T]
         */
     
-        A.block<1,4>(0, 0) = points[0][0]*T1.row(2) - T1.row(0); 
-        A.block<1,4>(1, 0) = points[0][1]*T1.row(2) - T1.row(1); 
-        A.block<1,4>(2, 0) = points[1][0]*T2.row(2) - T2.row(0); 
-        A.block<1,4>(3, 0) = points[1][1]*T2.row(2) - T2.row(1); 
+        A.block(0, 0, 1,4) = points[0][0]*T1.row(2) - T1.row(0); 
+        A.block(1, 0, 1,4) = points[0][1]*T1.row(2) - T1.row(1); 
+        A.block(2, 0, 1,4) = points[1][0]*T2.row(2) - T2.row(0); 
+        A.block(3, 0, 1,4) = points[1][1]*T2.row(2) - T2.row(1); 
     
         //* svd decomposition of A matrix 
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html

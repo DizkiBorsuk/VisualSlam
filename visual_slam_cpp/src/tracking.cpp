@@ -92,8 +92,8 @@ namespace mrVSLAM
         std::cout << "started initialization \n";  
         //!DONE
         // initialize stereo tracking 
-        int num_of_features_in_left_img = detectFeatures(); 
-        int num_of_corresponding_features_in_right = findCorrespondingStereoFeatures(); 
+        unsigned int num_of_features_in_left_img = detectFeatures(); 
+        unsigned int num_of_corresponding_features_in_right = findCorrespondingStereoFeatures(); 
         std::cout << "found " << num_of_corresponding_features_in_right <<" corresponding points \n"; 
 
         if(num_of_corresponding_features_in_right < num_of_features_for_initialization)
@@ -211,10 +211,12 @@ namespace mrVSLAM
         /* 
             create initial map 
         */
+        std::cout << "building initial map \n"; 
+
         std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
 
-        for(int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
+        for(unsigned int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
             if (current_frame->featuresFromRightImg[i] == nullptr) 
                 continue; 
