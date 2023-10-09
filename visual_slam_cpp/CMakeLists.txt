@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(GFLAGS_USE_TARGET_NAMESPACE ON)
 
+set(CMAKE_CXX_FLAGS "-std=c++20 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -pthread") 
+
 
 IF(WIN32)
     set(CMAKE_TOOLCHAIN_FILE "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_PREFIX_PATH "C:/Users/Maciek/Desktop/dev_workspace/vcpkg/installed/x64-windows/share")
-ELSE()
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-Ofast") 
+
 ENDIF()
 
 
@@ -67,6 +67,7 @@ set(Headers include/camera.hpp
             include/graph_structure.hpp
             )
 
+# SET(G2O_libs )
 
 add_executable(${PROJECT_NAME} ${Sources} )
 target_link_libraries(${PROJECT_NAME} 
@@ -75,8 +76,9 @@ target_link_libraries(${PROJECT_NAME}
                       ${Pangolin_LIBRARIES} 
                     #   Ceres::ceres
                       Sophus::Sophus
-                      g2o::core g2o::stuff g2o::types_sba g2o_solver_csparse g2o_csparse_extension g2o::types_icp
+                      g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
                       ${PYTHON_LIBRARIES}
-                      #pthread
+                      pthread
                       Python3::NumPy
+                      ${CSPARSE_LIBRARY}
                       ) #
