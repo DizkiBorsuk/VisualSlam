@@ -74,7 +74,7 @@ namespace mrVSLAM
 
             // Swap frames and Process Events
             pangolin::FinishFrame();
-            std::this_thread::sleep_for(5000ms); // https://en.cppreference.com/w/cpp/thread/sleep_for //? 
+            std::this_thread::sleep_for(0.5ms); // https://en.cppreference.com/w/cpp/thread/sleep_for //? 
         }
     }
 
@@ -104,14 +104,14 @@ namespace mrVSLAM
     {
         // get Twc - camera pose in world reference transformation matrix and use Pangolin follow  
         //? https://github.com/raulmur/ORB_SLAM2/issues/226
-        Eigen::Matrix4d CameraToWorldTransformation = current_frame->framePose.inverse(); //Tcw 
-        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation); 
+        Eigen::Matrix4d CameraToWorldTransformation = current_frame->getFramePose().inverse(); //Tcw 
+        pangolin::OpenGlMatrix matrix(CameraToWorldTransformation);
         s_cam.Follow(matrix, true); 
     }
 
     void Visualizer::drawFrame(std::shared_ptr<Frame> input_frame, const float color[3])
     {   
-        Eigen::Matrix4d CameraToWorldTransformation = input_frame->framePose.inverse(); //Tcw 
+        Eigen::Matrix4d CameraToWorldTransformation = input_frame->getFramePose().inverse(); //Tcw 
         
         
         glPushMatrix(); 

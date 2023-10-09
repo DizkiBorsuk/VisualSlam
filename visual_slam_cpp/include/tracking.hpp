@@ -70,7 +70,8 @@ namespace mrVSLAM
         unsigned int num_of_features_for_initialization = 100; // numbers of features needed to be found in both imgs for initalization success 
         unsigned int num_of_features_for_keyframe = 50; //? check in orbslam 
 
-        Eigen::Matrix4d transformationMatrix; //? maybe change to eigen or sophus 
+        //Eigen::Matrix4d transformationMatrix = Eigen::Matrix4d::Identity(); //? maybe change to eigen or sophus 
+        Sophus::SE3d transformationMatrix; 
 
         static constexpr double chi_squared_treshold = 5.991; // {9.210,7.378,5.991,5.991};
     }; 

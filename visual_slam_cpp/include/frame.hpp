@@ -46,8 +46,9 @@ namespace mrVSLAM
         unsigned int keyframe_id = 0; // id of a frame if it's a keyframe 
         static unsigned int keyframe_counter; 
         bool is_keyframe = false; // setting if frame is a keyframe 
-        //cv::Matx44d framePose = cv::Matx44d::eye(); // pose of a frame 
-        Eigen::Matrix4d framePose; //Sophus::SE3d framePose; 
+
+        //Eigen::Matrix4d framePose = Eigen::Matrix4d::Identity(); 
+        Sophus::SE3d framePose; 
 
         cv::Mat imgLeft = cv::Mat(370, 1226, CV_8UC1); //? not sure if that is the best way of doing it
         cv::Mat imgRight = cv::Mat(370, 1226, CV_8UC1); 
@@ -60,16 +61,16 @@ namespace mrVSLAM
 
         //*### member functions ####// 
 
-        Frame(unsigned int id_in, const Eigen::Matrix4d &pose, const cv::Mat &img) noexcept  // Frame for monocular case 
+        Frame(unsigned int id_in, const Sophus::SE3d &pose, const cv::Mat &img) noexcept  // Frame for monocular case 
         : id(id_in), framePose(pose), imgLeft(img)
         {   }
-        Frame(unsigned int id_in, const Eigen::Matrix4d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept // Frame for stereo case 
+        Frame(unsigned int id_in, const Sophus::SE3d &pose, const cv::Mat &img_left, const cv::Mat &img_right) noexcept // Frame for stereo case 
         : id(id_in), framePose(pose), imgLeft(img_left), imgRight(img_right) 
         {   }
 
         Eigen::Matrix4d getFramePose(); //Sophus::SE3d getFramePose();  // get frame pose from thread 
         Sophus::SE3d getSophusFramePose();
-        void SetFramePose(const Eigen::Matrix4d &pose); //void SetFramePose(const Sophus::SE3d &pose);  // set frame pose in thread 
+        //void SetFramePose(const Eigen::Matrix4d &pose);  // set frame pose in thread 
         void SetFramePose(const Sophus::SE3d &pose); 
         void SetFrameToKeyframe(); 
 

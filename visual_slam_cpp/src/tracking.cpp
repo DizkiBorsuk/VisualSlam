@@ -150,7 +150,7 @@ namespace mrVSLAM
         detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
         descriptorExtractor->compute(current_frame->imgLeft, keypoints, descriptors); 
 
-        for(int i = 0; i < keypoints.size(); i++)
+        for(unsigned int i = 0; i < keypoints.size(); i++)
         {
             current_frame->featuresFromLeftImg.emplace_back(new Feature{current_frame, keypoints[i], descriptors.row(i)}); //? have to check that 
             detected_features++; 
@@ -189,7 +189,7 @@ namespace mrVSLAM
         cv::calcOpticalFlowPyrLK(current_frame->imgLeft, current_frame->imgRight, keypoints_left, keypoints_right, status, err, cv::Size(11,11), 3, 
                                 cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,0.01), cv::OPTFLOW_USE_INITIAL_FLOW); 
         unsigned int foundCorrespondences = 0; 
-        for(int i = 0; i < status.size(); i++)
+        for(unsigned int i = 0; i < status.size(); i++)
         {
             if(status[i] == 1)
             {
@@ -261,19 +261,29 @@ namespace mrVSLAM
         if(prev_frame!=nullptr){
             //if at least 2 frames exist set current frame pose by multipling transMatrix with pose matrix (homogenous)
             std::cout << "in tracking \n";
-            current_frame->SetFramePose(transformationMatrix * prev_frame->getFramePose());
+            current_frame->SetFramePose(transformationMatrix * prev_frame->getSophusFramePose());
         } else {
             std::cerr << "tracking needs two frames, prev_frame doesn't exist \n";  //!have to add smth to happen if there is not prev frame but i don't thing it's even possible  
         } 
 
         std::vector<cv::Point2f> keypoints_prev_frame, keypoints_current_frame; 
+
+        // keypoints from previous keyframe/frame and initial guesses for current frame 
         for(auto &feature : prev_frame->featuresFromLeftImg )
         {
-            keypoints_prev_frame.emplace_back(feature->featurePoint_position.pt); 
+            if(feature->map_point.lock())
+            {
+                auto point_in_world = feature->map_point.lock(); 
+                auto point_in_image = camera_left->world2pixel(point_in_world->position, current_frame->getFramePose()); 
 
-            auto point_in_world = feature->map_point.lock(); 
-            auto point_in_image = camera_left->world2pixel(point_in_world->position, current_frame->getFramePose()); 
-            keypoints_current_frame.emplace_back(point_in_image[0], point_in_image[1]);  // transpose observed mappoint from previosu point to current frame img coordinates
+                keypoints_prev_frame.emplace_back(feature->featurePoint_position.pt); 
+                keypoints_current_frame.emplace_back(point_in_image[0], point_in_image[1]);  // transpose observed mappoint from previosu point to current frame img coordinates
+            }
+            else 
+            {
+                keypoints_prev_frame.emplace_back(feature->featurePoint_position.pt); 
+                keypoints_current_frame.emplace_back(feature->featurePoint_position.pt); 
+            }   
         }
 
         std::vector<uchar> status;
@@ -283,7 +293,7 @@ namespace mrVSLAM
 
         unsigned int number_of_matched_points = 0; 
 
-        for(int i = 0; i < status.size();i++ )
+        for(unsigned int i = 0; i < status.size();i++ )
         {
             if(status[i] == 1)
             {
@@ -294,7 +304,7 @@ namespace mrVSLAM
             }
         }
 
-        std::cout << "nymber of matched/tracked points = " << number_of_matched_points << "\n"; 
+        std::cout << "number of matched/tracked points = " << number_of_matched_points << "\n"; 
 
         unsigned int num_of_inliers = estimatePose(); 
         std::cout << "Number of inliers " << num_of_inliers << "\n"; 
@@ -302,10 +312,11 @@ namespace mrVSLAM
         //! decision if current frame is new keyframe 
         if( num_of_inliers < num_of_features_for_keyframe ) // work on this 
         {
+            //
             newKeyframeInsertion(); 
         }
         
-        transformationMatrix = (current_frame->getFramePose() * prev_frame->getFramePose().inverse()); 
+        transformationMatrix = (current_frame->getSophusFramePose() * prev_frame->getSophusFramePose().inverse()); 
        
         visualizer->addNewFrame(current_frame); 
     }
@@ -330,7 +341,8 @@ namespace mrVSLAM
             }  
         }
 
-        detectFeatures();
+        unsigned int num_of_feature =  detectFeatures();
+        std::cout << "found " << num_of_feature << "new features \n"; 
         findCorrespondingStereoFeatures();
         createNewMapPoints(); 
 
@@ -347,11 +359,11 @@ namespace mrVSLAM
         triangulate new map points //basiclly the same stuff as in buildMap //?maybe use this function in buildMap()?
         */
 
-       Eigen::Matrix4d currentPose_Twc = current_frame->framePose.inverse(); //camera to world transformation matrix 
+       Eigen::Matrix4d currentPose_Twc = current_frame->getFramePose().inverse(); //camera to world transformation matrix 
        unsigned int number_of_triangulatedPoints = 0; 
        std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera;
 
-       for(int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+       for(unsigned int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
        {
         // check if feature has any owners https://en.cppreference.com/w/cpp/memory/weak_ptr/expired and if feature from right were found 
             if(current_frame->featuresFromLeftImg[i]->map_point.expired() && current_frame->featuresFromRightImg[i] != nullptr)   
@@ -362,7 +374,7 @@ namespace mrVSLAM
 
                 bool triSuccess = triangulate(left_right_featurePoints_in_camera, camera_left->Rt, camera_right->Rt, point_in_3D); //triangulate features to get point in 3d
 
-                if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
+                if((triSuccess==true) && (point_in_3D[2] > 0) ) // check if Z is greater than O to eliminate points "behind" camera 
                 {
                     point_in_3D = currentPose_Twc.block<3,3>(0,0) * point_in_3D; 
 
@@ -381,7 +393,7 @@ namespace mrVSLAM
             }
        }
 
-       std::cout << "triangulated : " << number_of_triangulatedPoints << "new points \n"; 
+       std::cout << "triangulated : " << number_of_triangulatedPoints << " new points \n"; 
     }
 
 
@@ -396,9 +408,10 @@ namespace mrVSLAM
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
 
-        g2o::SparseOptimizer optimizer; 
         auto linearSolver = std::make_unique<LinearSolverType>(); 
         auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
+
+        g2o::SparseOptimizer optimizer; 
         optimizer.setAlgorithm(solver); 
         //optimizer.setVerbose(false); 
 
@@ -415,13 +428,15 @@ namespace mrVSLAM
         auto K = camera_left->K_eigen; 
         unsigned int edge_id = 1; 
 
-        for(int i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+        std::cout << "number of features in current frame = " << current_frame->featuresFromLeftImg.size() << "\n"; 
+
+        for(unsigned int i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
             auto map_point = current_frame->featuresFromLeftImg[i]->map_point.lock(); 
 
-            if(map_point != nullptr)
+            if(map_point)
             {
-                features.emplace_back(current_frame->featuresFromLeftImg[i]); 
+                features.push_back(current_frame->featuresFromLeftImg[i]); 
                 auto edge = new PoseEdge(map_point->getPosition(), K); 
                 edge->setId(edge_id);
                 edge->setVertex(0,pose_vertex); 
@@ -433,11 +448,13 @@ namespace mrVSLAM
                 edge->setInformation(Eigen::Matrix2d::Identity()); 
                 edge->setRobustKernel(new g2o::RobustKernelHuber);
 
-                pose_edges.emplace_back(edge); 
+                pose_edges.push_back(edge); 
                 optimizer.addEdge(edge);
                 edge_id++; 
+                std::cout << "new edge created \n";
             }
         }
+        std::cout << "size of pose edges " << pose_edges.size() << "\n"; 
 
         //chi squared outlier detection 
         for (int j = 0; j < 4; j++) 
@@ -448,7 +465,7 @@ namespace mrVSLAM
             bad_points = 0;
 
             // count the outliers
-            for (size_t i = 0; i < pose_edges.size(); ++i) 
+            for (size_t i = 0; i < pose_edges.size(); i++) 
             {
                 auto edge = pose_edges[i];
                 if (features[i]->outlier == true) 

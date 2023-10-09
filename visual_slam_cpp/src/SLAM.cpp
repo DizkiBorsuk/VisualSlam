@@ -59,10 +59,10 @@ namespace mrVSLAM
             // loopStart = cv::getTickCount(); 
             auto beginT = std::chrono::high_resolution_clock::now();
             // #####################
-            Eigen::Matrix4d eye_matrix = Eigen::Matrix4d::Identity(); //! temp solution, change later to camera R matrix  
+            Sophus::SE3d initial_matrix; // sophus matiris is identity matrix by default
             
             //* create Frame object and pointer to it
-            std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, eye_matrix, imgLeft, imgRight)); //? add K to frame class
+            std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, initial_matrix, imgLeft, imgRight)); //? add K to frame class
 
             //* pass frame to tracking and run tracking 
             tracking->addFrameAndTrackStereo(frame); 
