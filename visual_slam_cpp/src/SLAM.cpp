@@ -62,10 +62,10 @@ namespace mrVSLAM
             Sophus::SE3d initial_matrix; // sophus matiris is identity matrix by default
             
             //* create Frame object and pointer to it
-            std::shared_ptr<Frame> frame = std::shared_ptr<Frame>(new Frame(frame_counter, initial_matrix, imgLeft, imgRight)); //? add K to frame class
+            std::shared_ptr<Frame> frame(new Frame(frame_counter, initial_matrix, imgLeft, imgRight)); //? add K to frame class
 
             //* pass frame to tracking and run tracking 
-            tracking->addFrameAndTrackStereo(frame); 
+            bool tracking_working = tracking->addFrameAndTrackStereo(frame); 
 
             frame_counter++; 
             std::cout << "frame counter " << frame_counter << "\n";

@@ -28,7 +28,7 @@ namespace mrVSLAM
         void setTracking(std::shared_ptr<Map> in_map, std::shared_ptr<Visualizer> in_visualizer, std::shared_ptr<LocalMapping> in_lMapping, 
                         std::shared_ptr<Camera> in_camera_left, std::shared_ptr<Camera> in_camera_right);
         //void addFrameAndTrack(std::shared_ptr<Frame> frame_to_add);
-        void addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
+        bool addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add); // main function of tracking
 
         // 3 state functions 
         bool initialize(); // initialization for monocular case 
@@ -52,6 +52,7 @@ namespace mrVSLAM
 
     private: 
 
+        bool initSucces = false; 
         STATUS tracking_status = STATUS::INITIALIZATION; 
         
         cv::Ptr<cv::FeatureDetector> detector; 

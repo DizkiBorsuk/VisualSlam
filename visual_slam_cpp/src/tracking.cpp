@@ -51,7 +51,7 @@ namespace mrVSLAM
         camera_left = in_camera_left; 
     }
 
-    void Tracking::addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add)
+    bool Tracking::addFrameAndTrackStereo(std::shared_ptr<Frame> frame_to_add)
     {
         // get frame, set logic 
         current_frame = frame_to_add; 
@@ -59,8 +59,10 @@ namespace mrVSLAM
         switch(tracking_status)
         {
             case STATUS::INITIALIZATION: 
-                //initialization
-                if(stereoInitialize() == true) 
+                
+                initSucces = stereoInitialize(); 
+
+                if(initSucces== true) 
                 {  
                     tracking_status = STATUS::TRACKING; 
                     std::cout << "status changed to Tracking\n";
@@ -75,6 +77,7 @@ namespace mrVSLAM
         }
          
         prev_frame = current_frame; 
+        return true; 
     }
 
 //########################################################
@@ -171,10 +174,10 @@ namespace mrVSLAM
             keypoints_left.emplace_back(point->featurePoint_position.pt); 
             auto ptr_to_mappoint = point->map_point.lock(); 
 
-            if(ptr_to_mappoint != nullptr)
+            if(ptr_to_mappoint) //! i think that comparing with !=nullptr was a mistake 
             {
                 //if observed point already exist in map then project this point from world to image and use it as initial guess 
-                auto projected_point = camera_right->world2pixel(ptr_to_mappoint->position, current_frame->getFramePose()); 
+                auto projected_point = camera_left->world2pixel(ptr_to_mappoint->position, current_frame->getFramePose()); 
                 keypoints_right.emplace_back(projected_point[0], projected_point[1]); 
             } 
             else
@@ -194,7 +197,9 @@ namespace mrVSLAM
             if(status[i] == 1)
             {
                 cv::KeyPoint keypoint_in_right(keypoints_right[i], 7); // keypoint pos and size 
-                current_frame->featuresFromRightImg.emplace_back(new Feature(current_frame, keypoint_in_right)); 
+                std::shared_ptr<Feature> new_feature(new Feature(current_frame, keypoint_in_right)); 
+                new_feature->on_leftImg = false; 
+                current_frame->featuresFromRightImg.emplace_back(new_feature); 
                 foundCorrespondences++; 
             }
             else
@@ -216,7 +221,7 @@ namespace mrVSLAM
         std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
 
-        for(unsigned int i =0; i < current_frame->featuresFromLeftImg.size(); i++)
+        for(unsigned int i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
         {
             if (current_frame->featuresFromRightImg[i] == nullptr) 
                 continue; 
@@ -230,10 +235,10 @@ namespace mrVSLAM
 
             if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
             {
-                auto new_mappoint = std::shared_ptr<MapPoint>(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
+                std::shared_ptr<MapPoint> new_mappoint(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
                 //MapPoint::mappoint_counter++; //! counter addition is in constructor
                 number_of_points_in_map++; 
-                //std::cout << "mappoibnt id = " << MapPoint::mappoint_counter << "\n"; 
+                std::cout << "mappoint id = " << new_mappoint->id << "\n";
 
                 new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
                 new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
@@ -260,7 +265,6 @@ namespace mrVSLAM
 
         if(prev_frame!=nullptr){
             //if at least 2 frames exist set current frame pose by multipling transMatrix with pose matrix (homogenous)
-            std::cout << "in tracking \n";
             current_frame->SetFramePose(transformationMatrix * prev_frame->getSophusFramePose());
         } else {
             std::cerr << "tracking needs two frames, prev_frame doesn't exist \n";  //!have to add smth to happen if there is not prev frame but i don't thing it's even possible  
@@ -298,8 +302,10 @@ namespace mrVSLAM
             if(status[i] == 1)
             {
                 cv::KeyPoint current_frame_new_kp(keypoints_current_frame[i], 7); // keypoint pos and size 
-                // auto new_feature = std::shared_ptr<Feature>(new Feature(current_frame, current_frame_new_kp)); 
-                current_frame->featuresFromLeftImg.emplace_back(new Feature(current_frame, current_frame_new_kp));
+                std::shared_ptr<Feature> new_feature(new Feature(current_frame, current_frame_new_kp)); 
+                new_feature->map_point = prev_frame->featuresFromLeftImg[i]->map_point; 
+
+                current_frame->featuresFromLeftImg.emplace_back(new_feature);
                 number_of_matched_points++;
             }
         }
@@ -328,14 +334,14 @@ namespace mrVSLAM
         make current frame a keyframe, insert keyframe to map and visualizer, add 
         */
         current_frame->SetFrameToKeyframe(); 
-        std::cout << "new keyframe id = " << current_frame->keyframe_id << "\n"; 
+        std::cout << "frame with id" << current_frame->id << " is new keyframe id = " << current_frame->keyframe_id << "\n"; 
         map->insertKeyFrame(current_frame); 
 
         // add features from keyframe to observed mappoints
         for (auto &feature : current_frame->featuresFromLeftImg) 
         {
             auto mappoint = feature->map_point.lock();
-            if(mappoint !=nullptr)
+            if(mappoint)
             {
                 mappoint->addFeature(feature);
             }  
@@ -408,17 +414,17 @@ namespace mrVSLAM
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
 
-        auto linearSolver = std::make_unique<LinearSolverType>(); 
-        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::move(linearSolver))); 
+        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>())); 
 
         g2o::SparseOptimizer optimizer; 
         optimizer.setAlgorithm(solver); 
-        //optimizer.setVerbose(false); 
+        optimizer.setVerbose(false); 
 
         //add first pose vertex 
-        auto pose_vertex = new Pose3DVertex(); 
+        Pose3DVertex* pose_vertex = new Pose3DVertex(); 
         pose_vertex->setId(0); 
         pose_vertex->setEstimate(current_frame->getSophusFramePose()); 
+        pose_vertex->setFixed(false); 
         optimizer.addVertex(pose_vertex); //add vertex to graph 
 
         //create graph 
@@ -437,7 +443,7 @@ namespace mrVSLAM
             if(map_point)
             {
                 features.push_back(current_frame->featuresFromLeftImg[i]); 
-                auto edge = new PoseEdge(map_point->getPosition(), K); 
+                PoseEdge* edge = new PoseEdge(map_point->getPosition(), K); 
                 edge->setId(edge_id);
                 edge->setVertex(0,pose_vertex); 
 
@@ -459,8 +465,9 @@ namespace mrVSLAM
         //chi squared outlier detection 
         for (int j = 0; j < 4; j++) 
         {
+
             pose_vertex->setEstimate(current_frame->getSophusFramePose());
-            optimizer.initializeOptimization();
+            optimizer.initializeOptimization(0);
             optimizer.optimize(10);
             bad_points = 0;
 
@@ -472,7 +479,11 @@ namespace mrVSLAM
                 {
                     edge->computeError();
                 }
-                if (edge->chi2() > chi_squared_treshold) 
+
+                const float chi2 = edge->chi2(); 
+                std::cout << "output chi2 = " << chi2 << "\n";
+
+                if (chi2 > chi_squared_treshold) 
                 {
                     features[i]->outlier = true;
                     edge->setLevel(1);
@@ -488,6 +499,8 @@ namespace mrVSLAM
             }
         }
 
+        optimizer.clear(); 
+
         std::cout << "detected " << bad_points << "outliers from " << features.size() << "feature points \n"; 
         good_points = features.size() - bad_points;  
 
@@ -498,6 +511,7 @@ namespace mrVSLAM
             if(feature->outlier == true)
             {
                 feature->map_point.reset();  //Releases the reference to the managed object https://en.cppreference.com/w/cpp/memory/weak_ptr/reset
+                //feature->outlier = false; 
             }
         }
 

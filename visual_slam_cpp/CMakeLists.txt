@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(GFLAGS_USE_TARGET_NAMESPACE ON)
 
 set(CMAKE_CXX_FLAGS "-std=c++20 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -pthread") 
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++20 -O3 -fopenmp -pthread") 
 
 
 IF(WIN32)

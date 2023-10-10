@@ -2,8 +2,8 @@
 
 namespace mrVSLAM
 {
-    MapPoint::MapPoint(unsigned int id, Eigen::Vector3d point_position) noexcept
-        : id(id), position(point_position)
+    MapPoint::MapPoint(unsigned int in_id, Eigen::Vector3d point_position) noexcept
+        : id(in_id), position(point_position)
     {
         mappoint_counter++; 
     }
@@ -57,14 +57,18 @@ namespace mrVSLAM
 
         if(keyFrames.contains(keyframe->keyframe_id)) // check if hashmap already contains said frame with that id
         {
+            std::cout << "map already contains this keyframe id:" << currentKeyFrame->keyframe_id; 
             keyFrames[keyframe->keyframe_id] = keyframe; 
             enabled_keyframes[keyframe->keyframe_id] = keyframe; 
             
         } else {
             //if not, put it in keyframes map 
+            std::cout << "map does not contains this keyframe \n"; 
             keyFrames.insert({keyframe->keyframe_id, keyframe}); 
             enabled_keyframes.insert({keyframe->keyframe_id, keyframe});
         }
+
+        std::cout << "number of keyframes in map " << keyFrames.size() << "\n";
 
         if(enabled_keyframes.size() > num_of_enabled_keyframes)
         {
@@ -82,6 +86,8 @@ namespace mrVSLAM
             mappoints.insert({mappoint->id, mappoint});
             enabled_mappoints.insert({mappoint->id, mappoint});
         }
+
+        std::cout << "map contains " << mappoints.size() << " mappoints \n"; 
     }
 
     void Map::cleanMap()
