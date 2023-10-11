@@ -120,7 +120,7 @@ public:
       double f = K(0,0); 
 
       _jacobianOplusXi << -f*z_inv, 0 , f*x*z2_inv, f*x*y*z2_inv,
-                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z2_inv, 
+                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z_inv, 
                           f*y*z2_inv, f + f*y*y*z2_inv, -f*x*y*z2_inv, 
                           -f*x*z_inv; 
    }
@@ -178,7 +178,7 @@ public:
       double f = K(0,0); 
 
       _jacobianOplusXi << -f*z_inv, 0 , f*x*z2_inv, f*x*y*z2_inv,
-                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z2_inv, 
+                          -f - f*x*x*z2_inv, f*y*z_inv, 0, -f*z_inv, 
                           f*y*z2_inv, f + f*y*y*z2_inv, -f*x*y*z2_inv, 
                           -f*x*z_inv; 
       _jacobianOplusXj << _jacobianOplusXi.block<2, 3>(0, 0) *cam_extrinsics.rotationMatrix() * T.rotationMatrix(); 

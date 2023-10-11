@@ -58,8 +58,8 @@ namespace mrVSLAM
         if(keyFrames.contains(keyframe->keyframe_id)) // check if hashmap already contains said frame with that id
         {
             std::cout << "map already contains this keyframe id:" << currentKeyFrame->keyframe_id; 
-            keyFrames[keyframe->keyframe_id] = keyframe; 
-            enabled_keyframes[keyframe->keyframe_id] = keyframe; 
+            // keyFrames[keyframe->keyframe_id] = keyframe; 
+            // enabled_keyframes[keyframe->keyframe_id] = keyframe; 
             
         } else {
             //if not, put it in keyframes map 
@@ -80,8 +80,9 @@ namespace mrVSLAM
     {
         if(mappoints.contains(mappoint->id))
         {
-            mappoints[mappoint->id] = mappoint; 
-            enabled_mappoints[mappoint->id] = mappoint;
+            // mappoints[mappoint->id] = mappoint; 
+            // enabled_mappoints[mappoint->id] = mappoint;
+            std::cout << "map with this id already exist \n"; 
         } else {
             mappoints.insert({mappoint->id, mappoint});
             enabled_mappoints.insert({mappoint->id, mappoint});

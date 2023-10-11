@@ -177,7 +177,7 @@ namespace mrVSLAM
             if(ptr_to_mappoint) //! i think that comparing with !=nullptr was a mistake 
             {
                 //if observed point already exist in map then project this point from world to image and use it as initial guess 
-                auto projected_point = camera_left->world2pixel(ptr_to_mappoint->position, current_frame->getFramePose()); 
+                auto projected_point = camera_right->world2pixel(ptr_to_mappoint->position, current_frame->getFramePose()); 
                 keypoints_right.emplace_back(projected_point[0], projected_point[1]); 
             } 
             else
@@ -218,27 +218,29 @@ namespace mrVSLAM
         */
         std::cout << "building initial map \n"; 
 
-        std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
         unsigned int number_of_points_in_map = 0; 
+        const unsigned int features_size = current_frame->featuresFromLeftImg.size(); 
 
-        for(unsigned int i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+        for(std::size_t i = 0; i < features_size; i++)
         {
             if (current_frame->featuresFromRightImg[i] == nullptr) 
                 continue; 
             
+            std::array<Eigen::Vector3d,2 > left_right_featurePoints_in_camera; // detected keypoints in camera coordinate system for triangulation
             //convert feature points to camera coordinate system
-            left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
-            left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
+            left_right_featurePoints_in_camera.at(0) = (camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
+            left_right_featurePoints_in_camera.at(1) = (camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
             Eigen::Vector3d point_in_3D = Eigen::Vector3d::Zero(); 
 
             bool triSuccess = triangulate(left_right_featurePoints_in_camera, camera_left->Rt, camera_right->Rt, point_in_3D); //triangulate features to get point in 3d
 
-            if(triSuccess == true && point_in_3D[2] > 0 ) // check if Z is greater than O to eliminate points "behind" camera 
+            if((triSuccess == true) && (point_in_3D[2] > 0)) // check if Z is greater than O to eliminate points "behind" camera 
             {
                 std::shared_ptr<MapPoint> new_mappoint(new MapPoint(MapPoint::mappoint_counter, point_in_3D)); //created new map point object 
                 //MapPoint::mappoint_counter++; //! counter addition is in constructor
                 number_of_points_in_map++; 
                 std::cout << "mappoint id = " << new_mappoint->id << "\n";
+                std::cout << "position of point = " << new_mappoint->getPosition() << "\n"; 
 
                 new_mappoint->addFeature(current_frame->featuresFromLeftImg[i]); 
                 new_mappoint->addFeature(current_frame->featuresFromRightImg[i]); 
@@ -367,15 +369,16 @@ namespace mrVSLAM
 
        Eigen::Matrix4d currentPose_Twc = current_frame->getFramePose().inverse(); //camera to world transformation matrix 
        unsigned int number_of_triangulatedPoints = 0; 
-       std::vector<Eigen::Vector3d> left_right_featurePoints_in_camera;
+       
 
        for(unsigned int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
        {
         // check if feature has any owners https://en.cppreference.com/w/cpp/memory/weak_ptr/expired and if feature from right were found 
             if(current_frame->featuresFromLeftImg[i]->map_point.expired() && current_frame->featuresFromRightImg[i] != nullptr)   
             {
-                left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
-                left_right_featurePoints_in_camera.emplace_back(camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
+                std::array<Eigen::Vector3d, 2> left_right_featurePoints_in_camera;
+                left_right_featurePoints_in_camera.at(0) = (camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
+                left_right_featurePoints_in_camera.at(1) = (camera_left->pixel2camera(current_frame->featuresFromRightImg[i]->featurePoint_position, 1)); 
                 Eigen::Vector3d point_in_3D = Eigen::Vector3d::Zero();
 
                 bool triSuccess = triangulate(left_right_featurePoints_in_camera, camera_left->Rt, camera_right->Rt, point_in_3D); //triangulate features to get point in 3d
@@ -457,7 +460,6 @@ namespace mrVSLAM
                 pose_edges.push_back(edge); 
                 optimizer.addEdge(edge);
                 edge_id++; 
-                std::cout << "new edge created \n";
             }
         }
         std::cout << "size of pose edges " << pose_edges.size() << "\n"; 

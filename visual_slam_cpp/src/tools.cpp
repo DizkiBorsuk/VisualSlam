@@ -5,7 +5,7 @@ namespace plt = matplotlibcpp;
 namespace mrVSLAM
 {
 
-    bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos)
+    bool triangulate(const std::array<Eigen::Vector3d,2> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos)
     {
         /* triangulate one point, 
         In: 
@@ -23,19 +23,21 @@ namespace mrVSLAM
         A = [y1p2^T - p1^T; p0^T - x1p2^T; y2p2^T - p1^T; p0^T - x2p2^T]
         */
     
-        A.block(0, 0, 1,4) = points[0][0]*T1.row(2) - T1.row(0); 
-        A.block(1, 0, 1,4) = points[0][1]*T1.row(2) - T1.row(1); 
-        A.block(2, 0, 1,4) = points[1][0]*T2.row(2) - T2.row(0); 
-        A.block(3, 0, 1,4) = points[1][1]*T2.row(2) - T2.row(1); 
+        A.block<1,4>(0, 0) = points[0][0]*T1.row(2) - T1.row(0); 
+        A.block<1,4>(1, 0) = points[0][1]*T1.row(2) - T1.row(1); 
+        A.block<1,4>(2, 0) = points[1][0]*T2.row(2) - T2.row(0); 
+        A.block<1,4>(3, 0) = points[1][1]*T2.row(2) - T2.row(1); 
     
         //* svd decomposition of A matrix 
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
         out_point_pos = (svd.matrixV().col(3) / svd.matrixV()(3,3)).head<3>(); // convert to cartesian from homogenous 
 
-        if(svd.singularValues()[3] / svd.singularValues()[2] > 1e-2)
-            return false;
-        else 
-            return true;
+        if((svd.singularValues()[3] / svd.singularValues()[2]) < 0.01)
+        {
+            return true; 
+        } 
+        
+        return false;
     }
 
     inline void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)
@@ -111,7 +113,7 @@ namespace mrVSLAM
         plt::show();
     }
 
-    void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, const int num_of_frames)
+    void plotPoses(std::vector<Eigen::Matrix<double, 3,4>>& gt_poses, const int num_of_frames)
     {
         std::vector<double> gt_x(num_of_frames), gt_y(num_of_frames),gt_z(num_of_frames); 
         Eigen::Matrix<double,3,4> tmp_pose_matrix; 

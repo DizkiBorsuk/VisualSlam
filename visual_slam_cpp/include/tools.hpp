@@ -12,7 +12,7 @@ namespace mrVSLAM
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, 
                    std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& poses, const int num_of_frames); 
                    
-    void plotPoses(std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, const int num_of_frames); 
+    void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &gt_poses, const int num_of_frames); 
     void plotPoses(std::vector<cv::Matx44d>& poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>>& gt_poses, const int num_of_frames);
 
     void plotPerformance(std::vector<int> loopTimes); 
@@ -20,6 +20,6 @@ namespace mrVSLAM
 
     // ######## 
     // for stereo 
-    bool triangulate(const std::vector<Eigen::Vector3d> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos); 
+    bool triangulate(const std::array<Eigen::Vector3d,2> &points,const Eigen::Matrix4d &T1, const Eigen::Matrix4d &T2, Eigen::Vector3d &out_point_pos); 
     // for mon
 }

@@ -1,5 +1,7 @@
 #include "../include/SLAM.hpp"
 
+using namespace std::chrono_literals;
+
 namespace mrVSLAM
 {
     StereoSLAM::StereoSLAM(std::string sequence_number)
@@ -77,14 +79,28 @@ namespace mrVSLAM
             auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
             // performance.emplace_back(fps); 
             std::cout << "Loop time is " << elapsedT.count() << "ms \n"; 
-
+            std::this_thread::sleep_for(20ms); 
         }
         
         sequenceLeft.release(); 
         sequenceRight.release();
-    
+
+        local_mapping->endLocalMappingThread(); 
         visualizer->closeVisualizer(); 
         cv::destroyAllWindows(); 
+
+        //////////////////////////
+
+        std::cout << "namber of keyframes in map " << map->getNumberOfFramesInMap() << "\n"; 
+        std::cout << "namber of points in map " << map->getNumberOfPointsInMap() << "\n"; 
+
+        auto id_frame_pairs = map->getAllKeyframes(); 
+
+        for(std::size_t i = 0; i < id_frame_pairs.size(); i++)
+        {
+            trajectory.emplace_back(id_frame_pairs.at(i)->framePose.matrix3x4()); 
+        }
+
         return 0; 
     }
 }

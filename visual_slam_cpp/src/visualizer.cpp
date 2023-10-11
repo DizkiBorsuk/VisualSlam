@@ -66,7 +66,16 @@ namespace mrVSLAM
                 drawFrame(current_frame, green); 
                 drawFrameTrajectory(s_cam); 
 
-                cv::imshow("current frame", current_frame->imgLeft); 
+                cv::Mat img = cv::Mat(370, 1226, CV_8UC1);
+                img = current_frame->imgLeft; 
+
+                for(std::size_t i = 0; i < current_frame->featuresFromLeftImg.size(); i++)
+                {
+                    auto feature = current_frame->featuresFromLeftImg[i]; 
+                    cv::circle(img, feature->featurePoint_position.pt, 2, cv::Scalar(0,0,250), 2); 
+                }
+
+                cv::imshow("current frame", img); 
                 cv::waitKey(1); 
             }
 
@@ -74,7 +83,7 @@ namespace mrVSLAM
 
             // Swap frames and Process Events
             pangolin::FinishFrame();
-            std::this_thread::sleep_for(0.5ms); // https://en.cppreference.com/w/cpp/thread/sleep_for //? 
+            std::this_thread::sleep_for(5ms); // https://en.cppreference.com/w/cpp/thread/sleep_for //? 
         }
     }
 

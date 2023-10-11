@@ -13,6 +13,8 @@ int main()
     mrVSLAM::StereoSLAM slam("07"); 
 
     slam.Run(); 
+
+    mrVSLAM::plotPoses(slam.trajectory, slam.trajectory.size()); 
     
     return 0; 
 }
