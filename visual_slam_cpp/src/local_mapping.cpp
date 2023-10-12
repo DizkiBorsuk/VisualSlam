@@ -132,22 +132,30 @@ namespace mrVSLAM
                     optimizer.addVertex(p_vertex); 
                 }
 
-                edge->setId(edge_id); 
-                edge->setVertex(0, pose_verticies.at(frame->keyframe_id)); // set pose Vertex of the edge 
-                edge->setVertex(1,mapppoint_verticies.at(point_id)); //set mappoint node of edge 
-                Eigen::Vector2d feature_pt;
-                feature_pt << feature->featurePoint_position.pt.x, feature->featurePoint_position.pt.y; 
-                edge->setMeasurement(feature_pt); 
-                edge->setInformation(Eigen::Matrix2d::Identity()); 
+                if(pose_verticies.contains(frame->keyframe_id) && mapppoint_verticies.contains())
+                {
+                    edge->setId(edge_id); 
+                    edge->setVertex(0, pose_verticies.at(frame->keyframe_id)); // set pose Vertex of the edge 
+                    edge->setVertex(1,mapppoint_verticies.at(point_id)); //set mappoint node of edge 
+                    Eigen::Vector2d feature_pt;
+                    feature_pt << feature->featurePoint_position.pt.x, feature->featurePoint_position.pt.y; 
+                    edge->setMeasurement(feature_pt); 
+                    edge->setInformation(Eigen::Matrix2d::Identity()); 
 
-                auto kernel = new g2o::RobustKernelHuber(); 
-                kernel->setDelta(chi_squared_treshold); 
-                edge->setRobustKernel(kernel); 
+                    auto kernel = new g2o::RobustKernelHuber(); 
+                    kernel->setDelta(chi_squared_treshold); 
+                    edge->setRobustKernel(kernel); 
 
-                observation_edges.insert({edge, feature}); 
-                optimizer.addEdge(edge); 
+                    observation_edges.insert({edge, feature}); 
+                    optimizer.addEdge(edge); 
 
-                edge_id++; 
+                    edge_id++; 
+                }
+                else
+                {
+                    delete edge; 
+                }
+
             }
         }
 
