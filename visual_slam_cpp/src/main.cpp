@@ -14,7 +14,7 @@ int main()
 
     slam.Run(); 
 
-    mrVSLAM::plotPoses(slam.trajectory, slam.trajectory.size()); 
+    // mrVSLAM::plotPoses(slam.trajectory, slam.trajectory.size()); 
     
     return 0; 
 }

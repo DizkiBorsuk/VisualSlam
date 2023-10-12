@@ -4,6 +4,8 @@
 #include "../include/tools.hpp"
 #include "../include/graph_structure.hpp"
 
+using namespace std::chrono_literals;
+
 namespace mrVSLAM
 {
 
@@ -77,6 +79,7 @@ namespace mrVSLAM
         }
          
         prev_frame = current_frame; 
+        // std::this_thread::sleep_for(30ms); 
         return true; 
     }
 
@@ -374,7 +377,7 @@ namespace mrVSLAM
        for(unsigned int i  = 0; i < current_frame->featuresFromLeftImg.size(); i++)
        {
         // check if feature has any owners https://en.cppreference.com/w/cpp/memory/weak_ptr/expired and if feature from right were found 
-            if(current_frame->featuresFromLeftImg[i]->map_point.expired() && current_frame->featuresFromRightImg[i] != nullptr)   
+            if((current_frame->featuresFromLeftImg[i]->map_point.expired()) && (current_frame->featuresFromRightImg[i] != nullptr))   
             {
                 std::array<Eigen::Vector3d, 2> left_right_featurePoints_in_camera;
                 left_right_featurePoints_in_camera.at(0) = (camera_left->pixel2camera(current_frame->featuresFromLeftImg[i]->featurePoint_position, 1)); 
@@ -467,7 +470,6 @@ namespace mrVSLAM
         //chi squared outlier detection 
         for (int j = 0; j < 4; j++) 
         {
-
             pose_vertex->setEstimate(current_frame->getSophusFramePose());
             optimizer.initializeOptimization(0);
             optimizer.optimize(10);
@@ -499,9 +501,9 @@ namespace mrVSLAM
                     edge->setRobustKernel(nullptr);
                 }
             }
+            if(optimizer.edges().size() < 5)
+                break; 
         }
-
-        optimizer.clear(); 
 
         std::cout << "detected " << bad_points << "outliers from " << features.size() << "feature points \n"; 
         good_points = features.size() - bad_points;  

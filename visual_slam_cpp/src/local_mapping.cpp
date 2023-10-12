@@ -39,7 +39,7 @@ namespace mrVSLAM
             std::unordered_map<unsigned int, std::shared_ptr<Frame>> active_keyframes = map->getEnabledKeyframes(); 
             std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> active_mappoints = map->getEnabledMappoints(); 
 
-            localBundleAdjustment(active_keyframes, active_mappoints); 
+            // localBundleAdjustment(active_keyframes, active_mappoints); 
 
         }
     }

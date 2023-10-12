@@ -22,22 +22,27 @@ namespace mrVSLAM
         /*
         A = [y1p2^T - p1^T; p0^T - x1p2^T; y2p2^T - p1^T; p0^T - x2p2^T]
         */
-    
-        A.block<1,4>(0, 0) = points[0][0]*T1.row(2) - T1.row(0); 
-        A.block<1,4>(1, 0) = points[0][1]*T1.row(2) - T1.row(1); 
-        A.block<1,4>(2, 0) = points[1][0]*T2.row(2) - T2.row(0); 
-        A.block<1,4>(3, 0) = points[1][1]*T2.row(2) - T2.row(1); 
+ 
+        A.row(0) = points[0][0]*T1.row(2) - T1.row(0); 
+        A.row(1) = points[0][1]*T1.row(2) - T1.row(1); 
+        A.row(2) = points[1][0]*T2.row(2) - T2.row(0); 
+        A.row(3) = points[1][1]*T2.row(2) - T2.row(1); 
     
         //* svd decomposition of A matrix 
-        auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
-        out_point_pos = (svd.matrixV().col(3) / svd.matrixV()(3,3)).head<3>(); // convert to cartesian from homogenous 
+        //auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV); //? https://eigen.tuxfamily.org/dox/group__SVD__Module.html
+        Eigen::JacobiSVD<Eigen::Matrix4d> svd(A, Eigen::ComputeFullV);
+        
+        Eigen::Vector4d point_homo = svd.matrixV().col(3);
 
-        if((svd.singularValues()[3] / svd.singularValues()[2]) < 0.01)
+
+        out_point_pos = point_homo.head(3) / point_homo(3); // convert to cartesian from homogenous 
+
+        if(out_point_pos(2) <= 0)
         {
-            return true; 
+            return false; 
         } 
         
-        return false;
+        return true;
     }
 
     inline void getTransformationMatrix(const cv::Matx33d &R,const cv::Matx31d &t, cv::Matx44d &outT)

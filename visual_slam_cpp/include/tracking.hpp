@@ -67,7 +67,7 @@ namespace mrVSLAM
         std::shared_ptr<Camera> camera_right = nullptr; 
 
 
-        unsigned int num_of_features = 300; 
+        unsigned int num_of_features = 600; 
         unsigned int num_of_features_for_initialization = 100; // numbers of features needed to be found in both imgs for initalization success 
         unsigned int num_of_features_for_keyframe = 50; //? check in orbslam 
 

@@ -79,7 +79,6 @@ namespace mrVSLAM
             auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
             // performance.emplace_back(fps); 
             std::cout << "Loop time is " << elapsedT.count() << "ms \n"; 
-            std::this_thread::sleep_for(20ms); 
         }
         
         sequenceLeft.release(); 
@@ -91,8 +90,8 @@ namespace mrVSLAM
 
         //////////////////////////
 
-        std::cout << "namber of keyframes in map " << map->getNumberOfFramesInMap() << "\n"; 
-        std::cout << "namber of points in map " << map->getNumberOfPointsInMap() << "\n"; 
+        std::cout << "number of keyframes in map " << map->getNumberOfFramesInMap() << "\n"; 
+        std::cout << "number of points in map " << map->getNumberOfPointsInMap() << "\n"; 
 
         auto id_frame_pairs = map->getAllKeyframes(); 
 
