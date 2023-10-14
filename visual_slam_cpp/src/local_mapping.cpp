@@ -23,9 +23,9 @@ namespace mrVSLAM
 
     void LocalMapping::endLocalMappingThread()
     {
-        l_mapping_thread.join(); // join to main thread
         map_update_var.notify_one(); 
         l_mapping_running.store(false); 
+        l_mapping_thread.join(); // join to main thread
         std::cout << "end of local mapping optimization thread \n"; 
     }
 
@@ -39,8 +39,7 @@ namespace mrVSLAM
             std::unordered_map<unsigned int, std::shared_ptr<Frame>> active_keyframes = map->getEnabledKeyframes(); 
             std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> active_mappoints = map->getEnabledMappoints(); 
 
-            // localBundleAdjustment(active_keyframes, active_mappoints); 
-
+            localBundleAdjustment(active_keyframes, active_mappoints); 
         }
     }
 
@@ -132,7 +131,7 @@ namespace mrVSLAM
                     optimizer.addVertex(p_vertex); 
                 }
 
-                if(pose_verticies.contains(frame->keyframe_id) && mapppoint_verticies.contains())
+                if(pose_verticies.contains(frame->keyframe_id) && mapppoint_verticies.contains(point_id))
                 {
                     edge->setId(edge_id); 
                     edge->setVertex(0, pose_verticies.at(frame->keyframe_id)); // set pose Vertex of the edge 
@@ -217,7 +216,8 @@ namespace mrVSLAM
         {
             mappoints.at(mappoint_vertex.first)->setPosition(mappoint_vertex.second->estimate()); 
         }
-    
+        
+        std::cout << "ended optimizing local map \n"; 
     }
 
   //Enf of local mapping   

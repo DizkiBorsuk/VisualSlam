@@ -10,7 +10,7 @@ unsigned int mrVSLAM::MapPoint::mappoint_counter = 0;
 int main()
 {
     std::cout << "Hello mrVSLAM \n"; 
-    mrVSLAM::StereoSLAM slam("07"); 
+    mrVSLAM::StereoSLAM slam("00"); 
 
     slam.Run(); 
 

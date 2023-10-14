@@ -108,8 +108,14 @@ namespace mrVSLAM
             return false; //initialization failed 
         }
             
-        
-        buildMap(); 
+        if(!buildMap())
+        {
+            std::cout << "not enough initial points \n"; 
+            map->cleanMap(); 
+            return false; 
+        }
+
+
         if(visualizer != nullptr || l_mapping !=nullptr)
         {
             l_mapping->updateMap(); 
@@ -130,9 +136,15 @@ namespace mrVSLAM
     {
         //!DONE
         // function detects keypoints in main(left) img and pushes Features to Frame object 
+        cv::Mat mask(current_frame->imgLeft.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->featuresFromLeftImg) {
+            cv::rectangle(mask, feat->featurePoint_position.pt - cv::Point2f(10, 10),
+                        feat->featurePoint_position.pt + cv::Point2f(10, 10), 0, cv::FILLED);
+        }
+
 
         std::vector<cv::KeyPoint> keypoints; 
-        detector->detect(current_frame->imgLeft, keypoints, cv::noArray()); 
+        detector->detect(current_frame->imgLeft, keypoints, mask); 
         unsigned int detected_features = 0; 
 
         for(auto &point : keypoints)
@@ -213,7 +225,7 @@ namespace mrVSLAM
         return foundCorrespondences; 
     }
 
-    void Tracking::buildMap()
+    bool Tracking::buildMap()
     {
         //!DONE
         /* 
@@ -256,8 +268,14 @@ namespace mrVSLAM
         }
         std::cout << "Map created with " << number_of_points_in_map << " points in map \n"; 
 
+        if(number_of_points_in_map < 20)
+        {
+            return false; 
+        }
+
         current_frame->SetFrameToKeyframe(); 
         map->insertKeyFrame(current_frame); 
+        return true; 
     }
 
 
@@ -417,24 +435,27 @@ namespace mrVSLAM
 
         //https://www.wangxinliu.com/slam/optimization/research&study/g2o-1/
         //? https://github.com/RainerKuemmerle/g2o/blob/master/g2o/examples/tutorial_slam2d/tutorial_slam2d.cpp
-        typedef g2o::BlockSolver_6_3 BlockSolverType;
-        typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; 
 
-        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>())); 
+        typedef g2o::LinearSolverDense<g2o::BlockSolver_6_3 ::PoseMatrixType> LinearSolverType; 
+
+        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3>(std::make_unique<LinearSolverType>())); 
 
         g2o::SparseOptimizer optimizer; 
         optimizer.setAlgorithm(solver); 
         optimizer.setVerbose(false); 
 
         //add first pose vertex 
-        Pose3DVertex* pose_vertex = new Pose3DVertex(); 
+        g2o::VertexSE3Expmap* pose_vertex = new g2o::VertexSE3Expmap(); 
         pose_vertex->setId(0); 
-        pose_vertex->setEstimate(current_frame->getSophusFramePose()); 
+
+        g2o::SE3Quat pose_quat(current_frame->getSophusFramePose().rotationMatrix(), current_frame->getSophusFramePose().translation()); 
+        pose_vertex->setEstimate(pose_quat); 
         pose_vertex->setFixed(false); 
-        optimizer.addVertex(pose_vertex); //add vertex to graph 
+        bool did_add = optimizer.addVertex(pose_vertex); //add vertex to graph 
 
         //create graph 
-        std::vector<PoseEdge*> pose_edges; 
+        std::vector<g2o::EdgeSE3ProjectXYZ*> pose_edges; 
+        std::vector<g2o::VertexPointXYZ*> measurment_vertices; 
         std::vector<std::shared_ptr<Feature>> features; 
 
         auto K = camera_left->K_eigen; 
@@ -448,20 +469,41 @@ namespace mrVSLAM
 
             if(map_point)
             {
+                // create fixed measurment vertex 
+                g2o::VertexPointXYZ* new_measurment_vertex = new g2o::VertexPointXYZ(); 
+                new_measurment_vertex->setEstimate(map_point->getPosition()); 
+                new_measurment_vertex->setId(i+1); 
+                new_measurment_vertex->setFixed(true); 
+                optimizer.addVertex(new_measurment_vertex); 
+                measurment_vertices.emplace_back(new_measurment_vertex); 
+                
+                // create edges 
                 features.push_back(current_frame->featuresFromLeftImg[i]); 
-                PoseEdge* edge = new PoseEdge(map_point->getPosition(), K); 
-                edge->setId(edge_id);
-                edge->setVertex(0,pose_vertex); 
+
+
+                g2o::EdgeSE3ProjectXYZ* edge = new g2o::EdgeSE3ProjectXYZ(); 
+
+                edge->setVertex(0, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(i+1))); 
+                edge->setVertex(1, dynamic_cast<g2o::OptimizableGraph::Vertex*>(optimizer.vertex(0)));
 
                 auto pointxy = current_frame->featuresFromLeftImg[i]->featurePoint_position.pt; 
                 Eigen::Vector2d measurment(pointxy.x, pointxy.y);
                 edge->setMeasurement(measurment); 
 
+                edge->setId(edge_id);
+                edge->setLevel(0); 
                 edge->setInformation(Eigen::Matrix2d::Identity()); 
-                edge->setRobustKernel(new g2o::RobustKernelHuber);
+                g2o::RobustKernelHuber* kernel = new g2o::RobustKernelHuber;
+                kernel->setDelta(2.447); 
+                edge->setRobustKernel(kernel);
 
-                pose_edges.push_back(edge); 
+                edge->fx = K(0,0); 
+                edge->fx = K(1,1); 
+                edge->cx = K(0,2);
+                edge->cy = K(1,2);  
+
                 optimizer.addEdge(edge);
+                pose_edges.emplace_back(edge); 
                 edge_id++; 
             }
         }
@@ -470,7 +512,7 @@ namespace mrVSLAM
         //chi squared outlier detection 
         for (int j = 0; j < 4; j++) 
         {
-            pose_vertex->setEstimate(current_frame->getSophusFramePose());
+            // pose_vertex->setEstimate(current_frame->getSophusFramePose());
             optimizer.initializeOptimization(0);
             optimizer.optimize(10);
             bad_points = 0;
@@ -505,10 +547,14 @@ namespace mrVSLAM
                 break; 
         }
 
-        std::cout << "detected " << bad_points << "outliers from " << features.size() << "feature points \n"; 
+        std::cout << "detected " << bad_points << " outliers from " << features.size() << " feature points \n"; 
         good_points = features.size() - bad_points;  
 
-        current_frame->SetFramePose(pose_vertex->estimate()); 
+        g2o::VertexSE3Expmap* vSE3_recov = static_cast<g2o::VertexSE3Expmap*>(optimizer.vertex(0));
+        g2o::SE3Quat SE3quat_recov = vSE3_recov->estimate();
+        Sophus::SE3d estimated_pose( SE3quat_recov.to_homogeneous_matrix()); 
+
+        current_frame->SetFramePose(estimated_pose); 
 
         for(auto &feature : features)
         {
