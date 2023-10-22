@@ -1,34 +1,23 @@
-#include "../include/frame.hpp"
 
-namespace mrVSLAM
-{
-    Eigen::Matrix4d Frame::getFramePose()
-    {
-        std::lock_guard<std::mutex> lock(pose_mutex); 
-        return framePose.matrix(); 
-    }
 
-    Sophus::SE3d Frame::getSophusFramePose()
-    {
-        std::lock_guard<std::mutex> lock(pose_mutex); 
-        return framePose; 
-    }
+#include "myslam/frame.h"
 
-    // void Frame::SetFramePose(const Eigen::Matrix4d &pose)
-    // {
-    //     std::lock_guard<std::mutex> lock(pose_mutex);
-    //     framePose = pose.matrix();  
-    // }
+namespace myslam {
 
-    void Frame::SetFramePose(const Sophus::SE3d &pose)
-    {
-        std::lock_guard<std::mutex> lock(pose_mutex);
-        framePose = pose;  
-    }
+Frame::Frame(long id, double time_stamp, const Sophus::SE3d &pose, const cv::Mat &left, const cv::Mat &right)
+        : id_(id), time_stamp_(time_stamp), pose_(pose), left_img_(left), right_img_(right) {}
 
-    void Frame::SetFrameToKeyframe()
-    {
-        is_keyframe = true; 
-        keyframe_id = keyframe_counter++; 
-    }
+std::shared_ptr<Frame> Frame::CreateFrame() {
+    static long factory_id = 0;
+    std::shared_ptr<Frame> new_frame(new Frame);
+    new_frame->id_ = factory_id++;
+    return new_frame;
+}
+
+void Frame::SetKeyFrame() {
+    static long keyframe_factory_id = 0;
+    is_keyframe_ = true;
+    keyframe_id_ = keyframe_factory_id++;
+}
+
 }

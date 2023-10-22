@@ -1,7 +1,7 @@
-#include "../include/read_dataset.hpp"
+#include "myslam/read_dataset.hpp"
 
 
-namespace mrVSLAM
+namespace myslam
 {
     void KITTI_Dataset::chooseSequence(const std::string sequence)
     {   
@@ -22,7 +22,7 @@ namespace mrVSLAM
         right_imgs_path = sequence_dir  + sequence + rimg;
     } 
 
-    void mrVSLAM::KITTI_Dataset::readCalibData()
+    void KITTI_Dataset::readCalibData()
     {
         /*
         Calib.txt contains camera calibration data -> Projection matricies (3x4), projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters
@@ -69,7 +69,7 @@ namespace mrVSLAM
     }   
 
 
-    void mrVSLAM::KITTI_Dataset::getGTposes()
+    void KITTI_Dataset::getGTposes()
     {
         /*
         files with ground truth poses contain poses of car thru sequence, poses are represented as 3x4 Transformation matrix
@@ -117,7 +117,7 @@ namespace mrVSLAM
     }
 
 
-    void mrVSLAM::KITTI_Dataset::showPmatricies() const
+    void KITTI_Dataset::showPmatricies() const
     {
         std::cout << "---------------- \n"; 
         std::cout << "Left grayscale camera projection matrix = \n" << P0 << "\n"; 

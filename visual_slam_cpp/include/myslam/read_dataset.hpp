@@ -1,7 +1,7 @@
 #pragma once 
-#include "common_includes.hpp"
+#include "myslam/common_include.h"
 
-namespace mrVSLAM
+namespace myslam
 {
     class KITTI_Dataset
     {
@@ -9,11 +9,7 @@ namespace mrVSLAM
  
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-        std::string gt_poses_path; 
-        std::string camera_calibration_path; 
-        std::string left_imgs_path; 
-        std::string right_imgs_path;
-        std::string sequence; 
+        std::string dataset_path; 
 
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P0; //Projection matrix of left grayscale camera  
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1; //Projection matrix of right grayscale camera

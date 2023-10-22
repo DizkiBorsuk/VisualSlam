@@ -1,8 +1,0 @@
-
-1. Why use EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-https://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
-
-2. Use of mutex locks 
-https://stackoverflow.com/questions/43019598/stdlock-guard-or-stdscoped-lock
-
-3. 
