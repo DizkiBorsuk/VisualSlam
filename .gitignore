@@ -1,6 +1,6 @@
 /visual_slam_py/g2o/
 
-/KITTY_dataset/sequences/00/
+/KITTY_dataset/sequences/00/image_1/
 /visual_slam_cpp/build
 /visual_slam_py/__pycache__/ 
 *.pyc 
