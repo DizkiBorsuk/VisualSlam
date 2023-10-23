@@ -91,7 +91,7 @@ namespace myslam
 
         for(auto& frame : sorted_keyframes)
         {
-            std::cout << "frame id = " << frame.first << "\n"; 
+            // std::cout << "frame id = " << frame.first << "\n"; 
             trajectory.emplace_back(frame.second->Pose().matrix3x4());  
         }
         std::cout << "------- Results --------- \n"; 

@@ -34,12 +34,8 @@ void LocalMapping::LocalMappingThread() {
 void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
                        Map::LandmarksType &landmarks) {
     // setup g2o
-    typedef g2o::BlockSolver_6_3 BlockSolverType;
-    typedef g2o::LinearSolverCSparse<BlockSolverType::PoseMatrixType>
-        LinearSolverType;
-    auto solver = new g2o::OptimizationAlgorithmLevenberg(
-        std::make_unique<BlockSolverType>(
-            std::make_unique<LinearSolverType>()));
+    typedef g2o::LinearSolverCSparse<g2o::BlockSolver_6_3 ::PoseMatrixType> LinearSolverType;
+    auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3 >(std::make_unique<LinearSolverType>()));
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
 
@@ -48,14 +44,15 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
     for (auto &keyframe : keyframes) {
         auto kf = keyframe.second;
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
-        vertex_pose->setId(kf->keyframe_id_);
+        vertex_pose->setId(kf->keyframe_id);
         vertex_pose->setEstimate(kf->Pose());
         optimizer.addVertex(vertex_pose);
-        if (kf->keyframe_id_ > max_kf_id) {
-            max_kf_id = kf->keyframe_id_;
+        if (kf->keyframe_id > max_kf_id) 
+        {
+            max_kf_id = kf->keyframe_id;
         }
 
-        vertices.insert({kf->keyframe_id_, vertex_pose});
+        vertices.insert({kf->keyframe_id, vertex_pose});
     }
 
     std::map<unsigned long, VertexXYZ *> vertices_landmarks;
@@ -96,12 +93,11 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
             }
 
 
-            if (vertices.find(frame->keyframe_id_) !=
-                vertices.end() && 
-                vertices_landmarks.find(landmark_id) !=
-                vertices_landmarks.end()) {
+            if (vertices.find(frame->keyframe_id) != vertices.end() && 
+                vertices_landmarks.find(landmark_id) != vertices_landmarks.end()) 
+            {
                     edge->setId(index);
-                    edge->setVertex(0, vertices.at(frame->keyframe_id_));    // pose
+                    edge->setVertex(0, vertices.at(frame->keyframe_id));    // pose
                     edge->setVertex(1, vertices_landmarks.at(landmark_id));  // landmark
                     edge->setMeasurement(toVec2(feat->position_.pt));
                     edge->setInformation(Eigen::Matrix2d::Identity());
@@ -111,8 +107,11 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
                     edges_and_features.insert({edge, feat});
                     optimizer.addEdge(edge);
                     index++;
-                }
-            else delete edge;
+            }
+            else 
+            {
+                delete edge; 
+            }
                 
         }
     }

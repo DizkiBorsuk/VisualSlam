@@ -5,13 +5,13 @@ namespace myslam
     void Map::InsertKeyFrame(std::shared_ptr<Frame> frame) 
     {
         current_frame_ = frame;
-        if (keyframes_.find(frame->keyframe_id_) == keyframes_.end()) 
+        if (keyframes_.find(frame->keyframe_id) == keyframes_.end()) 
         {
-            keyframes_.insert(make_pair(frame->keyframe_id_, frame));
-            active_keyframes_.insert(make_pair(frame->keyframe_id_, frame));
+            keyframes_.insert(make_pair(frame->keyframe_id, frame));
+            active_keyframes_.insert(make_pair(frame->keyframe_id, frame));
         } else {
-            keyframes_[frame->keyframe_id_] = frame;
-            active_keyframes_[frame->keyframe_id_] = frame;
+            keyframes_[frame->keyframe_id] = frame;
+            active_keyframes_[frame->keyframe_id] = frame;
         }
 
         if (active_keyframes_.size() > num_active_keyframes_)
@@ -67,9 +67,9 @@ namespace myslam
             frame_to_remove = keyframes_.at(max_kf_id);
         }
 
-        std::cout  << "remove keyframe " << frame_to_remove->keyframe_id_;
+        std::cout  << "remove keyframe " << frame_to_remove->keyframe_id;
         // remove keyframe and landmark observation
-        active_keyframes_.erase(frame_to_remove->keyframe_id_);
+        active_keyframes_.erase(frame_to_remove->keyframe_id);
         for (auto feat : frame_to_remove->features_left_) {
             auto mp = feat->map_point_.lock();
             if (mp) {

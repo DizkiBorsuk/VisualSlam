@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+using namespace std::chrono_literals;
+
 namespace myslam {
 
     Visualizer::Visualizer(bool show_whole_map) 
@@ -76,7 +78,8 @@ namespace myslam {
             DrawMapPoints(blue);
 
             pangolin::FinishFrame();
-            usleep(5000);
+            // usleep(5000);
+            std::this_thread::sleep_for(5000us); 
         }
 
         std::cout << "Stop viewer \n";

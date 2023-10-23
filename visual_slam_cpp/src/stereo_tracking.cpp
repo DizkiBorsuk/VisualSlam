@@ -79,8 +79,8 @@ namespace myslam {
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
 
-        std::cout  << "Set frame " << current_frame->id_ << " as keyframe "
-                << current_frame->keyframe_id_ << "\n";
+        std::cout  << "Set frame " << current_frame->id << " as keyframe "
+                << current_frame->keyframe_id << "\n";
 
         for (auto &feat : current_frame->features_left_) 
         {
@@ -333,6 +333,12 @@ namespace myslam {
 
     int StereoTracking::FindFeaturesInRight() {
         // use LK flow to estimate points in the right image
+
+
+        
+
+
+
         std::vector<cv::Point2f> kps_left, kps_right;
         for (auto &kp : current_frame->features_left_) {
             kps_left.push_back(kp->position_.pt);
