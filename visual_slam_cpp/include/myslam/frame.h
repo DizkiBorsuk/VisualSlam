@@ -33,11 +33,11 @@ namespace myslam {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-        unsigned long id = 0;          
-        unsigned long keyframe_id = 0;  
+        unsigned int id = 0;          
+        unsigned int keyframe_id = 0;  
         bool keyframe = false;                     
         Sophus::SE3d pose_;                       
-        std::mutex pose_mutex_;           
+        std::mutex frame_mutex;           
         cv::Mat left_img_, right_img_;   
 
         // extracted features in left image
@@ -51,12 +51,12 @@ namespace myslam {
 
         // set and get pose, thread safe
         Sophus::SE3d Pose() {
-            std::unique_lock<std::mutex> lock(pose_mutex_);
+            std::unique_lock<std::mutex> lock(frame_mutex);
             return pose_;
         }
 
         void SetPose(const Sophus::SE3d &pose) {
-            std::unique_lock<std::mutex> lock(pose_mutex_);
+            std::unique_lock<std::mutex> lock(frame_mutex);
             pose_ = pose;
         }
 

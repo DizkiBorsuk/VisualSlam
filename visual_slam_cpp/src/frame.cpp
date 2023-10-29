@@ -8,7 +8,7 @@ namespace myslam
 
     std::shared_ptr<Frame> Frame::CreateFrame() 
     {
-        static long factory_id = 0;
+        static unsigned int factory_id = 0;
         std::shared_ptr<Frame> new_frame(new Frame);
         new_frame->id = factory_id++;
         return new_frame;
@@ -16,7 +16,7 @@ namespace myslam
 
     void Frame::SetKeyFrame() 
     {
-        static long keyframe_factory_id = 0;
+        static unsigned int keyframe_factory_id = 0;
         keyframe = true;
         keyframe_id = keyframe_factory_id++;
     }
