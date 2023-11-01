@@ -14,8 +14,11 @@ namespace myslam
 
     void StereoSLAM::Init() 
     {
-        dataset_ = std::shared_ptr<Dataset>(new Dataset(dataset_path));
-        dataset_->Init(); 
+        dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
+        dataset->readCalibData(); 
+
+        left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0));
+        right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1));
 
         // create components and links
         stereoTracking = std::shared_ptr<StereoTracking>(new StereoTracking(TrackingType::OpticalFlow_GFTT));
@@ -23,9 +26,9 @@ namespace myslam
         map = std::shared_ptr<Map>(new Map);
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(true));
 
-        stereoTracking->setTracking(map, local_mapping, visualizer, dataset_->GetCamera(0), dataset_->GetCamera(1));
+        stereoTracking->setTracking(map, local_mapping, visualizer, left_camera, right_camera);
 
-        local_mapping->setLocalMapping(map, dataset_->GetCamera(0), dataset_->GetCamera(1));
+        local_mapping->setLocalMapping(map, left_camera, right_camera);
 
         visualizer->SetMap(map);
     }
@@ -79,25 +82,20 @@ namespace myslam
         std::cout  << "Loop time : " << elapsedT.count() << " ms. \n";
 
         performance.emplace_back(elapsedT.count());
+        trajectory.emplace_back(new_frame->Pose().inverse().matrix3x4());
 
         return success;
     }
 
     void StereoSLAM::output()
     {
-        auto keyframes = map->GetAllKeyFrames(); 
+        dataset->getGTposes(); 
 
-        std::map<unsigned long, std::shared_ptr<Frame>> sorted_keyframes(keyframes.begin(), keyframes.end()); 
-
-        for(auto& frame : sorted_keyframes)
-        {
-            // std::cout << "frame id = " << frame.first << "\n"; 
-            trajectory.emplace_back(frame.second->Pose().matrix3x4());  
-        }
         std::cout << "------- Results --------- \n"; 
 
-        // plotPerformance(performance);
-        plotPoses(trajectory); 
+        plotPerformance(performance);
+        plotPoses(trajectory, dataset->ground_truth_poses); 
+        calculate_error(trajectory, dataset->ground_truth_poses); 
 
     } 
 

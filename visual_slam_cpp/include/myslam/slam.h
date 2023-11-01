@@ -1,7 +1,7 @@
 #pragma once
 #include "myslam/local_mapping.h"
 #include "myslam/common_include.h"
-#include "myslam/dataset.h"
+#include "myslam/read_dataset.hpp"
 #include "myslam/stereo_tracking.hpp"
 #include "myslam/viewer.h"
 
@@ -37,7 +37,10 @@ namespace myslam {
         std::shared_ptr<Visualizer> visualizer = nullptr;
 
         // dataset
-        std::shared_ptr<Dataset> dataset_ = nullptr;
+        std::shared_ptr<KITTI_Dataset> dataset = nullptr;
+
+        std::shared_ptr<Camera> left_camera = nullptr; 
+        std::shared_ptr<Camera> right_camera = nullptr; 
 
     };
 }  

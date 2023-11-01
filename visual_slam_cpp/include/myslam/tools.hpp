@@ -34,6 +34,7 @@ namespace myslam {
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses);
 
     void plotPerformance(std::vector<int> loopTimes);
+    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses); 
 }
 
 

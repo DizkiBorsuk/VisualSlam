@@ -41,12 +41,14 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
 
     std::map<unsigned long, VertexPose *> vertices;
     unsigned long max_kf_id = 0;
+
     for (auto &keyframe : keyframes) {
         auto kf = keyframe.second;
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(kf->keyframe_id);
         vertex_pose->setEstimate(kf->Pose());
         optimizer.addVertex(vertex_pose);
+
         if (kf->keyframe_id > max_kf_id) 
         {
             max_kf_id = kf->keyframe_id;
@@ -56,23 +58,30 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
     }
 
     std::map<unsigned long, VertexXYZ *> vertices_landmarks;
-    Eigen::Matrix3d K = cam_left_->K();
+    Eigen::Matrix3d K = cam_left_->getK();
     Sophus::SE3d left_ext = cam_left_->pose();
     Sophus::SE3d right_ext = cam_right_->pose();
 
     // edges
     int index = 1;
-    double chi2_th = 5.991;  // robust kernel 阈值
+    double chi2_th = 5.991;  
     std::map<EdgeProjection *, std::shared_ptr<Feature>> edges_and_features;
 
     for (auto &landmark : landmarks) {
-        if (landmark.second->is_outlier_) continue;
-        unsigned long landmark_id = landmark.second->id_;
+        if (landmark.second->is_outlier_) 
+            continue;
+
+        unsigned int landmark_id = landmark.second->id_;
         auto observations = landmark.second->GetObs();
-        for (auto &obs : observations) {
-            if (obs.lock() == nullptr) continue;
+
+        for (auto &obs : observations) 
+        {
+            if (obs.lock() == nullptr) 
+                continue;
             auto feat = obs.lock();
-            if (feat->is_outlier_ || feat->frame_.lock() == nullptr) continue;
+            
+            if (feat->is_outlier_ || feat->frame_.lock() == nullptr) 
+                continue;
 
             auto frame = feat->frame_.lock();
             EdgeProjection *edge = nullptr;
@@ -82,8 +91,8 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
                 edge = new EdgeProjection(K, right_ext);
             }
 
-            if (vertices_landmarks.find(landmark_id) ==
-                vertices_landmarks.end()) {
+            if (vertices_landmarks.find(landmark_id) == vertices_landmarks.end()) 
+            {
                 VertexXYZ *v = new VertexXYZ;
                 v->setEstimate(landmark.second->Pos());
                 v->setId(landmark_id + max_kf_id + 1);

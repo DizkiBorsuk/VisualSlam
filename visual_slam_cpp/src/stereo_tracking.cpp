@@ -48,7 +48,8 @@ namespace myslam {
     }
 
     bool StereoTracking::Track() {
-        if (last_frame) {
+        if (last_frame) 
+        {
             current_frame->SetPose(relative_motion_ * last_frame->Pose());
         }
 
@@ -67,9 +68,9 @@ namespace myslam {
             InsertKeyframe();
         }
 
-        relative_motion_ = current_frame->Pose() * last_frame->Pose().inverse();
+        relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
 
-        if (viewer_) viewer_->AddCurrentFrame(current_frame);
+        viewer_->AddCurrentFrame(current_frame);
         return true;
     }
 
@@ -154,7 +155,7 @@ namespace myslam {
         optimizer.addVertex(vertex_pose);
 
         // K
-        Eigen::Matrix3d K = camera_left_->K();
+        Eigen::Matrix3d K = camera_left_->getK();
 
         // edges
         int index = 1;

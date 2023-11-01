@@ -1,5 +1,4 @@
 #pragma once 
-
 #include <pangolin/pangolin.h>
 #include "myslam/common_include.h"
 #include "myslam/frame.h"
@@ -38,8 +37,8 @@ namespace myslam {
         bool whole_map = false; 
         bool map_updated = false;
 
-        std::unordered_map<unsigned long, std::shared_ptr<Frame>> keyframes;
-        std::unordered_map<unsigned long, std::shared_ptr<MapPoint>> landmarks;
+        std::unordered_map<unsigned int, std::shared_ptr<Frame>> keyframes;
+        std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> landmarks;
       
         std::thread visualizer_thread;
         std::mutex visualizer_mutex;
@@ -52,7 +51,6 @@ namespace myslam {
         static constexpr float cy = 384;
         static constexpr float width = 1024;
         static constexpr float height = 768;
-
 
         static constexpr int blue[3] = {0,0,1}; 
         static constexpr int green[3] = {0,1,0};

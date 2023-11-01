@@ -7,8 +7,9 @@ add_library(myslam SHARED
         local_mapping.cpp
         viewer.cpp
         slam.cpp
-        dataset.cpp
-        tools.cpp)
+        read_dataset.cpp
+        tools.cpp
+        )
 
 target_link_libraries(myslam
         ${THIRD_PARTY_LIBS})

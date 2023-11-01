@@ -3,24 +3,13 @@
 
 namespace myslam
 {
-    void KITTI_Dataset::chooseSequence(const std::string sequence)
-    {   
-        /*
-            Inputs: sequence - number of sequence from kitti dataset (07, 06, 00)
-        */
-        const std::string sequence_dir = "../KITTY_dataset/sequences/"; 
-        const std::string gtp_dir = "../KITTY_dataset/ground_truth_poses/"; 
-        
-        const std::string file = ".txt"; 
-        const std::string calib_file = "/calib.txt"; 
-        const std::string limg = "/image_0/00%04d.png"; 
-        const std::string rimg = "/image_1/00%04d.png"; 
-
-        gt_poses_path = gtp_dir + sequence + file; 
-        camera_calibration_path = sequence_dir + sequence + calib_file; 
-        left_imgs_path = sequence_dir + sequence + limg; 
-        right_imgs_path = sequence_dir  + sequence + rimg;
-    } 
+    KITTI_Dataset::KITTI_Dataset(const std::string dataset_path)
+    {
+        path_to_dataset = dataset_path; 
+        camera_calibration_path = dataset_path + "/calib.txt";
+        gt_poses_path = dataset_path + "/gt_poses.txt";
+    }
+ 
 
     void KITTI_Dataset::readCalibData()
     {
@@ -62,10 +51,6 @@ namespace myslam
         P0.resize(3,4); 
         P1 = calib_data_matrix.row(1); 
         P1.resize(3,4); 
-        P2 = calib_data_matrix.row(2); 
-        P2.resize(3,4); 
-        P3 = calib_data_matrix.row(3); 
-        P3.resize(3,4); 
     }   
 
 

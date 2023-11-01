@@ -14,7 +14,7 @@ namespace myslam
             active_keyframes_[frame->keyframe_id] = frame;
         }
 
-        if (active_keyframes_.size() > num_active_keyframes_)
+        if (active_keyframes_.size() > num_active_keyframes)
         {
             RemoveOldKeyframe();
         }
@@ -26,7 +26,9 @@ namespace myslam
         {
             landmarks_.insert(make_pair(map_point->id_, map_point));
             active_landmarks_.insert(make_pair(map_point->id_, map_point));
-        } else {
+        } 
+        else 
+        {
             landmarks_[map_point->id_] = map_point;
             active_landmarks_[map_point->id_] = map_point;
         }
@@ -49,11 +51,13 @@ namespace myslam
                 continue;
             }
             auto dis = (kf.second->Pose() * Twc).log().norm();
-            if (dis > max_dis) {
+            if (dis > max_dis) 
+            {
                 max_dis = dis;
                 max_kf_id = kf.first;
             }
-            if (dis < min_dis) {
+            if (dis < min_dis) 
+            {
                 min_dis = dis;
                 min_kf_id = kf.first;
             }
@@ -61,7 +65,8 @@ namespace myslam
 
         const double min_dis_th = 0.2;  
         std::shared_ptr<Frame> frame_to_remove = nullptr;
-        if (min_dis < min_dis_th) {
+        if (min_dis < min_dis_th) 
+        {
             frame_to_remove = keyframes_.at(min_kf_id);
         } else {
             frame_to_remove = keyframes_.at(max_kf_id);
@@ -70,21 +75,26 @@ namespace myslam
         std::cout  << "remove keyframe " << frame_to_remove->keyframe_id;
         // remove keyframe and landmark observation
         active_keyframes_.erase(frame_to_remove->keyframe_id);
-        for (auto feat : frame_to_remove->features_left_) {
-            auto mp = feat->map_point_.lock();
-            if (mp) {
-                mp->RemoveObservation(feat);
+
+        for (auto feature : frame_to_remove->features_left_) 
+        {
+            auto temp_mappoint = feature->map_point_.lock();
+            if (temp_mappoint) 
+            {
+                temp_mappoint->RemoveObservation(feature);
             }
         }
-        for (auto feat : frame_to_remove->features_right_) 
+
+        for (auto feature : frame_to_remove->features_right_) 
         {
-            if (feat == nullptr)
+            if (feature == nullptr)
             { 
                 continue;
             }
-            auto mp = feat->map_point_.lock();
-            if (mp) {
-                mp->RemoveObservation(feat);
+            auto temp_mappoint = feature->map_point_.lock();
+            if (temp_mappoint) 
+            {
+                temp_mappoint->RemoveObservation(feature);
             }
         }
 
