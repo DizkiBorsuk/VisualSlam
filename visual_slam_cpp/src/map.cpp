@@ -103,9 +103,10 @@ namespace myslam
 
     void Map::CleanMap() {
         int cnt_landmark_removed = 0;
-        for (auto iter = active_landmarks_.begin();
-            iter != active_landmarks_.end();) {
-            if (iter->second->observed_times_ == 0) {
+        for (auto iter = active_landmarks_.begin(); iter != active_landmarks_.end();) 
+        {
+            if (iter->second->observed_times_ == 0)
+            {
                 iter = active_landmarks_.erase(iter);
                 cnt_landmark_removed++;
             } else {

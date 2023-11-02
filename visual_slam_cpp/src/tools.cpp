@@ -20,9 +20,9 @@ namespace myslam
             y.push_back(poses.at(i).coeff(2,3)/2);
         }
 
-        plot(gt_x, gt_y); 
+        plot(gt_x, gt_y)->line_width(2); 
         hold(on); 
-        plot(x, y, "r--");
+        plot(x, y, "r--")->line_width(2);
         xlabel("x [m]");
         ylabel("y [m]");  
         matplot::legend({"prawdziwa trasa", "estymowana trasa"}); 
@@ -40,7 +40,7 @@ namespace myslam
             y.push_back(poses.at(i).coeff(1,3));
         }
 
-        plot(x, y, "r--");
+        plot(x, y, "r--")->line_width(2);
         xlabel("x [m]");
         ylabel("y [m]");
         show();
@@ -89,25 +89,34 @@ namespace myslam
         double mean_error_y = sum_error_y/er_y.size();  
         double mean_error_z = sum_error_z/er_z.size(); 
 
-        std::cout << "mean x error = " << mean_error_x << "\n"; 
+        std::cout << "mean x error = " << mean_error_x << "\n";
+        std::cout << "max x error = " << max(er_x) << ", min x error = " << min(er_x) << "\n"; 
         std::cout << "mean y error = " << mean_error_y << "\n";
+        std::cout << "max y error = " << max(er_y) << ", min y error = " << min(er_y) << "\n"; 
         std::cout << "mean z error = " << mean_error_z << "\n";
-
-        tiledlayout(3, 1);
-        auto ax1 = nexttile();
-        plot(er_x); 
-        ylabel("błąd [ms]"); 
+        std::cout << "max z error = " << max(er_z) << ", min z error = " << min(er_z) << "\n"; 
+ 
+        auto fig = figure();  
+        fig->width(fig->width()*2); 
+        fig->height(fig->height()*2);
+        auto ax1 = subplot(3, 1, 0);
+        plot(er_x)->line_width(2);
+        grid(ax1, on);   
+        ylabel("błąd x [m]"); 
         xlabel(" iteracja []");
 
-        auto ax2 = nexttile();
-        plot(er_y); 
-        ylabel("błąd [ms]"); 
+        auto ax2 = subplot(3, 1, 1);
+        plot(er_y)->line_width(2); 
+        grid(ax2, on);  
+        ylabel("błąd y [m]"); 
         xlabel(" iteracja []");
 
-        auto ax3 = nexttile();
-        plot(er_z); 
-        ylabel("błąd [ms]"); 
+        auto ax3 = subplot(3, 1, 2);
+        plot(er_z)->line_width(2);
+        grid(ax3, on);   
+        ylabel("błąd z [m]"); 
         xlabel(" iteracja []");
+        fig->draw(); 
         show(); 
 
     }

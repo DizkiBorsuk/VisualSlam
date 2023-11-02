@@ -96,7 +96,7 @@ namespace myslam
         plotPerformance(performance);
         plotPoses(trajectory, dataset->ground_truth_poses); 
         calculate_error(trajectory, dataset->ground_truth_poses); 
-
+        
     } 
 
 }  // namespace myslam
