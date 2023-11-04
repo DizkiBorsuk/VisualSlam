@@ -15,14 +15,22 @@ namespace myslam {
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
                 break; 
             case TrackingType::OpticalFlow_ORB: 
-                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);
+                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
                 break; 
-            case TrackingType::Matching: 
+
+            case TrackingType::Matching_ORB: 
                 matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING);
+                //matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
 
                 detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
                 extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
                 break; 
+            case TrackingType::Matching_SIFT: 
+                matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_SL2);
+
+                detector = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
+                extractor = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
+                break;
             default: 
                 break; 
         }
@@ -47,7 +55,8 @@ namespace myslam {
         return true;
     }
 
-    bool StereoTracking::Track() {
+    bool StereoTracking::Track() 
+    {
         if (last_frame) 
         {
             current_frame->SetPose(relative_motion_ * last_frame->Pose());
@@ -62,6 +71,7 @@ namespace myslam {
         } else {
             // lost
             status = TrackingStatus::LOST;
+            return false; 
         }
 
         if (tracking_inliers_ < num_features_needed_for_keyframe_) {
@@ -80,8 +90,7 @@ namespace myslam {
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
 
-        std::cout  << "Set frame " << current_frame->id << " as keyframe "
-                << current_frame->keyframe_id << "\n";
+        std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
 
         for (auto &feat : current_frame->features_left_) 
         {
@@ -92,7 +101,7 @@ namespace myslam {
         DetectFeatures();  // detect new features
 
         // track in right image
-        FindFeaturesInRight();
+        findCorrespondensesWithOpticalFlow();
         // triangulate map points
         TriangulateNewPoints();
         // update backend because we have a new keyframe
@@ -162,10 +171,12 @@ namespace myslam {
         std::vector<EdgeProjectionPoseOnly *> edges;
         std::vector<std::shared_ptr<Feature>> features;
 
-        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) {
+        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
+        {
             auto mp = current_frame->features_left_[i]->map_point_.lock();
-            if (mp) {
-                features.push_back(current_frame->features_left_[i]);
+            if (mp) 
+            {
+                features.emplace_back(current_frame->features_left_[i]);
                 EdgeProjectionPoseOnly *edge =
                     new EdgeProjectionPoseOnly(mp->pos_, K);
                 edge->setId(index);
@@ -173,7 +184,7 @@ namespace myslam {
                 edge->setMeasurement(toVec2(current_frame->features_left_[i]->position_.pt));
                 edge->setInformation(Eigen::Matrix2d::Identity());
                 edge->setRobustKernel(new g2o::RobustKernelHuber);
-                edges.push_back(edge);
+                edges.emplace_back(edge);
                 optimizer.addEdge(edge);
                 index++;
             }
@@ -214,8 +225,7 @@ namespace myslam {
             }
         }
 
-        std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/"
-                << features.size() - cnt_outlier << "\n";
+        std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/" << features.size() - cnt_outlier << "\n";
         // Set pose and outlier
         current_frame->SetPose(vertex_pose->estimate());
 
@@ -236,35 +246,34 @@ namespace myslam {
         // use LK flow to estimate points in the right image
         std::vector<cv::Point2f> kps_last, kps_current;
         for (auto &kp : last_frame->features_left_) {
-            if (kp->map_point_.lock()) {
-                // use project point
+            if (kp->map_point_.lock()) 
+            {
+                // use projected point
                 auto mp = kp->map_point_.lock();
                 auto px = camera_left_->world2pixel(mp->pos_, current_frame->Pose());
-                kps_last.push_back(kp->position_.pt);
-                kps_current.push_back(cv::Point2f(px[0], px[1]));
+                kps_last.emplace_back(kp->position_.pt);
+                kps_current.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
-                kps_last.push_back(kp->position_.pt);
-                kps_current.push_back(kp->position_.pt);
+                kps_last.emplace_back(kp->position_.pt);
+                kps_current.emplace_back(kp->position_.pt);
             }
         }
 
         std::vector<uchar> status;
         cv::Mat error;
-        cv::calcOpticalFlowPyrLK(
-            last_frame->left_img_, current_frame->left_img_, kps_last,
-            kps_current, status, error, cv::Size(11, 11), 3,
-            cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,
-                            0.01),
-            cv::OPTFLOW_USE_INITIAL_FLOW);
+        cv::calcOpticalFlowPyrLK( last_frame->left_img_, current_frame->left_img_, kps_last,
+                                  kps_current, status, error, cv::Size(11, 11), 3,
+                                  cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01), cv::OPTFLOW_USE_INITIAL_FLOW);
 
         int num_good_pts = 0;
 
-        for (size_t i = 0; i < status.size(); ++i) {
+        for (size_t i = 0; i < status.size(); ++i) 
+        {
             if (status[i]) {
                 cv::KeyPoint kp(kps_current[i], 7);
                 std::shared_ptr<Feature> feature(new Feature(current_frame, kp));
                 feature->map_point_ = last_frame->features_left_[i]->map_point_;
-                current_frame->features_left_.push_back(feature);
+                current_frame->features_left_.emplace_back(feature);
                 num_good_pts++;
             }
         }
@@ -273,9 +282,11 @@ namespace myslam {
         return num_good_pts;
     }
 
-    bool StereoTracking::StereoInit() {
+    bool StereoTracking::StereoInit() 
+    {
         DetectFeatures();
-        int num_coor_features = FindFeaturesInRight();
+        int num_coor_features = findCorrespondensesWithOpticalFlow();
+
         if (num_coor_features < num_features_init) {
             return false;
         }
@@ -293,13 +304,30 @@ namespace myslam {
 
     int StereoTracking::DetectFeatures() 
     {
+        /*
+            detect keypoints in img 
+        */
         cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
-        for (auto &feat : current_frame->features_left_) {
-            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10),
-                        feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED);
+        for (auto &feat : current_frame->features_left_) 
+        {
+            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
         }
 
+        // int img_width = current_frame->left_img_.cols; 
+        // int img_height = current_frame->left_img_.rows; 
+
+        // for (int x = 0; x < img_width - grid_size; x +=grid_size)
+        // {
+        //     for(int y = 0; y < img_height - grid_size; y += grid_size)
+        //     {
+
+        //     }
+
+        // }
+
         std::vector<cv::KeyPoint> keypoints;
+        keypoints.reserve(num_features); 
+
         detector->detect(current_frame->left_img_, keypoints, mask);
         unsigned int detected_features = 0;
 
@@ -315,70 +343,132 @@ namespace myslam {
 
     int StereoTracking::ExtractFeatures()
     {
+        /*
+        Extract features (keypoint and descriptor) from left img 
+        */
+        cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->features_left_) 
+        {
+            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
+
         unsigned int detected_features = 0;
 
         std::vector<cv::KeyPoint> keypoints; 
         cv::Mat descriptors; // each row is diffrent descriptor 
 
-        detector->detect(current_frame->left_img_, keypoints, cv::noArray());  
+        detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
             current_frame->features_left_.emplace_back(new Feature(current_frame, keypoints.at(i), descriptors.row(i))); 
+            detected_features++;
+        }
+
+        return detected_features;
+    }
+
+    int StereoTracking::extractStereoFeatures()
+    {
+        /*
+        Extract features (keypoint and descriptor) from left img 
+        */
+        // cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
+        // for (auto &feat : current_frame->features_left_) 
+        // {
+        //     cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        // }
+
+        unsigned int detected_features = 0;
+
+        std::vector<cv::KeyPoint> keypoints_left, keypoints_right;
+        keypoints_left.reserve(num_features);  
+        keypoints_right.reserve(num_features); 
+        cv::Mat descriptors_left; // each row is diffrent descriptor 
+        cv::Mat descriptors_right; 
+
+        detector->detect(current_frame->left_img_, keypoints_left, cv::noArray());  
+        extractor->compute(current_frame->left_img_, keypoints_left, descriptors_left);
+
+
+        for(size_t i = 0; i < keypoints_left.size(); i++)
+        {
+            current_frame->features_left_.emplace_back(new Feature(current_frame, keypoints_left.at(i), descriptors_left.row(i))); 
+            detected_features++;
+        }
+
+        for(size_t i = 0; i < keypoints_right.size(); i++)
+        {
+            auto new_feautre = new Feature(current_frame, keypoints_right.at(i), descriptors_right.row(i)); 
+            new_feautre->is_on_left_image_=false; 
+            current_frame->features_right_.emplace_back(new_feautre); 
         }
 
         return detected_features;
     }
 
 
-    int StereoTracking::FindFeaturesInRight() {
+    int StereoTracking::findCorrespondensesWithOpticalFlow() 
+    {
         // use LK flow to estimate points in the right image
 
-
-        
-
-
+        int num_good_pts = 0;
 
         std::vector<cv::Point2f> kps_left, kps_right;
-        for (auto &kp : current_frame->features_left_) {
-            kps_left.push_back(kp->position_.pt);
+        for (auto &kp : current_frame->features_left_) 
+        {
+            kps_left.emplace_back(kp->position_.pt);
             auto mp = kp->map_point_.lock();
             if (mp) {
                 // use projected points as initial guess
-                auto px =
-                    camera_right_->world2pixel(mp->pos_, current_frame->Pose());
-                kps_right.push_back(cv::Point2f(px[0], px[1]));
+                auto px = camera_right_->world2pixel(mp->pos_, current_frame->Pose());
+                kps_right.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
                 // use same pixel in left iamge
-                kps_right.push_back(kp->position_.pt);
+                kps_right.emplace_back(kp->position_.pt);
             }
         }
 
         std::vector<uchar> status;
         cv::Mat error;
-        cv::calcOpticalFlowPyrLK(
-            current_frame->left_img_, current_frame->right_img_, kps_left,
+        cv::calcOpticalFlowPyrLK( current_frame->left_img_, current_frame->right_img_, kps_left,
             kps_right, status, error, cv::Size(11, 11), 3,
-            cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30,
-                            0.01),
+            cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01),
             cv::OPTFLOW_USE_INITIAL_FLOW);
 
-        int num_good_pts = 0;
-        for (size_t i = 0; i < status.size(); ++i) {
+        for (size_t i = 0; i < status.size(); ++i) 
+        {
             if (status[i]) {
                 cv::KeyPoint kp(kps_right[i], 7);
                 std::shared_ptr<Feature> feat(new Feature(current_frame, kp));
                 feat->is_on_left_image_ = false;
-                current_frame->features_right_.push_back(feat);
+                current_frame->features_right_.emplace_back(feat);
                 num_good_pts++;
             } else {
-                current_frame->features_right_.push_back(nullptr);
+                current_frame->features_right_.emplace_back(nullptr);
             }
         }
+
         std::cout  << "Find " << num_good_pts << " in the right image. \n";
         return num_good_pts;
     }
+
+    int StereoTracking::findCorrespondensesWithMatching()
+    {
+        std::vector<cv::Point2f> kps_left, kps_right;
+        
+
+        kps_left.reserve(num_features); 
+        kps_right.reserve(num_features); 
+
+        for (auto &feature : current_frame->features_left_) 
+        {
+            kps_left.emplace_back(feature->position_.pt);
+
+        }
+    }
+
 
     bool StereoTracking::BuildInitMap() 
     {

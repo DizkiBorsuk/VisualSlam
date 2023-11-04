@@ -10,9 +10,10 @@ namespace myslam {
     class Visualizer;
 
     enum class TrackingStatus { INITING, TRACKING, LOST };
-    enum class TrackingType { OpticalFlow_GFTT, OpticalFlow_ORB, Matching };
+    enum class TrackingType { OpticalFlow_GFTT, OpticalFlow_ORB, Matching_ORB, Matching_SIFT};
 
-    class StereoTracking {
+    class StereoTracking 
+    {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
@@ -38,8 +39,11 @@ namespace myslam {
         bool StereoInit();
 
         int DetectFeatures();
-        int ExtractFeatures(); 
-        int FindFeaturesInRight();
+        int ExtractFeatures(); // extract features from only left img
+        int extractStereoFeatures(); // extract features from both imgs 
+
+        int findCorrespondensesWithOpticalFlow();
+        int findCorrespondensesWithMatching();
 
         bool BuildInitMap();
 
@@ -65,17 +69,19 @@ namespace myslam {
         int tracking_inliers_ = 0;  // inliers, used for testing new keyframes
 
         // params
-        int num_features = 150;
-        int num_features_init = 50;
-        int num_features_tracking_ = 50;
-        int num_features_tracking_bad_ = 20;
-        int num_features_needed_for_keyframe_ = 80;
+        static constexpr int num_features = 150;
+        static constexpr int num_features_init = 50;
+        static constexpr int num_features_tracking_bad_ = 20;
+        static constexpr int num_features_needed_for_keyframe_ = 80;
 
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
         cv::Ptr<cv::DescriptorMatcher> matcher;
 
+
+        static constexpr int grid_rows = 24;  
+        static constexpr int grid_cols = 32;  
     };
 
 }  // namespace myslam

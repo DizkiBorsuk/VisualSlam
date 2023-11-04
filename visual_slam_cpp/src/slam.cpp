@@ -21,10 +21,10 @@ namespace myslam
         right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1));
 
         // create components and links
-        stereoTracking = std::shared_ptr<StereoTracking>(new StereoTracking(TrackingType::OpticalFlow_GFTT));
+        stereoTracking = std::shared_ptr<StereoTracking>(new StereoTracking(TrackingType::OpticalFlow_ORB));
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
         map = std::shared_ptr<Map>(new Map);
-        visualizer = std::shared_ptr<Visualizer>(new Visualizer(true));
+        visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
 
         stereoTracking->setTracking(map, local_mapping, visualizer, left_camera, right_camera);
 
