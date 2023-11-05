@@ -370,43 +370,32 @@ namespace myslam {
         return detected_features;
     }
 
-    int StereoTracking::extractStereoFeatures()
+    int StereoTracking::findCorrespondensesWithMatching()
     {
         /*
-        Extract features (keypoint and descriptor) from left img 
+            extract features from right img and match them with features from left
         */
-        // cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
-        // for (auto &feat : current_frame->features_left_) 
-        // {
-        //     cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        // }
+        std::vector<cv::KeyPoint> kps_left, kps_right;
 
-        unsigned int detected_features = 0;
+        kps_left.reserve(num_features); 
+        kps_right.reserve(num_features); 
 
-        std::vector<cv::KeyPoint> keypoints_left, keypoints_right;
-        keypoints_left.reserve(num_features);  
-        keypoints_right.reserve(num_features); 
-        cv::Mat descriptors_left; // each row is diffrent descriptor 
-        cv::Mat descriptors_right; 
+        cv::Mat descriptors_left, descriptors_right; 
+        std::vector<std::vector<cv::DMatch>> matched_points; 
+        
+        detector->detect(current_frame->right_img_, kps_right, cv::noArray());  
+        extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
 
-        detector->detect(current_frame->left_img_, keypoints_left, cv::noArray());  
-        extractor->compute(current_frame->left_img_, keypoints_left, descriptors_left);
-
-
-        for(size_t i = 0; i < keypoints_left.size(); i++)
+        for (auto &feature : current_frame->features_left_) 
         {
-            current_frame->features_left_.emplace_back(new Feature(current_frame, keypoints_left.at(i), descriptors_left.row(i))); 
-            detected_features++;
+            kps_left.emplace_back(feature->position_);
+            descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
         }
 
-        for(size_t i = 0; i < keypoints_right.size(); i++)
-        {
-            auto new_feautre = new Feature(current_frame, keypoints_right.at(i), descriptors_right.row(i)); 
-            new_feautre->is_on_left_image_=false; 
-            current_frame->features_right_.emplace_back(new_feautre); 
-        }
+        matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
 
-        return detected_features;
+
+
     }
 
 
@@ -453,21 +442,6 @@ namespace myslam {
 
         std::cout  << "Find " << num_good_pts << " in the right image. \n";
         return num_good_pts;
-    }
-
-    int StereoTracking::findCorrespondensesWithMatching()
-    {
-        std::vector<cv::Point2f> kps_left, kps_right;
-        
-
-        kps_left.reserve(num_features); 
-        kps_right.reserve(num_features); 
-
-        for (auto &feature : current_frame->features_left_) 
-        {
-            kps_left.emplace_back(feature->position_.pt);
-
-        }
     }
 
 
