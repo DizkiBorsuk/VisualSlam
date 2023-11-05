@@ -68,11 +68,7 @@ namespace myslam {
 
         int tracking_inliers_ = 0;  // inliers, used for testing new keyframes
 
-        // params
-        static constexpr int num_features = 150;
-        static constexpr int num_features_init = 50;
-        static constexpr int num_features_tracking_bad_ = 20;
-        static constexpr int num_features_needed_for_keyframe_ = 80;
+
 
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
@@ -82,6 +78,13 @@ namespace myslam {
 
         static constexpr int grid_rows = 24;  
         static constexpr int grid_cols = 32;  
+
+    public:
+                // params
+        static constexpr int num_features = 550;
+        static constexpr int num_features_init = 50;
+        static constexpr int num_features_tracking_bad_ = 20;
+        static constexpr int num_features_needed_for_keyframe_ = 200;
     };
 
 }  // namespace myslam

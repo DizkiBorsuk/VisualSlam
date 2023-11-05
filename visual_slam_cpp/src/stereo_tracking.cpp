@@ -15,7 +15,8 @@ namespace myslam {
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
                 break; 
             case TrackingType::OpticalFlow_ORB: 
-                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
+                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+                //detector = cv::FastFeatureDetector::create(); 
                 break; 
 
             case TrackingType::Matching_ORB: 

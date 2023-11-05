@@ -95,8 +95,8 @@ namespace myslam
         }; 
 
         double sum_error_x = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
-        double sum_error_y = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
-        double sum_error_z = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
+        double sum_error_y = std::transform_reduce(PAR er_y.cbegin(), er_y.cend(), 0L, std::plus{}, abs_value);
+        double sum_error_z = std::transform_reduce(PAR er_z.cbegin(), er_z.cend(), 0L, std::plus{}, abs_value);
 
         double mean_error_x = sum_error_x/er_x.size(); 
         double mean_error_y = sum_error_y/er_y.size();  
@@ -108,7 +108,7 @@ namespace myslam
         std::cout << "max y error = " << *std::max_element(er_y.begin(), er_y.end(), compare_abs) << ", min y error = " << *std::min_element(er_y.begin(), er_y.end(), compare_abs) << "\n"; 
         std::cout << "mean z error = " << mean_error_z << "\n";
         std::cout << "max z error = " << *std::max_element(er_z.begin(), er_z.end(), compare_abs) << ", min z error = " << *std::min_element(er_z.begin(), er_z.end(),compare_abs) << "\n"; 
- 
+
         auto fig = matplot::figure();  
         fig->width(fig->width()*2); 
         fig->height(fig->height()*2);
