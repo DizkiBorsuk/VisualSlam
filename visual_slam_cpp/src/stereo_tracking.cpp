@@ -15,7 +15,7 @@ namespace myslam {
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
                 break; 
             case TrackingType::OpticalFlow_ORB: 
-                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
                 //detector = cv::FastFeatureDetector::create(); 
                 break; 
 
@@ -23,14 +23,14 @@ namespace myslam {
                 matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING);
                 //matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
 
-                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
-                extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
+                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);  
+                extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
             case TrackingType::Matching_SIFT: 
                 matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_SL2);
 
-                detector = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE);  
-                extractor = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::FAST_SCORE); 
+                detector = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);  
+                extractor = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break;
             default: 
                 break; 
@@ -342,7 +342,7 @@ namespace myslam {
         return detected_features;
     }
 
-    int StereoTracking::ExtractFeatures()
+    int StereoTracking::extractFeatures()
     {
         /*
         Extract features (keypoint and descriptor) from left img 
@@ -370,6 +370,36 @@ namespace myslam {
         return detected_features;
     }
 
+    // int StereoTracking::extractFeatures()
+    // {
+    //     /*
+    //     Extract features (keypoint and descriptor) from right img 
+    //     */
+    //     cv::Mat mask(current_frame->right_img_.size(), CV_8UC1, 255);
+    //     for (auto &feat : current_frame->features_right_) 
+    //     {
+    //         cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+    //     }
+
+    //     unsigned int detected_features = 0;
+
+    //     std::vector<cv::KeyPoint> keypoints; 
+    //     cv::Mat descriptors; // each row is diffrent descriptor 
+
+    //     detector->detect(current_frame->right_img_, keypoints, mask);  
+    //     extractor->compute(current_frame->right_img_, keypoints, descriptors); 
+
+    //     for(size_t i = 0; i < keypoints.size(); i++)
+    //     {
+    //         auto new_feature = new Feature(current_frame, keypoints.at(i), descriptors.row(i)); 
+    //         new_feature->is_on_left_image_ = false; 
+    //         current_frame->features_right_.emplace_back(new_feature); 
+    //         detected_features++;
+    //     }
+
+    //     return detected_features;
+    // }
+
     int StereoTracking::findCorrespondensesWithMatching()
     {
         /*
@@ -382,8 +412,14 @@ namespace myslam {
 
         cv::Mat descriptors_left, descriptors_right; 
         std::vector<std::vector<cv::DMatch>> matched_points; 
+
+        cv::Mat mask(current_frame->right_img_.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->features_right_) 
+        {
+            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
         
-        detector->detect(current_frame->right_img_, kps_right, cv::noArray());  
+        detector->detect(current_frame->right_img_, kps_right, mask);  
         extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
 
         for (auto &feature : current_frame->features_left_) 
@@ -394,7 +430,17 @@ namespace myslam {
 
         matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
 
-
+        float low_ratio = 0.7f; 
+        std::vector<std::vector<cv::DMatch>>::iterator it;
+        
+        for (it= matches.begin(); it!= matches.end(); ++it) 
+        {
+            if ((*it)[0].distance/(*it)[1].distance < low_ratio)
+            {
+                matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
+                matchedKeypoints[1] .emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
+            }
+        }
 
     }
 
@@ -402,7 +448,6 @@ namespace myslam {
     int StereoTracking::findCorrespondensesWithOpticalFlow() 
     {
         // use LK flow to estimate points in the right image
-
         int num_good_pts = 0;
 
         std::vector<cv::Point2f> kps_left, kps_right;
@@ -456,13 +501,8 @@ namespace myslam {
             }
 
             // create map point from triangulation
-            std::vector<Eigen::Vector3d> points{
-                camera_left_->pixel2camera(
-                    Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,
-                        current_frame->features_left_[i]->position_.pt.y)),
-                camera_right_->pixel2camera(
-                    Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,
-                        current_frame->features_right_[i]->position_.pt.y))};
+            std::vector<Eigen::Vector3d> points{ camera_left_->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y)),
+                                                camera_right_->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,current_frame->features_right_[i]->position_.pt.y))};
             Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
             if (triangulation(camera_left_->pose(),camera_right_->pose(), points, pworld)) {

@@ -39,8 +39,8 @@ namespace myslam {
         bool StereoInit();
 
         int DetectFeatures();
-        int ExtractFeatures(); // extract features from only left img
-        int extractStereoFeatures(); // extract features from both imgs 
+        int extractFeaturesFromLeftImg(); // extract features from only left img
+        int extractFeaturesFromLeftImg(); 
 
         int findCorrespondensesWithOpticalFlow();
         int findCorrespondensesWithMatching();
