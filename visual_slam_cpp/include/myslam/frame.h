@@ -27,6 +27,9 @@ namespace myslam {
             : frame_(frame), position_(kp) {}
         Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp, cv::Mat in_descriptor)
             : frame_(frame), position_(kp), descriptor(in_descriptor) {}
+
+        Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp, cv::Mat in_descriptor, bool is_on_left)
+            : frame_(frame), position_(kp), descriptor(in_descriptor),is_on_left_image_(is_on_left) {}
     };
 
     class Frame {

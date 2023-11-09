@@ -99,7 +99,8 @@ namespace myslam {
             if (mp) mp->AddObservation(feat);
         }
         
-        DetectFeatures();  // detect new features
+        //DetectFeatures();  // detect new features
+        extractFeatures(); 
 
         // track in right image
         findCorrespondensesWithOpticalFlow();
@@ -285,7 +286,8 @@ namespace myslam {
 
     bool StereoTracking::StereoInit() 
     {
-        DetectFeatures();
+        //DetectFeatures();
+        extractFeatures(); 
         int num_coor_features = findCorrespondensesWithOpticalFlow();
 
         if (num_coor_features < num_features_init) {
@@ -370,40 +372,10 @@ namespace myslam {
         return detected_features;
     }
 
-    // int StereoTracking::extractFeatures()
-    // {
-    //     /*
-    //     Extract features (keypoint and descriptor) from right img 
-    //     */
-    //     cv::Mat mask(current_frame->right_img_.size(), CV_8UC1, 255);
-    //     for (auto &feat : current_frame->features_right_) 
-    //     {
-    //         cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-    //     }
-
-    //     unsigned int detected_features = 0;
-
-    //     std::vector<cv::KeyPoint> keypoints; 
-    //     cv::Mat descriptors; // each row is diffrent descriptor 
-
-    //     detector->detect(current_frame->right_img_, keypoints, mask);  
-    //     extractor->compute(current_frame->right_img_, keypoints, descriptors); 
-
-    //     for(size_t i = 0; i < keypoints.size(); i++)
-    //     {
-    //         auto new_feature = new Feature(current_frame, keypoints.at(i), descriptors.row(i)); 
-    //         new_feature->is_on_left_image_ = false; 
-    //         current_frame->features_right_.emplace_back(new_feature); 
-    //         detected_features++;
-    //     }
-
-    //     return detected_features;
-    // }
-
-    int StereoTracking::findCorrespondensesWithMatching()
+    int StereoTracking::extractStereoFeatures()
     {
         /*
-            extract features from right img and match them with features from left
+            extract features from right img and match them with features from left, then create both feature objects 
         */
         std::vector<cv::KeyPoint> kps_left, kps_right;
 
@@ -413,41 +385,56 @@ namespace myslam {
         cv::Mat descriptors_left, descriptors_right; 
         std::vector<std::vector<cv::DMatch>> matched_points; 
 
-        cv::Mat mask(current_frame->right_img_.size(), CV_8UC1, 255);
+        cv::Mat mask_l(current_frame->left_img_.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->features_left_) 
+        {
+            cv::rectangle(mask_l, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
+
+        detector->detect(current_frame->left_img_, kps_left, mask_l);  
+        extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
+
+        
+        cv::Mat mask_r(current_frame->right_img_.size(), CV_8UC1, 255);
         for (auto &feat : current_frame->features_right_) 
         {
-            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+            cv::rectangle(mask_r, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
         }
-        
-        detector->detect(current_frame->right_img_, kps_right, mask);  
+
+        detector->detect(current_frame->right_img_, kps_right, mask_r);  
         extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
 
-        for (auto &feature : current_frame->features_left_) 
-        {
-            kps_left.emplace_back(feature->position_);
-            descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
-        }
+        // for (auto &feature : current_frame->features_left_) 
+        // {
+        //     kps_left.emplace_back(feature->position_);
+        //     descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
+        // }
 
         matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
 
         float low_ratio = 0.7f; 
         std::vector<std::vector<cv::DMatch>>::iterator it;
-        
-        for (it= matches.begin(); it!= matches.end(); ++it) 
+
+        unsigned int found_features = 0; 
+        for (it= matched_points.begin(); it!= matched_points.end(); ++it) 
         {
             if ((*it)[0].distance/(*it)[1].distance < low_ratio)
             {
-                matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
-                matchedKeypoints[1] .emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
+                current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx))); 
+                current_frame->features_right_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx), true)); 
+                // matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
+                // matchedKeypoints[1].emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
+                found_features++;
             }
         }
-
+        return found_features; 
     }
-
 
     int StereoTracking::findCorrespondensesWithOpticalFlow() 
     {
-        // use LK flow to estimate points in the right image
+        /*
+        after finding keypoints in left img, find the same keypoints in righr img using optical flow 
+        */
         int num_good_pts = 0;
 
         std::vector<cv::Point2f> kps_left, kps_right;
