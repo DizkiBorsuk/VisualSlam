@@ -1,4 +1,4 @@
-#include "myslam/frame.h"
+#include "myslam/frame.hpp"
 
 namespace myslam 
 {

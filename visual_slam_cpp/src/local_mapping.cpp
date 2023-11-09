@@ -1,6 +1,6 @@
-#include "myslam/local_mapping.h"
-#include "myslam/g2o_types.h"
-#include "myslam/mappoint.h"
+#include "myslam/local_mapping.hpp"
+#include "myslam/g2o_types.hpp"
+#include "myslam/mappoint.hpp"
 
 namespace myslam {
 

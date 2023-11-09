@@ -1,4 +1,4 @@
-#include "myslam/map.h"
+#include "myslam/map.hpp"
 
 namespace myslam 
 {

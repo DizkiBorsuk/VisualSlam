@@ -1,5 +1,5 @@
 #pragma once
-#include "myslam/common_include.h"
+#include "myslam/common_include.hpp"
 
 namespace myslam {
 

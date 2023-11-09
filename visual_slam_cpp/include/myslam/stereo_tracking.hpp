@@ -1,8 +1,8 @@
 #pragma once
 
-#include "myslam/common_include.h"
-#include "myslam/frame.h"
-#include "myslam/map.h"
+#include "myslam/common_include.hpp"
+#include "myslam/frame.hpp"
+#include "myslam/map.hpp"
 
 namespace myslam {
 

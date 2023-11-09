@@ -1,8 +1,8 @@
-#include "myslam/local_mapping.h"
+#include "myslam/local_mapping.hpp"
 #include "myslam/stereo_tracking.hpp"
-#include "myslam/g2o_types.h"
-#include "myslam/map.h"
-#include "myslam/viewer.h"
+#include "myslam/g2o_types.hpp"
+#include "myslam/map.hpp"
+#include "myslam/visualizer.hpp"
 
 namespace myslam {
 

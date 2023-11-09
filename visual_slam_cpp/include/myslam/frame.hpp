@@ -1,6 +1,6 @@
 #pragma once
-#include "myslam/camera.h"
-#include "myslam/common_include.h"
+#include "myslam/camera.hpp"
+#include "myslam/common_include.hpp"
 
 namespace myslam {
 

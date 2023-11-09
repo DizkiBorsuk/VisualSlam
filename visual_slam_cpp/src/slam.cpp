@@ -1,5 +1,5 @@
 
-#include "myslam/slam.h"
+#include "myslam/slam.hpp"
 #include <boost/config.hpp>
 #include <boost/format.hpp>
 

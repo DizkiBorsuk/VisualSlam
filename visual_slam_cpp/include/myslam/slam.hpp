@@ -1,9 +1,9 @@
 #pragma once
-#include "myslam/local_mapping.h"
-#include "myslam/common_include.h"
+#include "myslam/local_mapping.hpp"
+#include "myslam/common_include.hpp"
 #include "myslam/read_dataset.hpp"
 #include "myslam/stereo_tracking.hpp"
-#include "myslam/viewer.h"
+#include "myslam/visualizer.hpp"
 
 namespace myslam {
 

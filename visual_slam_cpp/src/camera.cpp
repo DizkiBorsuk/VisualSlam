@@ -1,4 +1,4 @@
-#include "myslam/camera.h"
+#include "myslam/camera.hpp"
 
 namespace myslam {
 

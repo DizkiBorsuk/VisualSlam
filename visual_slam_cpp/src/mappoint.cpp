@@ -1,9 +1,8 @@
-#include "myslam/mappoint.h"
-#include "myslam/frame.h"
+#include "myslam/mappoint.hpp"
+#include "myslam/frame.hpp"
 
 namespace myslam 
 {
-
     MapPoint::MapPoint(long id, Eigen::Vector3d position) : id_(id), pos_(position) 
     {}
 

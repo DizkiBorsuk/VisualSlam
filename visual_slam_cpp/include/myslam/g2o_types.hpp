@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "myslam/common_include.h"
+#include "myslam/common_include.hpp"
 
 #include <g2o/core/base_binary_edge.h>
 #include <g2o/core/base_unary_edge.h>

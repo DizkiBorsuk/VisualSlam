@@ -5,7 +5,7 @@ add_library(myslam SHARED
         camera.cpp
         stereo_tracking.cpp
         local_mapping.cpp
-        viewer.cpp
+        visualizer.cpp
         slam.cpp
         read_dataset.cpp
         tools.cpp
