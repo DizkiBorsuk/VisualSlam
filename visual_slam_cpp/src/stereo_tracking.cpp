@@ -356,8 +356,28 @@ namespace myslam {
 
         unsigned int detected_features = 0;
 
-        std::vector<cv::KeyPoint> keypoints; 
+        std::vector<cv::KeyPoint> keypoints;
+        keypoints.reserve(num_features); 
         cv::Mat descriptors; // each row is diffrent descriptor 
+        
+
+        // for (int y = 0; y < 1241 - GRID_SIZE_H; y += GRID_SIZE_H) 
+        // {
+        //     for (int x = 0; x < 376 - GRID_SIZE_W; x += GRID_SIZE_W) 
+        //     {
+        //         cv::Mat block; 
+        //         block = current_frame->left_img_(cv::Rect(x, y, GRID_SIZE_W, GRID_SIZE_H)).clone(); 
+        //         detector->detect(block, temp_keypoints, cv::noArray());  
+        //         extractor->compute(block, temp_keypoints, descriptors); 
+
+        //         for(auto &kp : temp_keypoints)
+        //         {
+        //             kp.pt.x +=x; 
+        //             kp.pt.y +=y; 
+        //             keypoints.emplace_back(kp); 
+        //         }
+        //     }
+        // }
 
         detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
