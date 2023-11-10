@@ -1,4 +1,4 @@
-#include "myslam/slam.h"
+#include "myslam/slam.hpp"
 
 int main() {
     

@@ -7,7 +7,7 @@
 
 namespace myslam {
 
-
+    
     class StereoSLAM {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
@@ -31,7 +31,7 @@ namespace myslam {
         int current_image_index_ = 0;
         bool inited_ = false;
 
-        std::shared_ptr<StereoTracking> stereoTracking = nullptr;
+        std::shared_ptr<StereoTracking_OPF> stereoTracking = nullptr;
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<Visualizer> visualizer = nullptr;

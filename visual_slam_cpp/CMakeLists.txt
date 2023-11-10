@@ -37,6 +37,7 @@ set(THIRD_PARTY_LIBS
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 add_subdirectory(src)
+# add_subdirectory(DBow3)
 
 add_executable(run_SLAM main.cpp)
 target_link_libraries(run_SLAM myslam )

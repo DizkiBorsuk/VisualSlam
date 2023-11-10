@@ -10,14 +10,14 @@ namespace myslam {
     class Visualizer;
 
     enum class TrackingStatus { INITING, TRACKING, LOST };
-    enum class TrackingType { OpticalFlow_GFTT, OpticalFlow_ORB, Matching_ORB, Matching_SIFT};
+    enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT};
 
-    class StereoTracking 
+    class StereoTracking_OPF
     {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-        StereoTracking(TrackingType choose_tracking_type);
+        StereoTracking_OPF(TrackingType choose_tracking_type, bool destriptors);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
         void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, 
@@ -52,7 +52,7 @@ namespace myslam {
 
         // data
         TrackingStatus status = TrackingStatus::INITING;
-        TrackingType type = TrackingType::OpticalFlow_GFTT; 
+        TrackingType type = TrackingType::GFTT; 
 
         std::shared_ptr<Frame> current_frame = nullptr;  
         std::shared_ptr<Frame> last_frame = nullptr;    
@@ -67,23 +67,20 @@ namespace myslam {
 
         int tracking_inliers_ = 0;  // inliers, used for testing new keyframes
 
-
-
-
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
-        cv::Ptr<cv::DescriptorMatcher> matcher;
+        bool use_descriptors = false; 
 
+        static constexpr int GRID_SIZE_H = 46;
+        static constexpr int GRID_SIZE_W = 68;
 
-        static constexpr int grid_rows = 24;  
-        static constexpr int grid_cols = 32;  
 
     public:
-                // params
-        static constexpr int num_features = 550;
-        static constexpr int num_features_init = 50;
-        static constexpr int num_features_tracking_bad_ = 20;
-        static constexpr int num_features_needed_for_keyframe_ = 200;
+        // params
+        static constexpr int num_features = 700; //150
+        static constexpr int num_features_init = 100; // 50 
+        static constexpr int num_features_tracking_bad_ = 20; 
+        static constexpr int num_features_needed_for_keyframe_ = 150; //80
     };
 
 }  // namespace myslam

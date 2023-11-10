@@ -6,38 +6,36 @@
 
 namespace myslam {
 
-    StereoTracking::StereoTracking(TrackingType choose_tracking_type) 
+    StereoTracking_OPF::StereoTracking_OPF(TrackingType choose_tracking_type, bool descriptors) 
     {
         type = choose_tracking_type; 
+        use_descriptors = descriptors; 
         switch(type)
         {
-            case TrackingType::OpticalFlow_GFTT:
+            case TrackingType::GFTT:
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
                 break; 
-            case TrackingType::OpticalFlow_ORB: 
+            case TrackingType::ORB: 
                 detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
-                //detector = cv::FastFeatureDetector::create(); 
+                if(use_descriptors == true) 
+                    extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
-
-            case TrackingType::Matching_ORB: 
-                matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING);
-                //matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
-
-                detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);  
-                extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+            case TrackingType::FAST_ORB: 
+                detector = cv::FastFeatureDetector::create(10, true, cv::FastFeatureDetector::TYPE_9_16);  
+                if(use_descriptors == true) 
+                    extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
-            case TrackingType::Matching_SIFT: 
-                matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_SL2);
-
-                detector = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);  
-                extractor = cv::SIFT::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+            case TrackingType::SIFT: 
+                detector = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false);  
+                if(use_descriptors == true) 
+                    extractor = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false); 
                 break;
             default: 
                 break; 
         }
     }
 
-    bool StereoTracking::AddFrame(std::shared_ptr<Frame> frame) {
+    bool StereoTracking_OPF::AddFrame(std::shared_ptr<Frame> frame) {
         current_frame = frame;
 
         switch (status) {
@@ -56,7 +54,7 @@ namespace myslam {
         return true;
     }
 
-    bool StereoTracking::Track() 
+    bool StereoTracking_OPF::Track() 
     {
         if (last_frame) 
         {
@@ -85,7 +83,7 @@ namespace myslam {
         return true;
     }
 
-    bool StereoTracking::InsertKeyframe() {
+    bool StereoTracking_OPF::InsertKeyframe() {
 
         // current frame is a new keyframe
         current_frame->SetKeyFrame();
@@ -99,8 +97,14 @@ namespace myslam {
             if (mp) mp->AddObservation(feat);
         }
         
-        //DetectFeatures();  // detect new features
-        extractFeatures(); 
+        if(use_descriptors == true)
+        {
+            extractFeatures(); 
+        } 
+        else 
+        {
+            DetectFeatures();
+        }
 
         // track in right image
         findCorrespondensesWithOpticalFlow();
@@ -114,7 +118,7 @@ namespace myslam {
         return true;
     }
 
-    int StereoTracking::TriangulateNewPoints() {
+    int StereoTracking_OPF::TriangulateNewPoints() {
 
         Sophus::SE3d current_pose_Twc = current_frame->Pose().inverse();
         int cnt_triangulated_pts = 0;
@@ -152,7 +156,7 @@ namespace myslam {
         return cnt_triangulated_pts;
     }
 
-    int StereoTracking::EstimateCurrentPose() {
+    int StereoTracking_OPF::EstimateCurrentPose() {
         // setup g2o
         typedef g2o::LinearSolverDense<g2o::BlockSolver_6_3::PoseMatrixType> LinearSolverType;
         auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3>(std::make_unique<LinearSolverType>()));
@@ -244,7 +248,7 @@ namespace myslam {
         return features.size() - cnt_outlier;
     }
 
-    int StereoTracking::TrackLastFrame() {
+    int StereoTracking_OPF::TrackLastFrame() {
         // use LK flow to estimate points in the right image
         std::vector<cv::Point2f> kps_last, kps_current;
         for (auto &kp : last_frame->features_left_) {
@@ -284,10 +288,17 @@ namespace myslam {
         return num_good_pts;
     }
 
-    bool StereoTracking::StereoInit() 
+    bool StereoTracking_OPF::StereoInit() 
     {
-        //DetectFeatures();
-        extractFeatures(); 
+        if(use_descriptors == true)
+        {
+            extractFeatures(); 
+        } 
+        else 
+        {
+            DetectFeatures();
+        }
+        
         int num_coor_features = findCorrespondensesWithOpticalFlow();
 
         if (num_coor_features < num_features_init) {
@@ -305,7 +316,7 @@ namespace myslam {
         return false;
     }
 
-    int StereoTracking::DetectFeatures() 
+    int StereoTracking_OPF::DetectFeatures() 
     {
         /*
             detect keypoints in img 
@@ -315,18 +326,6 @@ namespace myslam {
         {
             cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
         }
-
-        // int img_width = current_frame->left_img_.cols; 
-        // int img_height = current_frame->left_img_.rows; 
-
-        // for (int x = 0; x < img_width - grid_size; x +=grid_size)
-        // {
-        //     for(int y = 0; y < img_height - grid_size; y += grid_size)
-        //     {
-
-        //     }
-
-        // }
 
         std::vector<cv::KeyPoint> keypoints;
         keypoints.reserve(num_features); 
@@ -344,7 +343,7 @@ namespace myslam {
         return detected_features;
     }
 
-    int StereoTracking::extractFeatures()
+    int StereoTracking_OPF::extractFeatures()
     {
         /*
         Extract features (keypoint and descriptor) from left img 
@@ -372,65 +371,65 @@ namespace myslam {
         return detected_features;
     }
 
-    int StereoTracking::extractStereoFeatures()
-    {
-        /*
-            extract features from right img and match them with features from left, then create both feature objects 
-        */
-        std::vector<cv::KeyPoint> kps_left, kps_right;
+    // int StereoTracking_OPF::extractStereoFeatures()
+    // {
+    //     /*
+    //         extract features from right img and match them with features from left, then create both feature objects 
+    //     */
+    //     std::vector<cv::KeyPoint> kps_left, kps_right;
 
-        kps_left.reserve(num_features); 
-        kps_right.reserve(num_features); 
+    //     kps_left.reserve(num_features); 
+    //     kps_right.reserve(num_features); 
 
-        cv::Mat descriptors_left, descriptors_right; 
-        std::vector<std::vector<cv::DMatch>> matched_points; 
+    //     cv::Mat descriptors_left, descriptors_right; 
+    //     std::vector<std::vector<cv::DMatch>> matched_points; 
 
-        cv::Mat mask_l(current_frame->left_img_.size(), CV_8UC1, 255);
-        for (auto &feat : current_frame->features_left_) 
-        {
-            cv::rectangle(mask_l, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        }
+    //     cv::Mat mask_l(current_frame->left_img_.size(), CV_8UC1, 255);
+    //     for (auto &feat : current_frame->features_left_) 
+    //     {
+    //         cv::rectangle(mask_l, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+    //     }
 
-        detector->detect(current_frame->left_img_, kps_left, mask_l);  
-        extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
+    //     detector->detect(current_frame->left_img_, kps_left, mask_l);  
+    //     extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
 
         
-        cv::Mat mask_r(current_frame->right_img_.size(), CV_8UC1, 255);
-        for (auto &feat : current_frame->features_right_) 
-        {
-            cv::rectangle(mask_r, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        }
+    //     cv::Mat mask_r(current_frame->right_img_.size(), CV_8UC1, 255);
+    //     for (auto &feat : current_frame->features_right_) 
+    //     {
+    //         cv::rectangle(mask_r, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+    //     }
 
-        detector->detect(current_frame->right_img_, kps_right, mask_r);  
-        extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
+    //     detector->detect(current_frame->right_img_, kps_right, mask_r);  
+    //     extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
 
-        // for (auto &feature : current_frame->features_left_) 
-        // {
-        //     kps_left.emplace_back(feature->position_);
-        //     descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
-        // }
+    //     // for (auto &feature : current_frame->features_left_) 
+    //     // {
+    //     //     kps_left.emplace_back(feature->position_);
+    //     //     descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
+    //     // }
 
-        matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
+    //     matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
 
-        float low_ratio = 0.7f; 
-        std::vector<std::vector<cv::DMatch>>::iterator it;
+    //     float low_ratio = 0.7f; 
+    //     std::vector<std::vector<cv::DMatch>>::iterator it;
 
-        unsigned int found_features = 0; 
-        for (it= matched_points.begin(); it!= matched_points.end(); ++it) 
-        {
-            if ((*it)[0].distance/(*it)[1].distance < low_ratio)
-            {
-                current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx))); 
-                current_frame->features_right_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx), true)); 
-                // matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
-                // matchedKeypoints[1].emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
-                found_features++;
-            }
-        }
-        return found_features; 
-    }
+    //     unsigned int found_features = 0; 
+    //     for (it= matched_points.begin(); it!= matched_points.end(); ++it) 
+    //     {
+    //         if ((*it)[0].distance/(*it)[1].distance < low_ratio)
+    //         {
+    //             current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx))); 
+    //             current_frame->features_right_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx), true)); 
+    //             // matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
+    //             // matchedKeypoints[1].emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
+    //             found_features++;
+    //         }
+    //     }
+    //     return found_features; 
+    // }
 
-    int StereoTracking::findCorrespondensesWithOpticalFlow() 
+    int StereoTracking_OPF::findCorrespondensesWithOpticalFlow() 
     {
         /*
         after finding keypoints in left img, find the same keypoints in righr img using optical flow 
@@ -477,7 +476,7 @@ namespace myslam {
     }
 
 
-    bool StereoTracking::BuildInitMap() 
+    bool StereoTracking_OPF::BuildInitMap() 
     {
         unsigned int cnt_init_landmarks = 0;
         for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
@@ -513,7 +512,7 @@ namespace myslam {
         return true;
     }
 
-    bool StereoTracking::Reset() {
+    bool StereoTracking_OPF::Reset() {
         std::cout  << "Tracking lost \n";
         return false;
     }

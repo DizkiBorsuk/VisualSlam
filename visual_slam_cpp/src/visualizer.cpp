@@ -1,4 +1,4 @@
-#include "myslam/viewer.h"
+#include "myslam/visualizer.hpp"
 
 #include <unistd.h>
 #include <stdio.h>
