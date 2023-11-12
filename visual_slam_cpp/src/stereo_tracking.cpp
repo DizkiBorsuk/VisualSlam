@@ -14,6 +14,8 @@ namespace myslam {
         {
             case TrackingType::GFTT:
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
+                if(use_descriptors == true) 
+                    extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
             case TrackingType::ORB: 
                 detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT

@@ -77,10 +77,10 @@ namespace myslam {
 
     public:
         // params
-        static constexpr int num_features = 700; //150
-        static constexpr int num_features_init = 100; // 50 
+        static constexpr int num_features = 150; //150
+        static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe_ = 150; //80
+        static constexpr int num_features_needed_for_keyframe_ = 80; //80
     };
 
 }  // namespace myslam

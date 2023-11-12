@@ -112,6 +112,7 @@ namespace myslam
         auto fig = matplot::figure();  
         fig->width(fig->width()*2); 
         fig->height(fig->height()*2);
+        fig->color("white"); 
         auto ax1 = matplot::subplot(3, 1, 0);
         matplot::plot(er_x)->line_width(2);
         matplot::grid(ax1, matplot::on);   
