@@ -10,6 +10,9 @@ set(CMAKE_CXX_FLAGS_RELEASE  "-std=c++20 -O3 -fopenmp -pthread")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+set( DBoW3_INCLUDE_DIRS "/usr/local/include" )
+set( DBoW3_LIBS "/usr/local/lib/libDBoW3.so" )
+
 ############### dependencies ######################
 find_package(Eigen3  REQUIRED NO_MODULE)
 find_package(OpenCV  REQUIRED)
@@ -29,6 +32,7 @@ set(THIRD_PARTY_LIBS
         ${OpenCV_LIBS}
         ${Sophus_LIBRARIES}
         ${Pangolin_LIBRARIES}
+        ${DBoW3_LIBS}
         g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
         pthread
         Eigen3::Eigen 

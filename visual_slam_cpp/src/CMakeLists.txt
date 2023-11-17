@@ -9,6 +9,7 @@ add_library(myslam SHARED
         slam.cpp
         read_dataset.cpp
         tools.cpp
+        loop_closing.cpp
         )
 
 target_link_libraries(myslam ${THIRD_PARTY_LIBS})
