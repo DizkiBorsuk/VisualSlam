@@ -16,10 +16,10 @@ namespace myslam {
         Eigen::Matrix3d K; 
         Eigen::Vector3d t; 
 
-        Camera(const Eigen::Matrix<double,3,4> &projection_matrix) 
+        Camera(const Eigen::Matrix<double,3,4> &projection_matrix, float size_mult) 
         { 
             K = projection_matrix.block<3,3>(0,0); 
-            K = K/2; 
+            K = K*size_mult; 
             t = projection_matrix.col(3); 
             t = K.inverse() * t; 
 

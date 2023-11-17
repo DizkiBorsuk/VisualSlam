@@ -9,8 +9,7 @@
 namespace myslam
 {
 
-    void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
-                   std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses)
+    void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
     {
         std::vector<double> gt_x, gt_y, x, y; 
  
@@ -19,8 +18,8 @@ namespace myslam
             gt_x.push_back(gt_poses.at(i).coeff(0,3));  
             gt_y.push_back(gt_poses.at(i).coeff(2,3));
 
-            x.push_back(poses.at(i).coeff(0,3)/2);  
-            y.push_back(poses.at(i).coeff(2,3)/2);
+            x.push_back(poses.at(i).coeff(0,3)*resize_opt);  
+            y.push_back(poses.at(i).coeff(2,3)*resize_opt);
         }
 
         matplot::plot(gt_x, gt_y)->line_width(2); 
@@ -63,8 +62,7 @@ namespace myslam
         matplot::show(); 
     }
 
-    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
-                   std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses)
+    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
     {   
         double gt_x, gt_y, gt_z, x, y, z;
 
@@ -76,9 +74,9 @@ namespace myslam
             gt_y = gt_poses.at(i).coeff(2,3);
             gt_z = gt_poses.at(i).coeff(1,3);
 
-            x = poses.at(i).coeff(0,3)/2;  
-            y = poses.at(i).coeff(2,3)/2;
-            z = poses.at(i).coeff(1,3)/2;
+            x = poses.at(i).coeff(0,3)*resize_opt;  
+            y = poses.at(i).coeff(2,3)*resize_opt;
+            z = poses.at(i).coeff(1,3)*resize_opt;
 
             er_x.emplace_back((gt_x - x)); 
             er_y.emplace_back((gt_y - y));

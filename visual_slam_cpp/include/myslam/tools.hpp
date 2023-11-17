@@ -30,11 +30,11 @@ namespace myslam {
     inline Eigen::Vector2d toVec2(const cv::Point2f p) { return Eigen::Vector2d(p.x, p.y); }
 
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
-                   std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses);
+                   std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt);
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses);
 
     void plotPerformance(std::vector<int> loopTimes);
-    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses); 
+    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resieze_opt); 
 }
 
 

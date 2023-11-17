@@ -17,11 +17,11 @@ namespace myslam
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
 
-        left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0));
-        right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1));
+        left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
+        right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
         // create components and links
-        stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::FAST_ORB, false));
+        stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, false));
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
         map = std::shared_ptr<Map>(new Map);
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
@@ -94,8 +94,8 @@ namespace myslam
         std::cout << "------- Results --------- \n"; 
 
         plotPerformance(performance);
-        plotPoses(trajectory, dataset->ground_truth_poses); 
-        calculate_error(trajectory, dataset->ground_truth_poses); 
+        plotPoses(trajectory, dataset->ground_truth_poses, img_size_opt); 
+        calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt); 
         std::cout << "number of features used " << stereoTracking->num_features << "\n"; 
         
     } 

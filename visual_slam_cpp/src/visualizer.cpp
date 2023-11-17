@@ -54,10 +54,7 @@ namespace myslam {
             pangolin::ModelViewLookAt(0, -5, -10, 0, 0, 0, 0.0, -1.0, 0.0));
 
         // Add named OpenGL viewport to window and provide 3D Handler
-        pangolin::View& vis_display =
-            pangolin::CreateDisplay()
-                .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f)
-                .SetHandler(new pangolin::Handler3D(vis_camera));
+        pangolin::View& vis_display = pangolin::CreateDisplay().SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f).SetHandler(new pangolin::Handler3D(vis_camera));
 
         while (!pangolin::ShouldQuit() && visualizer_running) 
         {
@@ -89,7 +86,8 @@ namespace myslam {
     {
         cv::Mat img_out;
         cv::cvtColor(current_frame_->left_img_, img_out, cv::COLOR_GRAY2BGR);
-        for (size_t i = 0; i < current_frame_->features_left_.size(); ++i) {
+        for (size_t i = 0; i < current_frame_->features_left_.size(); ++i) 
+        {
             if (current_frame_->features_left_[i]->map_point_.lock()) {
                 auto feat = current_frame_->features_left_[i];
                 cv::circle(img_out, feat->position_.pt, 2, cv::Scalar(0, 250, 0), 2);
