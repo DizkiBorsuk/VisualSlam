@@ -6,9 +6,10 @@ This is a project I did as a part of my master thesis and my intrest in SLAM. It
 1. Eigen - matrix operation library, similar to matlab, 
 2. OpenCV - can't do computer vision without opencv, 
 3. Pangolin - library for SLAM visualization based on OpneGL,  
-4. Ceres / G2O - optimization libraries
-5. matplotlibcpp
-6. Open3D 
+4. Ceres / G2O/ GTSAM - optimization libraries
+5. matplotlibcpp/matplot++ 
+6. DBoW3/DBoW2 - bag of words for loop closing, BDoW3 is update to famous DBoW2, i made some changes to DBoW3 to make it work in C++17 and later
+7. Open3D 
 
 ### Python 
 1. OpenCV 
@@ -21,9 +22,9 @@ This is a project I did as a part of my master thesis and my intrest in SLAM. It
 ## Useful materials, theory etc. 
 
 Probabilistic Robotics - Sebastian Thurn <br />
-Introduction to Visual SLAM: From Theory to Practice, Xian Gao - https://github.com/gaoxiang12/slambook2 <br />
 Cyrill Stachniss yt channel - https://www.youtube.com/@CyrillStachniss <br />
 MonoSLAM: Real-Time Single Camera SLAM <br />
+OrbSLAM articles <br />
 https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html - good opencv documentation, old but all the functions are preaty much the same <br/>
 https://nl.mathworks.com/help/vision/visual-simultaneous-localization-and-mapping-slam.html<br />
 https://towardsdatascience.com/image-feature-extraction-traditional-and-deep-learning-techniques-ccc059195d04 <br />
