@@ -27,7 +27,6 @@ namespace myslam
         }
 
     private: 
-
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<StereoTracking_OPF> tracking = nullptr;  

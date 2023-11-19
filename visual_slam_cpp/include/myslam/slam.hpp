@@ -4,6 +4,7 @@
 #include "myslam/read_dataset.hpp"
 #include "myslam/stereo_tracking.hpp"
 #include "myslam/visualizer.hpp"
+#include "DBoW3/DBoW3.h"
 
 namespace myslam {
 
@@ -38,9 +39,12 @@ namespace myslam {
 
         // dataset
         std::shared_ptr<KITTI_Dataset> dataset = nullptr;
+        std::shared_ptr<DBoW3::Vocabulary> vocab = nullptr; 
 
         std::shared_ptr<Camera> left_camera = nullptr; 
         std::shared_ptr<Camera> right_camera = nullptr; 
+
+        std::string vocab_path = "orbvoc.dbow3"; 
 
     };
 }  

@@ -17,6 +17,8 @@ namespace myslam
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
 
+        vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
+
         left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
         right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
@@ -27,9 +29,7 @@ namespace myslam
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
 
         stereoTracking->setTracking(map, local_mapping, visualizer, left_camera, right_camera);
-
         local_mapping->setLocalMapping(map, left_camera, right_camera);
-
         visualizer->SetMap(map);
     }
 

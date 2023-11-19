@@ -47,7 +47,7 @@ namespace myslam {
         KeyframesType active_keyframes_;  // active keyframes
 
         std::shared_ptr<Frame> current_frame_ = nullptr;
-        int num_active_keyframes = 10;  
+        unsigned int num_active_keyframes = 10;  
     };
 }  
 
