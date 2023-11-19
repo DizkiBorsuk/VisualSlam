@@ -5,7 +5,7 @@ namespace myslam
     void Map::InsertKeyFrame(std::shared_ptr<Frame> frame) 
     {
         current_frame_ = frame;
-        if (keyframes_.find(frame->keyframe_id) == keyframes_.end()) 
+        if (!keyframes_.contains(frame->keyframe_id))  //keyframes_.find(frame->keyframe_id) == keyframes_.end()
         {
             keyframes_.insert(make_pair(frame->keyframe_id, frame));
             active_keyframes_.insert(make_pair(frame->keyframe_id, frame));
@@ -22,7 +22,7 @@ namespace myslam
 
     void Map::InsertMapPoint(std::shared_ptr<MapPoint> map_point) 
     {
-        if (landmarks_.find(map_point->id_) == landmarks_.end()) 
+        if (!landmarks_.contains(map_point->id_))  //landmarks_.find(map_point->id_) == landmarks_.end()
         {
             landmarks_.insert(make_pair(map_point->id_, map_point));
             active_landmarks_.insert(make_pair(map_point->id_, map_point));

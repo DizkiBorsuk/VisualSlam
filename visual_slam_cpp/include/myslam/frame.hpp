@@ -1,6 +1,7 @@
 #pragma once
 #include "myslam/camera.hpp"
 #include "myslam/common_include.hpp"
+#include "DBoW3/DBoW3.h"
 
 namespace myslam {
 
@@ -47,6 +48,8 @@ namespace myslam {
         std::vector<std::shared_ptr<Feature>> features_left_;
         // corresponding features in right image, set to nullptr if no corresponding
         std::vector<std::shared_ptr<Feature>> features_right_;
+
+        DBoW3::BowVector bow_vector; // bag of words vector of left img features
 
     public:  // data members
         Frame() {}

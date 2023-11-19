@@ -91,7 +91,7 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
                 edge = new EdgeProjection(K, right_ext);
             }
 
-            if (vertices_landmarks.find(landmark_id) == vertices_landmarks.end()) 
+            if (!vertices_landmarks.contains(landmark_id))  //vertices_landmarks.find(landmark_id) == vertices_landmarks.end()
             {
                 VertexXYZ *v = new VertexXYZ;
                 v->setEstimate(landmark.second->Pos());
@@ -102,8 +102,7 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
             }
 
 
-            if (vertices.find(frame->keyframe_id) != vertices.end() && 
-                vertices_landmarks.find(landmark_id) != vertices_landmarks.end()) 
+            if (vertices.contains(frame->keyframe_id) && vertices_landmarks.contains(landmark_id))  //vertices.find(frame->keyframe_id) != vertices.end() && vertices_landmarks.find(landmark_id) != vertices_landmarks.end()
             {
                     edge->setId(index);
                     edge->setVertex(0, vertices.at(frame->keyframe_id));    // pose

@@ -64,6 +64,7 @@ namespace myslam {
         }
 
         int num_track_last = TrackLastFrame();
+        std::cout << "bunver if tracking points = " << num_track_last << "\n"; 
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -128,13 +129,8 @@ namespace myslam {
         {
             if (current_frame->features_left_[i]->map_point_.expired() &&
                 current_frame->features_right_[i] != nullptr) {
-                std::vector<Eigen::Vector3d> points{
-                    camera_left_->pixel2camera(
-                        Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,
-                            current_frame->features_left_[i]->position_.pt.y)),
-                    camera_right_->pixel2camera(
-                        Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,
-                            current_frame->features_right_[i]->position_.pt.y))};
+                std::vector<Eigen::Vector3d> points{camera_left_->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
+                                                    camera_right_->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
                 if (triangulation(camera_left_->pose(),camera_right_->pose(), points, pworld)) 
@@ -179,14 +175,16 @@ namespace myslam {
         std::vector<EdgeProjectionPoseOnly *> edges;
         std::vector<std::shared_ptr<Feature>> features;
 
+        // edges.reserve(current_frame->features_left_.size()); 
+        // features.reserve(current_frame->features_left_.size()); 
+
         for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
         {
             auto mp = current_frame->features_left_[i]->map_point_.lock();
             if (mp) 
             {
                 features.emplace_back(current_frame->features_left_[i]);
-                EdgeProjectionPoseOnly *edge =
-                    new EdgeProjectionPoseOnly(mp->pos_, K);
+                EdgeProjectionPoseOnly *edge = new EdgeProjectionPoseOnly(mp->pos_, K);
                 edge->setId(index);
                 edge->setVertex(0, vertex_pose);
                 edge->setMeasurement(toVec2(current_frame->features_left_[i]->position_.pt));
@@ -237,7 +235,7 @@ namespace myslam {
         // Set pose and outlier
         current_frame->SetPose(vertex_pose->estimate());
 
-        std::cout  << "Current Pose = \n" << current_frame->Pose().matrix() << "\n";
+        //std::cout  << "Current Pose = \n" << current_frame->Pose().matrix() << "\n";
 
         for (auto &feat : features) 
         {
@@ -253,6 +251,7 @@ namespace myslam {
     int StereoTracking_OPF::TrackLastFrame() {
         // use LK flow to estimate points in the right image
         std::vector<cv::Point2f> kps_last, kps_current;
+
         for (auto &kp : last_frame->features_left_) {
             if (kp->map_point_.lock()) 
             {

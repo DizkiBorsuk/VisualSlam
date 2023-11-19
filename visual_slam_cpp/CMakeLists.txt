@@ -27,7 +27,6 @@ include_directories(${OpenCV_INCLUDE_DIRS}
                     ${G2O_INCLUDE_DIRS}
                     )
 
-
 set(THIRD_PARTY_LIBS
         ${OpenCV_LIBS}
         ${Sophus_LIBRARIES}
