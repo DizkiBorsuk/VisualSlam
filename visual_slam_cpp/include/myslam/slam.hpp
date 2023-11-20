@@ -11,7 +11,7 @@ namespace myslam {
     
     class StereoSLAM {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// constructor with config file
         StereoSLAM(std::string &config_path, float resize = 1.0);

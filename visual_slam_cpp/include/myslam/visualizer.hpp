@@ -8,7 +8,7 @@ namespace myslam {
 
     class Visualizer {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         Visualizer(bool show_whole_map = false);
 

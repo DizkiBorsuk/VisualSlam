@@ -8,7 +8,7 @@ namespace myslam {
 
     class Map {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         typedef std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> LandmarksType;
         typedef std::unordered_map<unsigned int, std::shared_ptr<Frame>> KeyframesType;
 

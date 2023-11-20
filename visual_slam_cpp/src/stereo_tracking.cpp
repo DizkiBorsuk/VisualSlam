@@ -82,7 +82,7 @@ namespace myslam {
 
         relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
 
-        viewer_->AddCurrentFrame(current_frame);
+        visualizer->AddCurrentFrame(current_frame);
         return true;
     }
 
@@ -115,8 +115,8 @@ namespace myslam {
         TriangulateNewPoints();
         // update backend because we have a new keyframe
         local_mapping->UpdateMap();
-
-        viewer_->UpdateMap();
+        loop_closer->addCurrentKeyframe(current_frame); 
+        visualizer->UpdateMap();
 
         return true;
     }
@@ -309,8 +309,9 @@ namespace myslam {
         if (BuildInitMap()) {
             
             status = TrackingStatus::TRACKING;
-            viewer_->AddCurrentFrame(current_frame);
-            viewer_->UpdateMap();
+            visualizer->AddCurrentFrame(current_frame);
+            visualizer->UpdateMap();
+            loop_closer->addCurrentKeyframe(current_frame); 
         
             return true;
         }
@@ -382,6 +383,7 @@ namespace myslam {
 
         detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
+        vocabulary.transfrom(descriptors, current_frame->bow_vector); 
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
@@ -526,6 +528,7 @@ namespace myslam {
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
         local_mapping->UpdateMap();
+        loop_closer->mapUpdate(); 
 
         std::cout  << "Initial map created with " << cnt_init_landmarks
                 << " map points \n";

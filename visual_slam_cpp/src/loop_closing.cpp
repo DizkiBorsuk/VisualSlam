@@ -11,5 +11,27 @@ namespace myslam
     {
         // vocabulary = DBoW3::Vocabulary("vocab_file"); 
         // vocabulary.transform(); // transforms features into words 
+
+        databse = DBoW3::Database(*vocabulary, false, 0)
+
+
+        while(true)
+        {
+            std::unique_lock<std::mutex> lock(loop_closer_mutex);
+            map_update.wait(lock);
+
+            cv::Mat descriptors; 
+
+            for()
+            {
+                //get descriptors from new keyframe
+                descriptors.push_back(); 
+            }
+
+            databse.add(descriotors); 
+
+            Map::KeyframesType keyframes = map->GetActiveKeyFrames();
+            Map::LandmarksType landmarks = map->GetActiveMapPoints();
+        }
     }
 }

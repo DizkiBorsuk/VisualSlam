@@ -8,7 +8,7 @@ namespace myslam {
     class Map;
     class LocalMapping {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         LocalMapping();
         void setLocalMapping(std::shared_ptr<Map> map_ptr, std::shared_ptr<Camera> left, std::shared_ptr<Camera> right)

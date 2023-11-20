@@ -7,6 +7,7 @@
 namespace myslam {
 
     class LocalMapping;
+    class LoopCloser; 
     class Visualizer;
 
     enum class TrackingStatus { INITING, TRACKING, LOST };
@@ -15,19 +16,22 @@ namespace myslam {
     class StereoTracking_OPF
     {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         StereoTracking_OPF(TrackingType choose_tracking_type, bool destriptors);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
-        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, 
-                        std::shared_ptr<Visualizer> viewer_ptr, std::shared_ptr<Camera> cam_l_ptr, std::shared_ptr<Camera> cam_r_ptr)
+        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopCloser> lpc_ptr; 
+                         std::shared_ptr<Visualizer> viewer_ptr, std::shared_ptr<Camera> cam_l_ptr, std::shared_ptr<Camera> cam_r_ptr, 
+                         std::shared_ptr<DBoW3::Vocabulary> vocab_ptr)
         {
             map = map_ptr; 
             local_mapping = l_mappping_ptr; 
             viewer_ = viewer_ptr;
-            camera_left_ = cam_l_ptr;
-            camera_right_ = cam_r_ptr;
+            camera_left = cam_l_ptr;
+            camera_right = cam_r_ptr;
+            loop_closer = lpc_ptr; 
+            vocabulary = vocab_ptr; 
         }
 
     private:
@@ -56,12 +60,14 @@ namespace myslam {
 
         std::shared_ptr<Frame> current_frame = nullptr;  
         std::shared_ptr<Frame> last_frame = nullptr;    
-        std::shared_ptr<Camera> camera_left_ = nullptr;  
-        std::shared_ptr<Camera> camera_right_ = nullptr;  
+        std::shared_ptr<Camera> camera_left = nullptr;  
+        std::shared_ptr<Camera> camera_right = nullptr;  
 
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
-        std::shared_ptr<Visualizer> viewer_ = nullptr;
+        std::shared_ptr<Visualizer> visualizer = nullptr;
+        std::shared_ptr<LoopCloser> loop_closer = nullptr;
+        std::shared_ptr<DBoW3::Vocabulary> vocabulary = nullptr; 
 
         Sophus::SE3d relative_motion_; 
 
@@ -80,7 +86,7 @@ namespace myslam {
         static constexpr int num_features = 150; //150
         static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe_ = 80; //80
+        static constexpr int num_features_needed_for_keyframe = 80; //80
     };
 
 }  // namespace myslam

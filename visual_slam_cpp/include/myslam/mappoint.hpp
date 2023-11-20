@@ -9,7 +9,7 @@ namespace myslam {
     class MapPoint 
     {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         unsigned long id_ = 0;  // ID
         bool is_outlier_ = false;
         Eigen::Vector3d pos_ = Eigen::Vector3d::Zero();  // Position in world

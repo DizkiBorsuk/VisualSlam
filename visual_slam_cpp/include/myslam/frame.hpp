@@ -11,7 +11,7 @@ namespace myslam {
 
     class Feature {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         std::weak_ptr<Frame> frame_; 
         cv::KeyPoint position_;     
