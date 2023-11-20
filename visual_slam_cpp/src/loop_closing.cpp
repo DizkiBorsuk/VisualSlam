@@ -21,7 +21,7 @@ namespace myslam
 
             cv::Mat descriptors; 
 
-            for()
+            for(auto feature : current_frame->)
             {
                 //get descriptors from new keyframe
                 descriptors.push_back(); 
