@@ -21,13 +21,13 @@ namespace myslam {
         StereoTracking_OPF(TrackingType choose_tracking_type, bool destriptors);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
-        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopClosing> lpc_ptr; 
+        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopClosing> lpc_ptr, 
                          std::shared_ptr<Visualizer> viewer_ptr, std::shared_ptr<Camera> cam_l_ptr, std::shared_ptr<Camera> cam_r_ptr, 
                          std::shared_ptr<DBoW3::Vocabulary> vocab_ptr)
         {
             map = map_ptr; 
             local_mapping = l_mappping_ptr; 
-            viewer_ = viewer_ptr;
+            visualizer = viewer_ptr;
             camera_left = cam_l_ptr;
             camera_right = cam_r_ptr;
             loop_closer = lpc_ptr; 

@@ -3,6 +3,8 @@
 #include "myslam/g2o_types.hpp"
 #include "myslam/map.hpp"
 #include "myslam/visualizer.hpp"
+#include "myslam/loop_closing.hpp"
+
 
 namespace myslam {
 
@@ -76,7 +78,7 @@ namespace myslam {
             return false; 
         }
 
-        if (tracking_inliers_ < num_features_needed_for_keyframe_) {
+        if (tracking_inliers_ < num_features_needed_for_keyframe) {
             InsertKeyframe();
         }
 
@@ -129,11 +131,11 @@ namespace myslam {
         {
             if (current_frame->features_left_[i]->map_point_.expired() &&
                 current_frame->features_right_[i] != nullptr) {
-                std::vector<Eigen::Vector3d> points{camera_left_->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
-                                                    camera_right_->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
+                std::vector<Eigen::Vector3d> points{camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
+                                                    camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
-                if (triangulation(camera_left_->pose(),camera_right_->pose(), points, pworld)) 
+                if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
                 {
                     auto new_map_point = MapPoint::CreateNewMappoint();
                     pworld = current_pose_Twc * pworld;
@@ -168,7 +170,7 @@ namespace myslam {
         optimizer.addVertex(vertex_pose);
 
         // K
-        Eigen::Matrix3d K = camera_left_->getK();
+        Eigen::Matrix3d K = camera_left->getK();
 
         // edges
         int index = 1;
@@ -257,7 +259,7 @@ namespace myslam {
             {
                 // use projected point
                 auto mp = kp->map_point_.lock();
-                auto px = camera_left_->world2pixel(mp->pos_, current_frame->Pose());
+                auto px = camera_left->world2pixel(mp->pos_, current_frame->Pose());
                 kps_last.emplace_back(kp->position_.pt);
                 kps_current.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
@@ -309,6 +311,11 @@ namespace myslam {
         if (BuildInitMap()) {
             
             status = TrackingStatus::TRACKING;
+
+            current_frame->SetKeyFrame();
+            map->InsertKeyFrame(current_frame);
+            local_mapping->UpdateMap();
+
             visualizer->AddCurrentFrame(current_frame);
             visualizer->UpdateMap();
             loop_closer->addCurrentKeyframe(current_frame); 
@@ -383,7 +390,7 @@ namespace myslam {
 
         detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
-        vocabulary.transfrom(descriptors, current_frame->bow_vector); 
+        vocabulary->transform(descriptors, current_frame->bow_vector); 
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
@@ -466,7 +473,7 @@ namespace myslam {
             auto mp = kp->map_point_.lock();
             if (mp) {
                 // use projected points as initial guess
-                auto px = camera_right_->world2pixel(mp->pos_, current_frame->Pose());
+                auto px = camera_right->world2pixel(mp->pos_, current_frame->Pose());
                 kps_right.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
                 // use same pixel in left iamge
@@ -510,11 +517,11 @@ namespace myslam {
             }
 
             // create map point from triangulation
-            std::vector<Eigen::Vector3d> points{ camera_left_->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y)),
-                                                camera_right_->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,current_frame->features_right_[i]->position_.pt.y))};
+            std::vector<Eigen::Vector3d> points{ camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y)),
+                                                camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,current_frame->features_right_[i]->position_.pt.y))};
             Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
-            if (triangulation(camera_left_->pose(),camera_right_->pose(), points, pworld)) {
+            if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) {
                 auto new_map_point = MapPoint::CreateNewMappoint();
                 new_map_point->SetPos(pworld);
                 new_map_point->AddObservation(current_frame->features_left_[i]);
@@ -525,11 +532,6 @@ namespace myslam {
                 map->InsertMapPoint(new_map_point);
             }
         }
-        current_frame->SetKeyFrame();
-        map->InsertKeyFrame(current_frame);
-        local_mapping->UpdateMap();
-        loop_closer->mapUpdate(); 
-
         std::cout  << "Initial map created with " << cnt_init_landmarks
                 << " map points \n";
 

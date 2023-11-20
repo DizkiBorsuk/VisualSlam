@@ -27,8 +27,9 @@ namespace myslam
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
         map = std::shared_ptr<Map>(new Map);
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
+        loop_closer = std::shared_ptr<LoopClosing>(new LoopClosing);
 
-        stereoTracking->setTracking(map, local_mapping, visualizer, left_camera, right_camera);
+        stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
         local_mapping->setLocalMapping(map, left_camera, right_camera);
         visualizer->SetMap(map);
     }

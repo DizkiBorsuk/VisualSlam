@@ -1,4 +1,5 @@
 #include "myslam/loop_closing.hpp"
+#include "myslam/frame.hpp"
 
 namespace myslam
 {
@@ -12,35 +13,27 @@ namespace myslam
         // vocabulary = DBoW3::Vocabulary("vocab_file"); 
         // vocabulary.transform(); // transforms features into words 
 
-        databse = DBoW3::Database(*vocabulary, false, 0)
+        // database = DBoW3::Database(*vocabulary, false, 0); 
 
         while(true)
         {
-            std::unique_lock<std::mutex> lock(loop_closer_mutex);
-            map_update.wait(lock);
+            // std::unique_lock<std::mutex> lock(loop_closer_mutex);
+            // map_update.wait(lock);
 
-            cv::Mat descriptors; 
+            // database.add(current_frame->bow_vector); 
 
-            for(auto feature : current_frame->)
-            {
-                //get descriptors from new keyframe
-                descriptors.push_back(); 
-            }
+            // // Map::KeyframesType keyframes = map->GetActiveKeyFrames();
+            // // Map::LandmarksType landmarks = map->GetActiveMapPoints();
 
-            databse.add(descriotors); 
+            // for(std::size_t i = 0; i < database.size(); i++)
+            // {
 
-            // Map::KeyframesType keyframes = map->GetActiveKeyFrames();
-            // Map::LandmarksType landmarks = map->GetActiveMapPoints();
-
-            for(std::size_t i = 0; i < database.size(); i++)
-            {
-
-            }
+            // }
 
         }
     }
 
-    void LoopCloser::end()
+    void LoopClosing::end()
     {
         loop_closer_thread.join(); 
     }

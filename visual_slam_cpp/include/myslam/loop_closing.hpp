@@ -21,7 +21,7 @@ namespace myslam
         void setLoopCloser(std::shared_ptr<Map> map_ptr, 
                            std::shared_ptr<StereoTracking_OPF> tracking_ptr, 
                            std::shared_ptr<DBoW3::Vocabulary> vocab_ptr, 
-                           std::shared_ptr<LocaLMapping> l_map_ptr)
+                           std::shared_ptr<LocalMapping> l_map_ptr)
         {
             map = map_ptr; 
             tracking = tracking_ptr; 
@@ -43,7 +43,7 @@ namespace myslam
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<StereoTracking_OPF> tracking = nullptr;  
-        std::shared_ptr<LocaLMapping> local_mapping = nullptr;  
+        std::shared_ptr<LocalMapping> local_mapping = nullptr;  
         std::shared_ptr<DBoW3::Vocabulary> vocabulary = nullptr; 
 
         std::thread loop_closer_thread; 

@@ -4,7 +4,7 @@
 #include "myslam/read_dataset.hpp"
 #include "myslam/stereo_tracking.hpp"
 #include "myslam/visualizer.hpp"
-#include "DBoW3/DBoW3.h"
+#include "myslam/loop_closing.hpp"
 
 namespace myslam {
 
@@ -36,6 +36,7 @@ namespace myslam {
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<Visualizer> visualizer = nullptr;
+        std::shared_ptr<LoopClosing> loop_closer = nullptr; 
 
         // dataset
         std::shared_ptr<KITTI_Dataset> dataset = nullptr;
