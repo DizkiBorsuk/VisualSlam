@@ -103,6 +103,7 @@ namespace myslam {
         if(use_descriptors == true)
         {
             extractFeatures(); 
+            loop_closer->addCurrentKeyframe(current_frame); 
         } 
         else 
         {
@@ -115,7 +116,6 @@ namespace myslam {
         TriangulateNewPoints();
         // update backend because we have a new keyframe
         local_mapping->UpdateMap();
-        loop_closer->addCurrentKeyframe(current_frame); 
         visualizer->UpdateMap();
 
         return true;

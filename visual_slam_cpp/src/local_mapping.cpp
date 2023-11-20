@@ -16,7 +16,7 @@ void LocalMapping::UpdateMap() {
 
 void LocalMapping::Stop() {
     backend_running_.store(false);
-    map_update_.notify_one();
+    map_update_.notify_one(); //? 
     backend_thread_.join();
 }
 

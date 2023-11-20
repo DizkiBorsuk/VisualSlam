@@ -14,7 +14,6 @@ namespace myslam
 
         databse = DBoW3::Database(*vocabulary, false, 0)
 
-
         while(true)
         {
             std::unique_lock<std::mutex> lock(loop_closer_mutex);
@@ -30,8 +29,19 @@ namespace myslam
 
             databse.add(descriotors); 
 
-            Map::KeyframesType keyframes = map->GetActiveKeyFrames();
-            Map::LandmarksType landmarks = map->GetActiveMapPoints();
+            // Map::KeyframesType keyframes = map->GetActiveKeyFrames();
+            // Map::LandmarksType landmarks = map->GetActiveMapPoints();
+
+            for(std::size_t i = 0; i < database.size(); i++)
+            {
+
+            }
+
         }
+    }
+
+    void LoopCloser::end()
+    {
+        loop_closer_thread.join(); 
     }
 }

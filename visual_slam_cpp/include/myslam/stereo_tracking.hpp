@@ -7,7 +7,7 @@
 namespace myslam {
 
     class LocalMapping;
-    class LoopCloser; 
+    class LoopClosing; 
     class Visualizer;
 
     enum class TrackingStatus { INITING, TRACKING, LOST };
@@ -21,7 +21,7 @@ namespace myslam {
         StereoTracking_OPF(TrackingType choose_tracking_type, bool destriptors);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
-        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopCloser> lpc_ptr; 
+        void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopClosing> lpc_ptr; 
                          std::shared_ptr<Visualizer> viewer_ptr, std::shared_ptr<Camera> cam_l_ptr, std::shared_ptr<Camera> cam_r_ptr, 
                          std::shared_ptr<DBoW3::Vocabulary> vocab_ptr)
         {
@@ -66,7 +66,7 @@ namespace myslam {
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<Visualizer> visualizer = nullptr;
-        std::shared_ptr<LoopCloser> loop_closer = nullptr;
+        std::shared_ptr<LoopClosing> loop_closer = nullptr;
         std::shared_ptr<DBoW3::Vocabulary> vocabulary = nullptr; 
 
         Sophus::SE3d relative_motion_; 
