@@ -3,17 +3,15 @@
 
 namespace myslam
 {
-    LoopClosing::LoopClosing()
+    LoopClosing::LoopClosing(std::shared_ptr<DBoW3::Vocabulary> vocab)
     {
+        database = DBoW3::Database(*vocab, false, 0); 
         loop_closer_thread = std::thread(std::bind(&LoopClosing::runLoopCloser, this)); 
     }
 
     void LoopClosing::runLoopCloser()
     {
-        // vocabulary = DBoW3::Vocabulary("vocab_file"); 
-        // vocabulary.transform(); // transforms features into words 
 
-        // database = DBoW3::Database(*vocabulary, false, 0); 
 
         while(true)
         {

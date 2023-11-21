@@ -6,8 +6,9 @@
 
 namespace myslam 
 {
-    StereoSLAM::StereoSLAM(std::string &in_dataset_path, float resize)
-        : dataset_path(in_dataset_path), img_size_opt(resize)
+    StereoSLAM::StereoSLAM(std::string &in_dataset_path,bool matching, bool loop_closer, float resize)
+        : dataset_path(in_dataset_path),use_matching(matching),
+          use_loop_closing(loop_closer), img_size_opt(resize)
     {
 
     }
@@ -17,8 +18,6 @@ namespace myslam
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
 
-        vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
-
         left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
         right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
@@ -27,7 +26,12 @@ namespace myslam
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
         map = std::shared_ptr<Map>(new Map);
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
-        loop_closer = std::shared_ptr<LoopClosing>(new LoopClosing);
+
+        if(use_loop_closing == true)
+        {
+            vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
+            loop_closer = std::shared_ptr<LoopClosing>(new LoopClosing(vocab));
+        }
 
         stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
         local_mapping->setLocalMapping(map, left_camera, right_camera);

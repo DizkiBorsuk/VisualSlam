@@ -14,7 +14,7 @@ namespace myslam {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// constructor with config file
-        StereoSLAM(std::string &config_path, float resize = 1.0);
+        StereoSLAM(std::string &config_path,bool matching = false, bool loop_closer = false, float resize = 1.0);
 
         void Init();
         void Run();
@@ -27,10 +27,11 @@ namespace myslam {
 
     private:
         std::string dataset_path;
+        bool use_matching = false; 
+        bool use_loop_closing = false; 
         float img_size_opt = 1.0; 
 
         int current_image_index_ = 0;
-        bool inited_ = false;
 
         std::shared_ptr<StereoTracking_OPF> stereoTracking = nullptr;
         std::shared_ptr<LocalMapping> local_mapping = nullptr;

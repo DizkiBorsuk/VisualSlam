@@ -13,7 +13,7 @@ namespace myslam
     {
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        LoopClosing(); 
+        LoopClosing(std::shared_ptr<DBoW3::Vocabulary> vocab); 
         void runLoopCloser(); 
         void GlobalBundleAdjustment(); 
         void end(); 

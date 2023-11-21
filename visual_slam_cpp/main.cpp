@@ -5,7 +5,7 @@ int main() {
     std::cout << "Hello mrVSLAM \n"; 
     std::string kitti_path = "/home/maciek/dev/projects/VisualSlam/KITTY_dataset/sequences/06"; 
 
-    std::shared_ptr<myslam::StereoSLAM> slam(new myslam::StereoSLAM(kitti_path, 0.5));
+    std::shared_ptr<myslam::StereoSLAM> slam(new myslam::StereoSLAM(kitti_path,false,false, 0.5));
     slam->Init();
     slam->Run();
 

@@ -318,7 +318,8 @@ namespace myslam {
 
             visualizer->AddCurrentFrame(current_frame);
             visualizer->UpdateMap();
-            loop_closer->addCurrentKeyframe(current_frame); 
+            if(loop_closer)
+                loop_closer->addCurrentKeyframe(current_frame); 
         
             return true;
         }
