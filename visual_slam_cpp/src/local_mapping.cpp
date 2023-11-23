@@ -31,8 +31,7 @@ void LocalMapping::LocalMappingThread() {
     }
 }
 
-void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,
-                       Map::LandmarksType &landmarks) {
+void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,Map::LandmarksType &landmarks) {
     // setup g2o
     typedef g2o::LinearSolverCSparse<g2o::BlockSolver_6_3 ::PoseMatrixType> LinearSolverType;
     auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3 >(std::make_unique<LinearSolverType>()));

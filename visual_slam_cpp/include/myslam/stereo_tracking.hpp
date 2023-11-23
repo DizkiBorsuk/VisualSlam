@@ -44,12 +44,10 @@ namespace myslam {
 
         int DetectFeatures();
         int extractFeatures(); // extract features from only left img
-        
-        int extractStereoFeatures(); // extract and matches features from both imgs 
+
         int findCorrespondensesWithOpticalFlow();
 
         bool BuildInitMap();
-
         int TriangulateNewPoints();
 
         bool Reset();
