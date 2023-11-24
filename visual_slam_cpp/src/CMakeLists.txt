@@ -5,6 +5,7 @@ add_library(myslam SHARED
         camera.cpp
         stereo_tracking.cpp
         stereo_tracking_matching.cpp
+        mono_tracking.cpp
         local_mapping.cpp
         visualizer.cpp
         slam.cpp

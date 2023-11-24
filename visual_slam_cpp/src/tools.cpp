@@ -132,4 +132,11 @@ namespace myslam
         matplot::show(); 
 
     }
+
+    std::vector<std::string> getNNModelOutput(const cv::dnn::Net &net)
+    {
+        std::vector<std::int32_t> output_layers = net.getUnconnectedOutLayers(); 
+        std::vector<std::string> layers_name = net.getLayerNames(); 
+        
+    }
 }

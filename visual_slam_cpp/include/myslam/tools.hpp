@@ -1,5 +1,6 @@
 #pragma once
 #include "myslam/common_include.hpp"
+#include "opencv4/opencv2/dnn.hpp"
 
 namespace myslam {
 
@@ -35,6 +36,8 @@ namespace myslam {
 
     void plotPerformance(std::vector<int> loopTimes);
     void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resieze_opt); 
+
+    inline std::vector<std::string> getNNModelOutput(const cv::dnn::Net &net); 
 }
 
 

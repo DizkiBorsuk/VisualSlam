@@ -29,16 +29,7 @@ namespace myslam
             local_mapping = l_map_ptr; 
         }
 
-        void addCurrentKeyframe(std::shared_ptr<Frame> new_keyframe)
-        {
-            /*
-            adds current keyframe to keyframe database, then it is compared with every other keyframe.
-            */
-            std::unique_lock<std::mutex> lock(loop_closer_mutex); 
-            current_frame = new_keyframe; 
-            map_update.notify_one();
-        }
-
+        void addCurrentKeyframe(std::shared_ptr<Frame> new_keyframe); 
     private: 
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Map> map = nullptr; 
