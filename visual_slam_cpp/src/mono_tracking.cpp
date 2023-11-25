@@ -50,7 +50,7 @@ namespace myslam {
                 Track();
                 break;
             case TrackingStatus::LOST:
-                Reset();
+                std::cout << "lost tracking, try reseting \n"; 
                 break;
         }
 
@@ -113,7 +113,7 @@ namespace myslam {
         }
 
         // track in right image
-        findCorrespondensesWithOpticalFlow();
+        // findCorrespondensesWithOpticalFlow();
         // triangulate map points
         TriangulateNewPoints();
         // update backend because we have a new keyframe
@@ -131,25 +131,24 @@ namespace myslam {
         {
             if (current_frame->features_left_[i]->map_point_.expired() &&
                 current_frame->features_right_[i] != nullptr) {
-                std::vector<Eigen::Vector3d> points{camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
-                                                    camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
+                Eigen::Vector3d point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y));
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
-                if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
-                {
-                    auto new_map_point = MapPoint::CreateNewMappoint();
-                    pworld = current_pose_Twc * pworld;
-                    new_map_point->SetPos(pworld);
-                    new_map_point->AddObservation(
-                        current_frame->features_left_[i]);
-                    new_map_point->AddObservation(
-                        current_frame->features_right_[i]);
+                // if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
+                // {
+                //     auto new_map_point = MapPoint::CreateNewMappoint();
+                //     pworld = current_pose_Twc * pworld;
+                //     new_map_point->SetPos(pworld);
+                //     new_map_point->AddObservation(
+                //         current_frame->features_left_[i]);
+                //     new_map_point->AddObservation(
+                //         current_frame->features_right_[i]);
 
-                    current_frame->features_left_[i]->map_point_ = new_map_point;
-                    current_frame->features_right_[i]->map_point_ = new_map_point;
-                    map->InsertMapPoint(new_map_point);
-                    cnt_triangulated_pts++;
-                }
+                //     current_frame->features_left_[i]->map_point_ = new_map_point;
+                //     current_frame->features_right_[i]->map_point_ = new_map_point;
+                //     map->InsertMapPoint(new_map_point);
+                //     cnt_triangulated_pts++;
+                // }
             }
         }
         std::cout  << "new landmarks: " << cnt_triangulated_pts << "\n";
@@ -302,12 +301,6 @@ namespace myslam {
             DetectFeatures();
         }
         
-        int num_coor_features = findCorrespondensesWithOpticalFlow();
-
-        if (num_coor_features < num_features_init) {
-            return false;
-        }
-
         if (BuildInitMap()) {
             
             status = TrackingStatus::TRACKING;
@@ -415,14 +408,15 @@ namespace myslam {
         return true;
     }
 
-    void MonoTracking::estimateDepth(std::string model_path)
+    bool MonoTracking::estimateDepth()
     {
+        std::string model_path = "mamd"; 
         auto network = cv::dnn::readNetFromONNX(model_path); 
 
         //network.setPreferableBackend(DNN_BACKEND_OPENCV);
         //network.set
 
-        cv::Mat blob = cv::dnn::blobFromImage(current_frame->left_img_, 1/255, cv::Scalar(123.675, 116.28, 103.53)); 
+        cv::Mat blob = cv::dnn::blobFromImage(current_frame->left_img_, 1/255,cv::Size(), cv::Scalar(123.675, 116.28, 103.53)); 
         
         std::vector<std::int32_t> output_layers = network.getUnconnectedOutLayers(); 
         std::vector<std::string> layers_name = network.getLayerNames(); 
@@ -430,16 +424,10 @@ namespace myslam {
 
         for(size_t i = 0; i < output_layers.size(); i++)
         {
-            names = layers_name[output_layers[i]-1]; 
+            names[i] = layers_name[output_layers[i]-1]; 
         }
 
-
-    }
-
-
-    bool MonoTracking::Reset() {
-        std::cout  << "Tracking lost \n";
-        return false;
+        return true; 
     }
 
 }  // namespace myslam

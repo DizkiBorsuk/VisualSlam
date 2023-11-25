@@ -8,13 +8,17 @@
 
 namespace myslam {
 
+    enum class slamType {stereo_opf, stereo_matching, mono}; 
+
+    class StereoTracking_Match; 
+    class MonoTracking; 
     
-    class StereoSLAM {
+    class SLAM {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         /// constructor with config file
-        StereoSLAM(std::string &config_path,bool matching = false, bool loop_closer = false, float resize = 1.0);
+        SLAM(std::string &config_path, slamType type_of_algorithm, bool loop_closer = false, float resize = 1.0);
 
         void Init();
         void Run();
@@ -27,6 +31,8 @@ namespace myslam {
 
     private:
         std::string dataset_path;
+        slamType algorithm_type = slamType::stereo_opf; 
+
         bool use_matching = false; 
         bool use_loop_closing = false; 
         float img_size_opt = 1.0; 
@@ -34,6 +40,9 @@ namespace myslam {
         int current_image_index_ = 0;
 
         std::shared_ptr<StereoTracking_OPF> stereoTracking = nullptr;
+        std::shared_ptr<StereoTracking_Match> stereoTracking_with_match = nullptr; 
+        std::shared_ptr<MonoTracking> monoTracking = nullptr; 
+
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<Visualizer> visualizer = nullptr;

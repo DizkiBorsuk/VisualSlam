@@ -2,46 +2,78 @@
 #include "myslam/slam.hpp"
 #include <boost/config.hpp>
 #include <boost/format.hpp>
+#include "myslam/stereo_tracking_matching.hpp"
+#include "myslam/mono_tracking.hpp"
 
 
 namespace myslam 
 {
-    StereoSLAM::StereoSLAM(std::string &in_dataset_path,bool matching, bool loop_closer, float resize)
-        : dataset_path(in_dataset_path),use_matching(matching),
-          use_loop_closing(loop_closer), img_size_opt(resize)
+    SLAM::SLAM(std::string &config_path, slamType type_of_algorithm, bool loop_closer, float resize)
+        : dataset_path(config_path),algorithm_type(type_of_algorithm),
+        use_loop_closing(loop_closer), img_size_opt(resize)
     {
 
     }
 
-    void StereoSLAM::Init() 
+    void SLAM::Init() 
     {
+        // read data
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
 
-        left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
-        right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
-
-        // create components and links
-        stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, false));
+        //create map, local mapping nad visualizer objects and start their threads 
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
         map = std::shared_ptr<Map>(new Map);
         visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
 
+        // create bow vocabulary and start loop closer 
         if(use_loop_closing == true)
         {
             vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
             loop_closer = std::shared_ptr<LoopClosing>(new LoopClosing(vocab));
         }
 
-        stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
+        //choose and set tracking algorithm 
+        switch (algorithm_type)
+        {
+        case slamType::stereo_opf:
+            left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
+            right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
+
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
+            stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
+            break;
+        case slamType::stereo_matching: 
+            left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
+            right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
+
+            stereoTracking_with_match = std::shared_ptr<StereoTracking_Match>(new StereoTracking_Match(TrackingType::GFTT, use_loop_closing));
+            stereoTracking_with_match->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
+            break;  
+        case slamType::mono: 
+            //create camera objects (both camera are created even for mono slam because i don't want to change local mapping, right camera won't be used in practice)
+            left_camera = std::shared_ptr<Camera>(new Camera(dataset->P2, img_size_opt)); // for monocular depth estimation you need color imgs 
+            right_camera = std::shared_ptr<Camera>(new Camera(dataset->P3, img_size_opt));
+
+            monoTracking = std::shared_ptr<MonoTracking>(new MonoTracking(TrackingType::GFTT, use_loop_closing)); 
+            monoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, vocab);
+            break; 
+        
+        default:
+            std::cout << "smth wrong \n"; 
+            break;
+        }
+
+        // set local mapping and visualizer with pointers 
         local_mapping->setLocalMapping(map, left_camera, right_camera);
         visualizer->SetMap(map);
     }
 
-    void StereoSLAM::Run() 
+    void SLAM::Run() 
     {
         std::cout << "Running main thread \n";
 
+        //! main loop  
         while (true) 
         {
             if (createNewFrameAndTrack() == false) {
@@ -53,8 +85,11 @@ namespace myslam
         visualizer->Close();
     }
 
-    bool StereoSLAM::createNewFrameAndTrack() 
+    bool SLAM::createNewFrameAndTrack() 
     {
+        /*
+        read imgs, create Frame object and pass it to 
+        */
         boost::format fmt("%s/image_%d/%06d.png");
         cv::Mat image_left, image_right;
         // read images
@@ -78,10 +113,25 @@ namespace myslam
         new_frame->left_img_ = image_left_resized;
         new_frame->right_img_ = image_right_resized;
         current_image_index_++;
+        
         if (new_frame == nullptr) 
             return false;
-    
-        bool success = stereoTracking->AddFrame(new_frame);
+        
+        bool success = false; 
+
+        switch (algorithm_type)
+        {
+        case slamType::stereo_opf:
+            success = stereoTracking->AddFrame(new_frame);
+            break;
+        case slamType::stereo_matching: 
+            success = stereoTracking_with_match->AddFrame(new_frame);
+            break;  
+        case slamType::mono: 
+            success = monoTracking->AddFrame(new_frame);
+            break; 
+        }
+
         auto endT = std::chrono::steady_clock::now();
         auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
         std::cout  << "Loop time : " << elapsedT.count() << " ms. \n";
@@ -92,7 +142,7 @@ namespace myslam
         return success;
     }
 
-    void StereoSLAM::output()
+    void SLAM::output()
     {
         dataset->getGTposes(); 
 

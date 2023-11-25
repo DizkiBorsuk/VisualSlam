@@ -12,15 +12,12 @@ namespace myslam {
     class LoopClosing; 
     class Visualizer;
 
-    enum class TrackingStatus { INITING, TRACKING, LOST };
-    enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT};
-
     class MonoTracking
     {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        MonoTacking(TrackingType choose_tracking_type, bool destriptors);
+        MonoTracking(TrackingType choose_tracking_type, bool destriptors);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
         void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopClosing> lpc_ptr, 
@@ -37,14 +34,16 @@ namespace myslam {
     private:
         bool Track();
 
+
         int TrackLastFrame();
         int EstimateCurrentPose();
         bool InsertKeyframe();
+        bool Init(); 
 
         int DetectFeatures();
         int extractFeatures(); // extract features from only left img
 
-        void estimateDepth(std::string model_path); 
+        bool estimateDepth(); 
 
         bool BuildInitMap();
         int TriangulateNewPoints();
@@ -72,10 +71,7 @@ namespace myslam {
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
         bool use_descriptors = false; 
-
-        static constexpr int GRID_SIZE_H = 46;
-        static constexpr int GRID_SIZE_W = 68;
-
+        
 
     public:
         // params

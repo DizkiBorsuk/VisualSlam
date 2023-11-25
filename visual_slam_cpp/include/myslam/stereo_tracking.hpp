@@ -10,9 +10,6 @@ namespace myslam {
     class LoopClosing; 
     class Visualizer;
 
-    enum class TrackingStatus { INITING, TRACKING, LOST };
-    enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT};
-
     class StereoTracking_OPF
     {
     public:

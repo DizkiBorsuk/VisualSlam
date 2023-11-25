@@ -51,6 +51,9 @@ namespace myslam
         P0.resize(3,4); 
         P1 = calib_data_matrix.row(1); 
         P1.resize(3,4); 
+        P2.resize(3,4); 
+        P3 = calib_data_matrix.row(3); 
+        P3.resize(3,4); 
     }   
 
 

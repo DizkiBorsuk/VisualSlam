@@ -26,3 +26,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/core/core.hpp>
+
+
+enum class TrackingStatus { INITING, TRACKING, LOST };
+enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT};

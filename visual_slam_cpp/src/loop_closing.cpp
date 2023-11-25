@@ -40,7 +40,7 @@ namespace myslam
                 {
                     if(similarity.at(i) > 0.7)
                     {
-                        std::cout << "found loop closing at " << similarity.at(i); 
+                        std::cout << "found loop closing at " << similarity.at(i) << "\n"; 
                     }
                 }
             }
