@@ -5,24 +5,25 @@
 namespace myslam {
 
 LocalMapping::LocalMapping() {
-    backend_running_.store(true);
-    backend_thread_ = std::thread(std::bind(&LocalMapping::LocalMappingThread, this));
+    local_mapping_running.store(true);
+    local_mapping_thread = std::thread(std::bind(&LocalMapping::LocalMappingThread, this));
 }
 
 void LocalMapping::UpdateMap() {
-    std::unique_lock<std::mutex> lock(data_mutex_);
+    std::unique_lock<std::mutex> lock(local_mapping_mutex);
     map_update_.notify_one();
 }
 
 void LocalMapping::Stop() {
-    backend_running_.store(false);
+    local_mapping_running.store(false);
     map_update_.notify_one(); //? 
-    backend_thread_.join();
+    local_mapping_thread.join();
 }
 
 void LocalMapping::LocalMappingThread() {
-    while (backend_running_.load()) {
-        std::unique_lock<std::mutex> lock(data_mutex_);
+    while (local_mapping_running.load()) 
+    {
+        std::unique_lock<std::mutex> lock(local_mapping_mutex);
         map_update_.wait(lock);
 
         Map::KeyframesType active_kfs = map->GetActiveKeyFrames();

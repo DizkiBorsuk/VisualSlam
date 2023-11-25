@@ -40,7 +40,7 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::ORB, use_loop_closing));
             stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;
         case slamType::stereo_matching: 
@@ -81,6 +81,7 @@ namespace myslam
             }
         }
 
+        loop_closer->end(); 
         local_mapping->Stop();
         visualizer->Close();
     }

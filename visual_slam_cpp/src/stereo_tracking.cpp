@@ -66,7 +66,7 @@ namespace myslam {
         }
 
         int num_track_last = TrackLastFrame();
-        std::cout << "bunver if tracking points = " << num_track_last << "\n"; 
+        std::cout << "tracking points = " << num_track_last << "\n"; 
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -152,7 +152,6 @@ namespace myslam {
                 }
             }
         }
-        std::cout  << "new landmarks: " << cnt_triangulated_pts << "\n";
         return cnt_triangulated_pts;
     }
 

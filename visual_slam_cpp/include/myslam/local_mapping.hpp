@@ -25,11 +25,11 @@ namespace myslam {
         void LocalBundleAdjustment(Map::KeyframesType& keyframes, Map::LandmarksType& landmarks);
 
         std::shared_ptr<Map> map;
-        std::thread backend_thread_;
-        std::mutex data_mutex_;
+        std::thread local_mapping_thread;
+        std::mutex local_mapping_mutex;
 
         std::condition_variable map_update_;
-        std::atomic<bool> backend_running_;
+        std::atomic<bool> local_mapping_running;
 
         std::shared_ptr<Camera> cam_left_ = nullptr, cam_right_ = nullptr;
     };

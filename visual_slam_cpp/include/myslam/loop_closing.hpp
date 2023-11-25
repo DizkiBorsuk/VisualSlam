@@ -43,6 +43,7 @@ namespace myslam
         DBoW3::Database database; 
 
         std::condition_variable map_update;
+        std::atomic<bool> loop_closer_running;
 
     }; 
 }
