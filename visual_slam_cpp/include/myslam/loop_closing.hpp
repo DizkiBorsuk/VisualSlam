@@ -15,7 +15,7 @@ namespace myslam
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         LoopClosing(std::shared_ptr<DBoW3::Vocabulary> vocab); 
         void runLoopCloser(); 
-        void GlobalBundleAdjustment(); 
+        void globalBundleAdjustment(); 
         void end(); 
 
         void setLoopCloser(std::shared_ptr<Map> map_ptr, 

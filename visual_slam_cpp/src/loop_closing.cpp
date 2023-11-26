@@ -20,6 +20,12 @@ namespace myslam
         map_update.notify_one();
     }
 
+    void LoopClosing::end()
+    {
+        loop_closer_running.store(false); 
+        map_update.notify_one(); 
+        loop_closer_thread.join(); 
+    }
 
     void LoopClosing::runLoopCloser()
     {
@@ -30,31 +36,33 @@ namespace myslam
 
             database.add(current_frame->bow_vector); 
             DBoW3::QueryResults similarity; 
-            int z = 0; 
+
+            unsigned int loop_candidate_id = 0; 
 
             if(database.size()>10)
             {
-                database.query(current_frame->bow_vector, similarity, 0); 
+                database.query(current_frame->bow_vector, similarity, 10); 
 
                 for(std::size_t i = 0; i < similarity.size(); i++)
                 {
                     if(similarity.at(i).Score > 0.05 && similarity.at(i).Score < 0.99) //&& similarity.at(i).Score < 0.95
                     {
-                        std::cout << "keyframe id = " << current_frame->keyframe_id << "\n"; 
-                        std::cout << "found loop closing at " << similarity.at(i) << "\n"; 
+                        std::cout << "for keyframe"  << current_frame->keyframe_id << "found loop candidate with id = " << similarity.at(i).Id << "\n"; 
+                        loop_candidate_id = similarity.at(i).Id; 
+                        std::cout << " score is " << similarity.at(i).Score << "\n"; 
+                        globalBundleAdjustment(); 
+                        break;
                     }
                     
                 }
                 std::cout << "database size " << database.size() << "\n"; 
-                std::cout << "compared " << z << " images \n"; 
             }
         }
     }
 
-    void LoopClosing::end()
+    void LoopClosing::globalBundleAdjustment()
     {
-        loop_closer_running.store(false); 
-        map_update.notify_one(); 
-        loop_closer_thread.join(); 
+
     }
+
 }
