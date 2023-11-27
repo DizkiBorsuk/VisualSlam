@@ -29,8 +29,8 @@ namespace myslam
         // create bow vocabulary and start loop closer 
         if(use_loop_closing == true)
         {
-            vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
             loop_closer = std::shared_ptr<LoopClosing>(new LoopClosing(vocab));
+            vocab = std::shared_ptr<DBoW3::Vocabulary>(new DBoW3::Vocabulary(vocab_path)); 
         }
 
         //choose and set tracking algorithm 
@@ -40,7 +40,7 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::ORB, use_loop_closing));
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
             stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;
         case slamType::stereo_matching: 
@@ -81,7 +81,9 @@ namespace myslam
             }
         }
 
-        loop_closer->end(); 
+        if(loop_closer)
+            loop_closer->end(); 
+
         local_mapping->Stop();
         visualizer->Close();
     }

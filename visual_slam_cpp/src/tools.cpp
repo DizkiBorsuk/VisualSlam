@@ -22,6 +22,10 @@ namespace myslam
             y.push_back(poses.at(i).coeff(2,3)*resize_opt);
         }
 
+        auto fig = matplot::figure();  
+        fig->width(fig->width()*1.3); 
+        fig->height(fig->height()*1.3);
+        fig->color("white"); 
         matplot::plot(gt_x, gt_y)->line_width(2); 
         matplot::hold(matplot::on); 
         matplot::plot(x, y, "r--")->line_width(2);
@@ -42,6 +46,10 @@ namespace myslam
             y.push_back(poses.at(i).coeff(1,3));
         }
 
+        auto fig = matplot::figure();  
+        fig->width(fig->width()*1.3); 
+        fig->height(fig->height()*1.3);
+        fig->color("white"); 
         matplot::plot(x, y, "r--")->line_width(2);
         matplot::xlabel("x [m]");
         matplot::ylabel("y [m]");
@@ -56,6 +64,10 @@ namespace myslam
         std::cout << "mean time = " << mean << "ms \n"; 
         std::cout << "min value = " << *std::min_element(loopTimes.begin(), loopTimes.end()) << "\n"; 
 
+        auto fig = matplot::figure();  
+        fig->width(fig->width()*1.3); 
+        fig->height(fig->height()*1.3);
+        fig->color("white");  
         matplot::plot(loopTimes); 
         matplot::xlabel(" iteracja []");
         matplot::ylabel("czas [ms]"); 
@@ -83,14 +95,8 @@ namespace myslam
             er_z.emplace_back((gt_z - z));
         } 
 
-        auto abs_value = [](auto value)
-        {
-            return std::abs(value);
-        }; 
-        auto compare_abs = [](auto value1, auto value2)
-        {
-            return std::abs(value1) < std::abs(value2);
-        }; 
+        auto abs_value = [](auto value) {return std::abs(value); }; 
+        auto compare_abs = [](auto value1, auto value2) {return std::abs(value1) < std::abs(value2);}; 
 
         double sum_error_x = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
         double sum_error_y = std::transform_reduce(PAR er_y.cbegin(), er_y.cend(), 0L, std::plus{}, abs_value);
@@ -133,10 +139,5 @@ namespace myslam
 
     }
 
-    std::vector<std::string> getNNModelOutput(const cv::dnn::Net &net)
-    {
-        std::vector<std::int32_t> output_layers = net.getUnconnectedOutLayers(); 
-        std::vector<std::string> layers_name = net.getLayerNames(); 
-        
-    }
+
 }
