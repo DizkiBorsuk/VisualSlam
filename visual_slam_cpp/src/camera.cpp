@@ -29,8 +29,9 @@ namespace myslam {
         return camera2pixel(world2camera(p_w, T_c_w));
     }
 
-    Eigen::Vector3d Camera::pixel2world(const Eigen::Vector2d &p_p, const Sophus::SE3d &T_c_w, double depth) {
-        return camera2world(pixel2camera(p_p, depth), T_c_w);
+    Eigen::Vector3d Camera::pixel2world(const Eigen::Vector2d &p_p, const Sophus::SE3d &T_c_w, double depth) {   
+        Eigen::Vector3d p2c = pixel2camera(p_p, depth); 
+        return camera2world(p2c, T_c_w);
     }
 
 }

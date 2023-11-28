@@ -24,6 +24,7 @@ namespace myslam {
 
             baseline_ = t.norm(); 
             pose_ = Sophus::SE3d(Sophus::SO3d(), t); 
+            pose_inv_ = pose_.inverse();
             fx_ = K(0, 0);
             fy_ = K(1, 1); 
             cx_ = K(0, 2); 

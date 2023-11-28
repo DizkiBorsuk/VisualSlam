@@ -20,6 +20,7 @@ namespace myslam
         // read data
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
+        dataset->showPmatricies(); 
 
         //create map, local mapping nad visualizer objects and start their threads 
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
@@ -99,8 +100,8 @@ namespace myslam
 
         auto beginT = std::chrono::steady_clock::now();
 
-        image_left = cv::imread((fmt % dataset_path % 0 % current_image_index_).str(), cv::IMREAD_GRAYSCALE);
-        image_right = cv::imread((fmt % dataset_path % 1 % current_image_index_).str(), cv::IMREAD_GRAYSCALE);
+        image_left = cv::imread((fmt % dataset_path % 0 % current_image_index_).str(), cv::IMREAD_UNCHANGED);
+        image_right = cv::imread((fmt % dataset_path % 1 % current_image_index_).str(), cv::IMREAD_UNCHANGED);
 
         if (image_left.data == nullptr || image_right.data == nullptr) 
         {

@@ -51,6 +51,7 @@ namespace myslam
         P0.resize(3,4); 
         P1 = calib_data_matrix.row(1); 
         P1.resize(3,4); 
+        P2 = calib_data_matrix.row(2); 
         P2.resize(3,4); 
         P3 = calib_data_matrix.row(3); 
         P3.resize(3,4); 
@@ -108,9 +109,9 @@ namespace myslam
     void KITTI_Dataset::showPmatricies() const
     {
         std::cout << "---------------- \n"; 
-        std::cout << "Left grayscale camera projection matrix = \n" << P0 << "\n"; 
+        std::cout << "Left grayscale camera projection matrix = \n" << P2 << "\n"; 
         std::cout << "\n"; 
-        std::cout << "Right grayscale camera projection matrix = \n" << P1 << "\n"; 
+        std::cout << "Right grayscale camera projection matrix = \n" << P3 << "\n"; 
         std::cout << "---------------- \n";
     }
 

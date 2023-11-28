@@ -103,72 +103,10 @@ namespace myslam {
             DetectFeatures();
         }
 
-        // // track in right image
-        // // findCorrespondensesWithOpticalFlow();
-        // // triangulate map points
-        // TriangulateNewPoints();
         estimateDepth(); 
         // update backend because we have a new keyframe
         local_mapping->UpdateMap();
         visualizer->UpdateMap();
-
-        return true;
-    }
-
-    int MonoTracking::TriangulateNewPoints() {
-
-        Sophus::SE3d current_pose_Twc = current_frame->Pose().inverse();
-        int cnt_triangulated_pts = 0;
-        for (std::size_t i = 0; i < current_frame->features_left_.size(); i++) 
-        {
-            if (current_frame->features_left_[i]->map_point_.expired() &&
-                current_frame->features_right_[i] != nullptr) {
-                Eigen::Vector3d point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y));
-                Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
-
-                // if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
-                // {
-                //     auto new_map_point = MapPoint::CreateNewMappoint();
-                //     pworld = current_pose_Twc * pworld;
-                //     new_map_point->SetPos(pworld);
-                //     new_map_point->AddObservation(
-                //         current_frame->features_left_[i]);
-                //     new_map_point->AddObservation(
-                //         current_frame->features_right_[i]);
-
-                //     current_frame->features_left_[i]->map_point_ = new_map_point;
-                //     current_frame->features_right_[i]->map_point_ = new_map_point;
-                //     map->InsertMapPoint(new_map_point);
-                //     cnt_triangulated_pts++;
-                // }
-            }
-        }
-        std::cout  << "new landmarks: " << cnt_triangulated_pts << "\n";
-        return cnt_triangulated_pts;
-    }
-
-    bool MonoTracking::BuildInitMap() 
-    {
-        unsigned int cnt_init_landmarks = 0;
-        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
-        {
-            // create map point from triangulation
-            Eigen::Vector3d point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y));
-            Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
-
-            if (estimateDepth()) 
-            {
-                auto new_map_point = MapPoint::CreateNewMappoint();
-                new_map_point->SetPos(pworld);
-                new_map_point->AddObservation(current_frame->features_left_[i]);
-    
-                current_frame->features_left_[i]->map_point_ = new_map_point;
-                cnt_init_landmarks++;
-                map->InsertMapPoint(new_map_point);
-            }
-        }
-        std::cout  << "Initial map created with " << cnt_init_landmarks
-                << " map points \n";
 
         return true;
     }
@@ -323,7 +261,6 @@ namespace myslam {
 
         if (created_points >= num_features_init) 
         {
-            
             status = TrackingStatus::TRACKING;
 
             current_frame->SetKeyFrame();
@@ -427,11 +364,12 @@ namespace myslam {
 
         for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
         {
-            // create map point from triangulation
-            Eigen::Vector3d point_in_cam = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y));
             Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+            Eigen::Vector2d pixel_point = Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y); 
 
-            pworld << point_in_cam, net_output.at<double>(current_frame->features_left_[i]->position_.pt)/1000; 
+            Sophus::SE3d pose = current_frame->Pose(); 
+            float depth = net_output.at<float>(current_frame->features_left_[i]->position_.pt)/100; 
+            pworld = camera_left->pixel2world(pixel_point, pose,depth); 
 
             if (pworld[2] > 0 && pworld[2] < 1000) 
             {
@@ -443,7 +381,10 @@ namespace myslam {
                 map->InsertMapPoint(new_map_point);
                 created_points_num++; 
             }
+            std::cout << "point = " << pworld << "\n"; 
         }
+
+        std::cout << created_points_num << "\n"; 
         return created_points_num; 
     }
 

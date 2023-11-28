@@ -34,7 +34,6 @@ namespace myslam {
     private:
         bool Track();
 
-
         int TrackLastFrame();
         int EstimateCurrentPose();
         bool InsertKeyframe();
@@ -44,9 +43,6 @@ namespace myslam {
         int extractFeatures(); // extract features from only left img
 
         unsigned int estimateDepth(); 
-
-        bool BuildInitMap();
-        int TriangulateNewPoints();
 
         // data
         TrackingStatus status = TrackingStatus::INITING;
