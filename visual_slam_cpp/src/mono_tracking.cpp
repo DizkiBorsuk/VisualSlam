@@ -12,6 +12,9 @@ namespace myslam {
     {
         type = choose_tracking_type; 
         use_descriptors = descriptors; 
+
+        network = cv::dnn::readNetFromONNX(model_path); 
+
         switch(type)
         {
             case TrackingType::GFTT:
@@ -24,16 +27,6 @@ namespace myslam {
                 if(use_descriptors == true) 
                     extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
-            case TrackingType::FAST_ORB: 
-                detector = cv::FastFeatureDetector::create(10, true, cv::FastFeatureDetector::TYPE_9_16);  
-                if(use_descriptors == true) 
-                    extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
-                break; 
-            case TrackingType::SIFT: 
-                detector = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false);  
-                if(use_descriptors == true) 
-                    extractor = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false); 
-                break;
             default: 
                 break; 
         }
@@ -66,7 +59,6 @@ namespace myslam {
         }
 
         int num_track_last = TrackLastFrame();
-        std::cout << "bunver if tracking points = " << num_track_last << "\n"; 
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -94,12 +86,11 @@ namespace myslam {
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
 
-        std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
-
-        for (auto &feat : current_frame->features_left_) 
+        for (auto &feature : current_frame->features_left_) 
         {
-            auto mp = feat->map_point_.lock();
-            if (mp) mp->AddObservation(feat);
+            auto mappoint = feature->map_point_.lock();
+            if (mappoint) 
+                mappoint->AddObservation(feature);
         }
         
         if(use_descriptors == true)
@@ -112,10 +103,11 @@ namespace myslam {
             DetectFeatures();
         }
 
-        // track in right image
-        // findCorrespondensesWithOpticalFlow();
-        // triangulate map points
-        TriangulateNewPoints();
+        // // track in right image
+        // // findCorrespondensesWithOpticalFlow();
+        // // triangulate map points
+        // TriangulateNewPoints();
+        estimateDepth(); 
         // update backend because we have a new keyframe
         local_mapping->UpdateMap();
         visualizer->UpdateMap();
@@ -153,6 +145,32 @@ namespace myslam {
         }
         std::cout  << "new landmarks: " << cnt_triangulated_pts << "\n";
         return cnt_triangulated_pts;
+    }
+
+    bool MonoTracking::BuildInitMap() 
+    {
+        unsigned int cnt_init_landmarks = 0;
+        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
+        {
+            // create map point from triangulation
+            Eigen::Vector3d point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y));
+            Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+
+            if (estimateDepth()) 
+            {
+                auto new_map_point = MapPoint::CreateNewMappoint();
+                new_map_point->SetPos(pworld);
+                new_map_point->AddObservation(current_frame->features_left_[i]);
+    
+                current_frame->features_left_[i]->map_point_ = new_map_point;
+                cnt_init_landmarks++;
+                map->InsertMapPoint(new_map_point);
+            }
+        }
+        std::cout  << "Initial map created with " << cnt_init_landmarks
+                << " map points \n";
+
+        return true;
     }
 
     int MonoTracking::EstimateCurrentPose() {
@@ -301,7 +319,10 @@ namespace myslam {
             DetectFeatures();
         }
         
-        if (BuildInitMap()) {
+        unsigned int created_points = estimateDepth();  
+
+        if (created_points >= num_features_init) 
+        {
             
             status = TrackingStatus::TRACKING;
 
@@ -376,58 +397,54 @@ namespace myslam {
         return detected_features;
     }
 
-
-    bool MonoTracking::BuildInitMap() 
+    unsigned int MonoTracking::estimateDepth()
     {
-        unsigned int cnt_init_landmarks = 0;
+        /*
+        estimate monocular depth using midas neural network model and assign depth to every feature 
+        */
+        cv::Mat blob = cv::dnn::blobFromImage(current_frame->left_img_, 1/255.f,cv::Size(384,384), cv::Scalar(123.675, 116.28, 103.53),true, false); 
+
+        network.setInput(blob); 
+        cv::Mat net_output; 
+
+        std::vector<std::string> names; 
+        std::vector<std::int32_t> output_layers = network.getUnconnectedOutLayers(); 
+        std::vector<std::string> layers_name = network.getLayerNames(); 
+
+        names.resize(output_layers.size()); 
+        for(std::size_t i = 0; i < output_layers.size(); i++)
+        {
+            names[i] = layers_name[output_layers[i]-1]; 
+        }
+
+        net_output = network.forward(names[0]); //! estimated depth output 
+
+        const std::vector<int32_t> size = {net_output.size[1], net_output.size[2]}; 
+        net_output = cv::Mat(static_cast<int32_t>(size.size()), &size[0], CV_32F, net_output.ptr<float>()); 
+
+        cv::resize(net_output, net_output, current_frame->left_img_.size()); 
+        unsigned int created_points_num = 0; 
+
         for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
         {
-            if (current_frame->features_right_[i] == nullptr)
-            {
-                continue;
-            }
-
             // create map point from triangulation
-            Eigen::Vector3d point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y));
+            Eigen::Vector3d point_in_cam = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y));
             Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
-            if (estimateDepth()) 
+            pworld << point_in_cam, net_output.at<double>(current_frame->features_left_[i]->position_.pt)/1000; 
+
+            if (pworld[2] > 0 && pworld[2] < 1000) 
             {
                 auto new_map_point = MapPoint::CreateNewMappoint();
                 new_map_point->SetPos(pworld);
                 new_map_point->AddObservation(current_frame->features_left_[i]);
     
                 current_frame->features_left_[i]->map_point_ = new_map_point;
-                cnt_init_landmarks++;
                 map->InsertMapPoint(new_map_point);
+                created_points_num++; 
             }
         }
-        std::cout  << "Initial map created with " << cnt_init_landmarks
-                << " map points \n";
-
-        return true;
-    }
-
-    bool MonoTracking::estimateDepth()
-    {
-        std::string model_path = "mamd"; 
-        auto network = cv::dnn::readNetFromONNX(model_path); 
-
-        //network.setPreferableBackend(DNN_BACKEND_OPENCV);
-        //network.set
-
-        cv::Mat blob = cv::dnn::blobFromImage(current_frame->left_img_, 1/255,cv::Size(), cv::Scalar(123.675, 116.28, 103.53)); 
-        
-        std::vector<std::int32_t> output_layers = network.getUnconnectedOutLayers(); 
-        std::vector<std::string> layers_name = network.getLayerNames(); 
-        std::vector<std::string> names; 
-
-        for(size_t i = 0; i < output_layers.size(); i++)
-        {
-            names[i] = layers_name[output_layers[i]-1]; 
-        }
-
-        return true; 
+        return created_points_num; 
     }
 
 }  // namespace myslam
