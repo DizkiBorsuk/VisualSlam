@@ -400,65 +400,7 @@ namespace myslam {
 
         return detected_features;
     }
-
-    // int StereoTracking_OPF::extractStereoFeatures()
-    // {
-    //     /*
-    //         extract features from right img and match them with features from left, then create both feature objects 
-    //     */
-    //     std::vector<cv::KeyPoint> kps_left, kps_right;
-
-    //     kps_left.reserve(num_features); 
-    //     kps_right.reserve(num_features); 
-
-    //     cv::Mat descriptors_left, descriptors_right; 
-    //     std::vector<std::vector<cv::DMatch>> matched_points; 
-
-    //     cv::Mat mask_l(current_frame->left_img_.size(), CV_8UC1, 255);
-    //     for (auto &feat : current_frame->features_left_) 
-    //     {
-    //         cv::rectangle(mask_l, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-    //     }
-
-    //     detector->detect(current_frame->left_img_, kps_left, mask_l);  
-    //     extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
-
-        
-    //     cv::Mat mask_r(current_frame->right_img_.size(), CV_8UC1, 255);
-    //     for (auto &feat : current_frame->features_right_) 
-    //     {
-    //         cv::rectangle(mask_r, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-    //     }
-
-    //     detector->detect(current_frame->right_img_, kps_right, mask_r);  
-    //     extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
-
-    //     // for (auto &feature : current_frame->features_left_) 
-    //     // {
-    //     //     kps_left.emplace_back(feature->position_);
-    //     //     descriptors_left.push_back(feature->descriptor); //cv::Mat::push_back /didn't know cv::Mat has pushback
-    //     // }
-
-    //     matcher->knnMatch(descriptors_right, descriptors_right, matched_points, 2); 
-
-    //     float low_ratio = 0.7f; 
-    //     std::vector<std::vector<cv::DMatch>>::iterator it;
-
-    //     unsigned int found_features = 0; 
-    //     for (it= matched_points.begin(); it!= matched_points.end(); ++it) 
-    //     {
-    //         if ((*it)[0].distance/(*it)[1].distance < low_ratio)
-    //         {
-    //             current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx))); 
-    //             current_frame->features_right_.emplace_back(new Feature(current_frame, kps_left.at((*it)[0].queryIdx), descriptors_left.row((*it)[0].queryIdx), true)); 
-    //             // matchedKeypoints[0].emplace_back(frame1.frameFeaturePoints[(*it)[0].queryIdx].pt); 
-    //             // matchedKeypoints[1].emplace_back(frame2.frameFeaturePoints[(*it)[0].trainIdx].pt); 
-    //             found_features++;
-    //         }
-    //     }
-    //     return found_features; 
-    // }
-
+    
     int StereoTracking_OPF::findCorrespondensesWithOpticalFlow() 
     {
         /*

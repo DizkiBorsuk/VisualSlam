@@ -47,7 +47,7 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking_with_match = std::shared_ptr<StereoTracking_Match>(new StereoTracking_Match(TrackingType::GFTT, use_loop_closing));
+            stereoTracking_with_match = std::shared_ptr<StereoTracking_Match>(new StereoTracking_Match(TrackingType::GFTT));
             stereoTracking_with_match->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;  
         case slamType::mono: 
@@ -58,7 +58,6 @@ namespace myslam
             monoTracking = std::shared_ptr<MonoTracking>(new MonoTracking(TrackingType::GFTT, use_loop_closing)); 
             monoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, vocab);
             break; 
-        
         default:
             std::cout << "smth wrong \n"; 
             break;

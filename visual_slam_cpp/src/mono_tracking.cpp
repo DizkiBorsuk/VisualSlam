@@ -44,6 +44,7 @@ namespace myslam {
                 break;
             case TrackingStatus::LOST:
                 std::cout << "lost tracking, try reseting \n"; 
+                return false; 
                 break;
         }
 

@@ -15,7 +15,7 @@ namespace myslam {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        StereoTracking_Match(TrackingType choose_tracking_type, bool destriptors);
+        StereoTracking_Match(TrackingType choose_tracking_type);
 
         bool AddFrame(std::shared_ptr<Frame> frame);
         void setTracking(std::shared_ptr<Map> map_ptr, std::shared_ptr<LocalMapping> l_mappping_ptr, std::shared_ptr<LoopClosing> lpc_ptr, 
@@ -72,7 +72,6 @@ namespace myslam {
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
         cv::Ptr<cv::DescriptorMatcher> matcher;
-        bool use_descriptors = false; 
 
         static constexpr int GRID_SIZE_H = 46;
         static constexpr int GRID_SIZE_W = 68;
@@ -80,7 +79,7 @@ namespace myslam {
 
     public:
         // params
-        static constexpr int num_features = 150; //150
+        static constexpr int num_features = 500; //150
         static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
         static constexpr int num_features_needed_for_keyframe = 80; //80
