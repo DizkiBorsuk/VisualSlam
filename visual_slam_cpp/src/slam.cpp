@@ -20,7 +20,6 @@ namespace myslam
         // read data
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path));
         dataset->readCalibData(); 
-        dataset->showPmatricies(); 
 
         //create map, local mapping nad visualizer objects and start their threads 
         local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping);
@@ -41,7 +40,7 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::ORB, use_loop_closing));
             stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;
         case slamType::stereo_matching: 
@@ -151,12 +150,11 @@ namespace myslam
         dataset->getGTposes(); 
 
         std::cout << "------- Results --------- \n"; 
-
+        std::cout << "number of features used " << stereoTracking->num_features << "\n"; 
+        std::cout << "number of created keyframes = " << map->getNumberOfKeyframes() << "\n"; 
         plotPerformance(performance);
         plotPoses(trajectory, dataset->ground_truth_poses, img_size_opt); 
-        calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt); 
-        std::cout << "number of features used " << stereoTracking->num_features << "\n"; 
-        
+        calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6); 
     } 
 
 }  // namespace myslam

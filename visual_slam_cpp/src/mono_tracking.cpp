@@ -71,7 +71,7 @@ namespace myslam {
         }
 
         if (tracking_inliers_ < num_features_needed_for_keyframe) {
-            InsertKeyframe();
+        InsertKeyframe();
         }
 
         relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
@@ -105,7 +105,7 @@ namespace myslam {
 
         estimateDepth(); 
         // update backend because we have a new keyframe
-        local_mapping->UpdateMap();
+        //local_mapping->UpdateMap();
         visualizer->UpdateMap();
 
         return true;

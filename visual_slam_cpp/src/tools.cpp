@@ -74,9 +74,10 @@ namespace myslam
         matplot::show(); 
     }
 
-    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
+    void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt, int seq)
     {   
         double gt_x, gt_y, gt_z, x, y, z;
+        
 
         std::vector<double> er_x, er_y, er_z; 
 
@@ -105,7 +106,29 @@ namespace myslam
         double mean_error_x = sum_error_x/er_x.size(); 
         double mean_error_y = sum_error_y/er_y.size();  
         double mean_error_z = sum_error_z/er_z.size(); 
+        double mean_e = (mean_error_x + mean_error_y + mean_error_z)/3; 
+        double percent_e = 0; 
 
+        double distance = 0;
+
+        switch (seq)
+        {
+        case 0: 
+            break; 
+        case 6:
+            distance = 1232.87; 
+            percent_e = (mean_e/distance)*100; 
+            break;
+        case 7:
+            distance = 649.69; 
+            percent_e = (mean_e/distance)*100; 
+            break;
+        
+        default:
+            break;
+        }
+
+        std::cout << "mean error = " << mean_e << ", "<< percent_e <<"\n";
         std::cout << "mean x error = " << mean_error_x << "\n";
         std::cout << "max x error = " << *std::max_element(er_x.begin(), er_x.end(), compare_abs) << ", min x error = " << *std::min_element(er_x.begin(), er_x.end(), compare_abs) << "\n"; 
         std::cout << "mean y error = " << mean_error_y << "\n";

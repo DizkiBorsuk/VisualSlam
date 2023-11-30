@@ -74,8 +74,7 @@ namespace myslam {
 
         static constexpr int GRID_SIZE_H = 46;
         static constexpr int GRID_SIZE_W = 68;
-
-
+        
     public:
         // params
         static constexpr int num_features = 150; //150

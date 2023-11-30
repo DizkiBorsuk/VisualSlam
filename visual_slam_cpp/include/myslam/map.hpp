@@ -36,6 +36,10 @@ namespace myslam {
         }
 
         void CleanMap();
+        int getNumberOfKeyframes()
+        {
+            return keyframes_.size(); 
+        }
 
     private:
         void RemoveOldKeyframe();

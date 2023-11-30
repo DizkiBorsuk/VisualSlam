@@ -68,10 +68,10 @@ namespace myslam {
 
     public:
         // params
-        static constexpr int num_features = 150; //150
-        static constexpr int num_features_init = 50; // 50 
-        static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe = 80; //80
+        static constexpr int num_features = 50; //150
+        static constexpr int num_features_init = 20; // 50 
+        static constexpr int num_features_tracking_bad_ = 5; 
+        static constexpr int num_features_needed_for_keyframe = 30; //80
 
         //neural network for depth estimation 
         std::string model_path = "./model-f6b98070.onnx"; //original midas

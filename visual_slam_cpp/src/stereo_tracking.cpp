@@ -66,7 +66,7 @@ namespace myslam {
         }
 
         int num_track_last = TrackLastFrame();
-        std::cout << "tracking points = " << num_track_last << "\n"; 
+        //std::cout << "tracking points = " << num_track_last << "\n"; 
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -94,7 +94,7 @@ namespace myslam {
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
 
-        std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
+        //std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
 
         for (auto &feat : current_frame->features_left_) 
         {
