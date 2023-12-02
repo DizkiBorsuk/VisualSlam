@@ -15,18 +15,22 @@ namespace myslam
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         LoopClosing(std::shared_ptr<DBoW3::Vocabulary> vocab); 
         void runLoopCloser(); 
-        void globalBundleAdjustment(); 
+        void globalBundleAdjustment(unsigned int loop_candidate_1_id, unsigned int loop_candidate_2_id); 
         void end(); 
 
         void setLoopCloser(std::shared_ptr<Map> map_ptr, 
                            std::shared_ptr<StereoTracking_OPF> tracking_ptr, 
                            std::shared_ptr<DBoW3::Vocabulary> vocab_ptr, 
-                           std::shared_ptr<LocalMapping> l_map_ptr)
+                           std::shared_ptr<LocalMapping> l_map_ptr,
+                           std::shared_ptr<Camera> l_cam_ptr, 
+                           std::shared_ptr<Camera> r_cam_ptr)
         {
             map = map_ptr; 
             tracking = tracking_ptr; 
             vocabulary = vocab_ptr; 
             local_mapping = l_map_ptr; 
+            camera_left = l_cam_ptr; 
+            camera_right = r_cam_ptr; 
         }
 
         void addCurrentKeyframe(std::shared_ptr<Frame> new_keyframe); 
@@ -36,6 +40,9 @@ namespace myslam
         std::shared_ptr<StereoTracking_OPF> tracking = nullptr;  
         std::shared_ptr<LocalMapping> local_mapping = nullptr;  
         std::shared_ptr<DBoW3::Vocabulary> vocabulary = nullptr; 
+
+        std::shared_ptr<Camera> camera_left = nullptr; 
+        std::shared_ptr<Camera> camera_right = nullptr; 
 
         std::thread loop_closer_thread; 
         std::mutex loop_closer_mutex; 
