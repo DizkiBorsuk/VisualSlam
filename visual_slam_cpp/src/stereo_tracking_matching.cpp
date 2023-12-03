@@ -94,8 +94,12 @@ namespace myslam
             auto mp = feat->map_point_.lock();
             if (mp) mp->AddObservation(feat);
         }
+
+        current_frame->features_left_.clear(); 
         
         extractStereoFeatures(); 
+
+
         TriangulateNewPoints();
 
         if(loop_closer)
@@ -112,12 +116,16 @@ namespace myslam
 
         Sophus::SE3d current_pose_Twc = current_frame->Pose().inverse();
         int cnt_triangulated_pts = 0;
-        for (std::size_t i = 0; i < current_frame->features_left_.size(); i++) 
+        
+        std::cout << "left features size = " << current_frame->features_left_.size() << "\n"; 
+        std::cout << "right features size = " << current_frame->features_right_.size() << "\n"; 
+
+        for (std::size_t i = 0; i < current_frame->features_right_.size(); i++) 
         {
-            if (current_frame->features_left_[i]->map_point_.expired() &&
-                current_frame->features_right_[i] != nullptr) {
-                std::vector<Eigen::Vector3d> points{camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
-                                                    camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
+            if (current_frame->features_left_.at(i)->map_point_.expired()) 
+            {
+                std::vector<Eigen::Vector3d> points = {camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
+                                                       camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_.at(i)->position_.pt.x, current_frame->features_right_.at(i)->position_.pt.y))};
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
                 if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
@@ -175,9 +183,9 @@ namespace myslam
             if ( dist > max_dist ) max_dist = dist;
         }
 
-        for(size_t i; i < matched_points.size(); i++ )
+        for(size_t i = 0; i < matched_points.size(); i++ )
         {
-            if ( matched_points[i].distance <= std::max( 2*min_dist, 30.0 ) )
+            if ( matched_points[i].distance <= std::max( 2*min_dist, 20.0 ) )
             {
                 good_matches.push_back ( matched_points[i] );
             }
@@ -202,7 +210,7 @@ namespace myslam
     bool StereoTracking_Match::StereoInit() 
     {
         int num_coor_features = extractStereoFeatures();
-
+    
         if (num_coor_features < num_features_init) {
             return false;
         }
@@ -238,14 +246,14 @@ namespace myslam
         unsigned int found_features = 0; 
 
         // create mask to find correct features in left img
-        cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
-        for (auto &feat : current_frame->features_left_) 
-        {
-            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        }
+        // cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
+        // for (auto &feat : current_frame->features_left_) 
+        // {
+        //     cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        // }
         
         // extract from left img and create bow vector
-        detector->detect(current_frame->left_img_, kps_left, mask);  
+        detector->detect(current_frame->left_img_, kps_left, cv::noArray());  
         extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
 
         if(vocabulary)
@@ -266,9 +274,9 @@ namespace myslam
             if ( dist > max_dist ) max_dist = dist;
         }
 
-        for ( int i = 0; i < descriptors_left.rows; i++ )
+        for (std::size_t i = 0; i < kps_left.size(); i++ )
         {
-            if(matched_points[i].distance <= std::max( 2*min_dist, 30.0 ))
+            if(matched_points[i].distance <= std::max( 2*min_dist, 20.0 ))
             {
                 current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at(matched_points[i].queryIdx), descriptors_left.row(matched_points[i].queryIdx))); 
                 current_frame->features_right_.emplace_back(new Feature(current_frame, kps_right.at(matched_points[i].trainIdx), descriptors_right.row(matched_points[i].trainIdx), true)); 
@@ -353,7 +361,9 @@ namespace myslam
         }
 
         // estimate the Pose and determine the outliers
-        const double chi2_th = 5.991;
+        //const float chi2_th = 5.991; 
+        const float chi2_th[4]={7.815,7.815,7.815, 7.815};
+
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {
@@ -370,7 +380,7 @@ namespace myslam
                 {
                     e->computeError();
                 }
-                if (e->chi2() > chi2_th) 
+                if (e->chi2() > chi2_th[iteration]) 
                 {
                     features[i]->is_outlier_ = true;
                     e->setLevel(1);

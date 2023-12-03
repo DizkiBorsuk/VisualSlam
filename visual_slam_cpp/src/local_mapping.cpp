@@ -65,6 +65,7 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,Map::Land
     // edges
     int index = 1;
     double chi2_th = 5.991;  
+    //double chi2_th = 7.815; 
     std::map<EdgeProjection *, std::shared_ptr<Feature>> edges_and_features;
 
     for (auto &landmark : landmarks) {

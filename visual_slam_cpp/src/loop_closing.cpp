@@ -45,21 +45,21 @@ namespace myslam
 
             if(database.size()>10)
             {
-                database.query(current_frame->bow_vector, similarity, 10); 
+                database.query(current_frame->bow_vector, similarity, 0); 
 
-                for(int s = 0; s < 5; s++)
+                for(std::size_t s = 0; s < similarity.size(); s++)
                 {
                     std::cout << "miara podobieństwa = " <<  similarity.at(s) << "\n";  
                 }
 
                 // i only have to check score at second entry because scores are sorted and first one is current frame itself
-                if(similarity.at(1).Score > 0.05 ) 
-                {
-                    std::cout << "for keyframe"  << current_frame->keyframe_id << "found loop candidate with id = " << similarity.at(1).Id << "\n"; 
-                    loop_candidate_id = similarity.at(1).Id; // id of frame that current frame is similar to 
-                    std::cout << " score is " << similarity.at(1).Score << "\n"; 
-                    globalBundleAdjustment(current_frame->keyframe_id, loop_candidate_id); 
-                }
+                // if(similarity.at(1).Score > 0.05 ) 
+                // {
+                //     std::cout << "for keyframe"  << current_frame->keyframe_id << "found loop candidate with id = " << similarity.at(1).Id << "\n"; 
+                //     loop_candidate_id = similarity.at(1).Id; // id of frame that current frame is similar to 
+                //     std::cout << " score is " << similarity.at(1).Score << "\n"; 
+                //     globalBundleAdjustment(current_frame->keyframe_id, loop_candidate_id); 
+                // }
                     
                 std::cout << "database size " << database.size() << "\n"; 
             }
@@ -102,7 +102,7 @@ namespace myslam
         }
 
         //create an edge between two pose vertexes and connect thowse two keyframes that were concluded as the same keyframe
-
+        
 
 
         // map of verticies that represents all map points 

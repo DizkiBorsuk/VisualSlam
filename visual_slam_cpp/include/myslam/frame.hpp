@@ -21,7 +21,6 @@ namespace myslam {
         bool is_outlier_ = false;      
         bool is_on_left_image_ = true; 
 
-    public:
         Feature() {}
 
         Feature(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp)
@@ -51,7 +50,7 @@ namespace myslam {
 
         DBoW3::BowVector bow_vector; // bag of words vector of left img features
 
-    public:  // data members
+        // data members
         Frame() {}
         Frame(unsigned int in_id, const Sophus::SE3d &in_pose, const cv::Mat &left, const cv::Mat &right);
 

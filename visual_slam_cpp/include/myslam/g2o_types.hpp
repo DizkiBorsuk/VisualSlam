@@ -18,7 +18,7 @@ namespace myslam {
 
     class VertexPose : public g2o::BaseVertex<6, Sophus::SE3d> {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         virtual void setToOriginImpl() override { _estimate = Sophus::SE3d(); }
 
@@ -37,7 +37,7 @@ namespace myslam {
 
     class VertexXYZ : public g2o::BaseVertex<3, Eigen::Vector3d> {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         virtual void setToOriginImpl() override { _estimate = Eigen::Vector3d::Zero(); }
 
         virtual void oplusImpl(const double *update) override {
@@ -53,7 +53,7 @@ namespace myslam {
 
     class EdgeProjectionPoseOnly : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, VertexPose> {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EdgeProjectionPoseOnly(const Eigen::Vector3d &pos, const Eigen::Matrix3d &K)
             : _pos3d(pos), _K(K) {}
@@ -96,7 +96,7 @@ namespace myslam {
     class EdgeProjection : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, VertexPose, VertexXYZ> 
     {
     public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         EdgeProjection(const Eigen::Matrix3d &K, const Sophus::SE3d &cam_ext) : _K(K) {
             _cam_ext = cam_ext;

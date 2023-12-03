@@ -15,7 +15,7 @@ namespace myslam {
         switch(type)
         {
             case TrackingType::GFTT:
-                detector = cv::GFTTDetector::create(num_features, 0.01, 20);
+                detector = cv::GFTTDetector::create(num_features, 0.01, 10);
                 if(use_descriptors == true) 
                     extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
@@ -66,7 +66,7 @@ namespace myslam {
         }
 
         int num_track_last = TrackLastFrame();
-        //std::cout << "tracking points = " << num_track_last << "\n"; 
+        std::cout << "tracking points = " << num_track_last << "\n"; 
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -199,6 +199,7 @@ namespace myslam {
 
         // estimate the Pose the determine the outliers
         const double chi2_th = 5.991;
+        //const double chi2_th = 7.815;
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {

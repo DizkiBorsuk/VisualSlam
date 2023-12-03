@@ -41,7 +41,7 @@ namespace myslam {
 
         std::shared_ptr<StereoTracking_OPF> stereoTracking = nullptr;
         std::shared_ptr<StereoTracking_Match> stereoTracking_with_match = nullptr; 
-        std::shared_ptr<MonoTracking> monoTracking = nullptr; 
+        // std::shared_ptr<MonoTracking> monoTracking = nullptr; 
 
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<Map> map = nullptr;
