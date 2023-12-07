@@ -129,20 +129,20 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,Map::Land
     optimizer.initializeOptimization();
     optimizer.optimize(10);
 
-    int cnt_outlier = 0, cnt_inlier = 0;
+    int outlier = 0, inlier = 0;
     int iteration = 0;
     while (iteration < 5) {
-        cnt_outlier = 0;
-        cnt_inlier = 0;
-        // determine if we want to adjust the outlier threshold
+        outlier = 0;
+        inlier = 0;
+   
         for (auto &ef : edges_and_features) {
             if (ef.first->chi2() > chi2_th) {
-                cnt_outlier++;
+                outlier++;
             } else {
-                cnt_inlier++;
+                inlier++;
             }
         }
-        double inlier_ratio = cnt_inlier / double(cnt_inlier + cnt_outlier);
+        double inlier_ratio = inlier / double(inlier + outlier);
         if (inlier_ratio > 0.5) {
             break;
         } else {
@@ -161,14 +161,16 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,Map::Land
         }
     }
 
-    std::cout << "Outlier/Inlier in optimization: " << cnt_outlier << "/"
-              << cnt_inlier << "\n";
+    std::cout << "Outlier/Inlier in optimization: " << outlier << "/"
+              << inlier << "\n";
 
     // Set pose and lanrmark position
-    for (auto &v : vertices) {
+    for (auto &v : vertices) 
+    {
         keyframes.at(v.first)->SetPose(v.second->estimate());
     }
-    for (auto &v : vertices_landmarks) {
+    for (auto &v : vertices_landmarks) 
+    {
         landmarks.at(v.first)->SetPos(v.second->estimate());
     }
 }

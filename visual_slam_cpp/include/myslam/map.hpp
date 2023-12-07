@@ -18,37 +18,49 @@ namespace myslam {
         void InsertMapPoint(std::shared_ptr<MapPoint> map_point);
 
         LandmarksType GetAllMapPoints() {
-            std::unique_lock<std::mutex> lck(map_mutex);
-            return landmarks_;
+            std::unique_lock<std::mutex> lock(map_mutex);
+            return landmarks;
         }
         KeyframesType GetAllKeyFrames() {
-            std::unique_lock<std::mutex> lck(map_mutex);
-            return keyframes_;
+            std::unique_lock<std::mutex> lock(map_mutex);
+            return keyframes;
         }
         LandmarksType GetActiveMapPoints() {
-            std::unique_lock<std::mutex> lck(map_mutex);
-            return active_landmarks_;
+            std::unique_lock<std::mutex> lock(map_mutex);
+            return active_landmarks;
         }
 
         KeyframesType GetActiveKeyFrames() {
-            std::unique_lock<std::mutex> lck(map_mutex);
-            return active_keyframes_;
+            std::unique_lock<std::mutex> lock(map_mutex);
+            return active_keyframes;
         }
+
+        std::shared_ptr<Frame> getKeyFrameById(unsigned int kf_id)
+        {
+            std::unique_lock<std::mutex> lock(map_mutex);
+            if(keyframes.contains(kf_id))
+                return keyframes.at(kf_id); 
+            else 
+                std::cerr << "frame doesn't exist \n"; 
+
+            return nullptr; 
+        }
+
 
         void CleanMap();
         int getNumberOfKeyframes()
         {
-            return keyframes_.size(); 
+            return keyframes.size(); 
         }
 
     private:
         void RemoveOldKeyframe();
 
         std::mutex map_mutex;
-        LandmarksType landmarks_;         // all landmarks
-        LandmarksType active_landmarks_;  // active landmarks
-        KeyframesType keyframes_;         // all keyframes
-        KeyframesType active_keyframes_;  // active keyframes
+        LandmarksType landmarks;         
+        LandmarksType active_landmarks; 
+        KeyframesType keyframes;         
+        KeyframesType active_keyframes;  
 
         std::shared_ptr<Frame> current_frame_ = nullptr;
         unsigned int num_active_keyframes = 10;  

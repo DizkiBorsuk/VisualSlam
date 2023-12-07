@@ -15,10 +15,16 @@ namespace myslam
             case TrackingType::GFTT:
                 detector = cv::GFTTDetector::create(num_features, 0.01, 20);
                 extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
+
+                detector_init = cv::GFTTDetector::create(1000, 0.01, 20);
+                extractor_init = cv::ORB::create(1000, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
             case TrackingType::ORB: 
                 detector = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
                 extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+
+                detector_init = cv::ORB::create(1000, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
+                extractor_init = cv::ORB::create(1000, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break;  
             case TrackingType::SIFT: 
                 detector = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false);  

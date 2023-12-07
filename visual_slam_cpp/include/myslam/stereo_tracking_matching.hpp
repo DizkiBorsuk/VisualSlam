@@ -71,6 +71,10 @@ namespace myslam {
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
+
+        cv::Ptr<cv::FeatureDetector> detector_init;  // feature detector in opencv
+        cv::Ptr<cv::DescriptorExtractor>  extractor_init; 
+
         cv::Ptr<cv::DescriptorMatcher> matcher;
 
         static constexpr int GRID_SIZE_H = 46;
@@ -79,7 +83,7 @@ namespace myslam {
 
     public:
         // params
-        static constexpr int num_features = 1000; //150
+        static constexpr int num_features = 300; //150
         static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
         static constexpr int num_features_needed_for_keyframe = 80; //80

@@ -21,13 +21,13 @@ namespace myslam {
         SLAM(std::string &config_path, slamType type_of_algorithm, bool loop_closer = false, float resize = 1.0);
 
         void Init();
-        void Run();
+        void runMainThread();
         bool createNewFrameAndTrack();
         void output(); 
 
-
         std::vector<int> performance; 
         std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
+        std::vector<std::array<std::shared_ptr<Frame>,2>> kf_pairs; 
 
     private:
         std::string dataset_path;

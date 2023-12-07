@@ -4,6 +4,8 @@
 
 namespace myslam {
 
+    class Frame; 
+
     inline bool triangulation(const Sophus::SE3d cam_l_Rt,const Sophus::SE3d cam_r_Rt , const std::vector<Eigen::Vector3d> points, Eigen::Vector3d &out_point_pos) {
     
         Eigen::MatrixXd A(4, 4);
@@ -33,11 +35,11 @@ namespace myslam {
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
                    std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt);
     void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses);
+    void plotPosesWitLoopPairs(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<std::array<std::shared_ptr<Frame>, 2>> kf_pairs); 
 
     void plotPerformance(std::vector<int> loopTimes);
     void calculate_error(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resieze_opt, int seq); 
 
-    inline std::vector<std::string> getNNModelOutput(const cv::dnn::Net &net); 
 }
 
 

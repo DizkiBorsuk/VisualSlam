@@ -45,23 +45,33 @@ namespace myslam
 
             if(database.size()>10)
             {
-                database.query(current_frame->bow_vector, similarity, 0); 
+                database.query(current_frame->bow_vector, similarity, 10); 
 
                 for(std::size_t s = 0; s < similarity.size(); s++)
                 {
                     std::cout << "miara podobieństwa = " <<  similarity.at(s) << "\n";  
-                }
+      
+                    //i only have to check score at second entry because scores are sorted and first one is current frame itself
+                    if(similarity.at(s).Score > 0.05 && similarity.at(s).Score < 0.95) 
+                    {
+                        std::cout << "for keyframe"  << current_frame->keyframe_id << " found a loop candidate with id = " << similarity.at(s).Id << "\n"; 
+                        std::cout << " score is " << similarity.at(1).Score << "\n"; 
 
-                // i only have to check score at second entry because scores are sorted and first one is current frame itself
-                // if(similarity.at(1).Score > 0.05 ) 
-                // {
-                //     std::cout << "for keyframe"  << current_frame->keyframe_id << "found loop candidate with id = " << similarity.at(1).Id << "\n"; 
-                //     loop_candidate_id = similarity.at(1).Id; // id of frame that current frame is similar to 
-                //     std::cout << " score is " << similarity.at(1).Score << "\n"; 
-                //     globalBundleAdjustment(current_frame->keyframe_id, loop_candidate_id); 
-                // }
+                        loop_candidate_id = similarity.at(1).Id; // id of frame that current frame is similar to 
+                        
+                        
+                        
+                        std::array<std::shared_ptr<Frame>,2> pair;
+                        pair.at(0) = current_frame;
+                        pair.at(1) =  map->getKeyFrameById(loop_candidate_id); 
+                        keyframe_pairs.emplace_back(pair); 
+                        // globalBundleAdjustment(current_frame->keyframe_id, loop_candidate_id); 
+                        break; 
+                    }
+                }
                     
                 std::cout << "database size " << database.size() << "\n"; 
+                std::cout << "kf pair size " << keyframe_pairs.size() << "\n"; 
             }
         }
     }

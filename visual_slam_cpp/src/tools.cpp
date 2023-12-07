@@ -3,6 +3,7 @@
 #include <cmath>
 #include <functional>
 #include <execution>
+#include "myslam/frame.hpp"
 
 #define PAR std::execution::par,
 
@@ -160,6 +161,67 @@ namespace myslam
         fig->draw(); 
         matplot::show(); 
 
+    }
+
+    void plotPosesWitLoopPairs(std::vector<Eigen::Matrix<double, 3,4>> &poses, std::vector<std::array<std::shared_ptr<Frame>, 2>> kf_pairs)
+    {
+        std::vector<double>  x, y; 
+        std::vector<unsigned int> kf_id1, kf_id2; 
+ 
+        for(std::size_t i = 0; i < poses.size(); i++)
+        {
+            x.push_back(poses.at(i).coeff(0,3));  
+            y.push_back(poses.at(i).coeff(2,3));
+            
+        }
+
+
+        auto fig = matplot::figure();  
+
+
+        for(std::size_t i = 0; i < kf_pairs.size(); i++)
+        {
+            std::vector<double> x1, y1, x2, y2, x_c, y_c; 
+            std::cout << "loop candidate 1 = " << kf_pairs.at(i).at(0)->keyframe_id << ", loop candidate 2 = " << kf_pairs.at(i).at(1)->keyframe_id<< "\n"; 
+    
+            x1.emplace_back(kf_pairs.at(i).at(0)->Pose().inverse().matrix3x4().coeff(0,3)); 
+            y1.emplace_back(kf_pairs.at(i).at(0)->Pose().inverse().matrix3x4().coeff(2,3));
+
+            x2.emplace_back(kf_pairs.at(i).at(1)->Pose().inverse().matrix3x4().coeff(0,3)); 
+            y2.emplace_back(kf_pairs.at(i).at(1)->Pose().inverse().matrix3x4().coeff(2,3));
+
+            std::cout << "x1,y1 = " << x1.at(0) << "," << y1.at(0) << " x2,y2 = " << x2.at(0) << "," << y2.at(0) << "\n"; 
+            x_c.emplace_back(x1.at(0)); 
+            x_c.emplace_back(x2.at(0)); 
+            y_c.emplace_back(y1.at(0)); 
+            y_c.emplace_back(y2.at(0)); 
+            
+            matplot::plot(x, y, "b")->line_width(2);
+            matplot::xlabel("x [m]");
+            matplot::ylabel("y [m]");  
+            matplot::hold(matplot::on);
+            auto sc1 = matplot::scatter(x1, y1, 10); 
+            sc1->marker_style(matplot::line_spec::marker_style::asterisk); 
+            auto sc2 = matplot::scatter(x2, y2, 10); 
+            sc2->marker_style(matplot::line_spec::marker_style::circle); 
+            matplot::plot(x_c,y_c, "k"); 
+            matplot::show();
+   
+        }
+        
+
+
+        // auto fig = matplot::figure();  
+        // fig->width(fig->width()*1.3); 
+        // fig->height(fig->height()*1.3);
+        // fig->color("white"); 
+        // //matplot::plot(x, y, "r")->line_width(2);
+        // matplot::hold(matplot::on); 
+        // matplot::plot(kf_id1, "g*"); 
+        // matplot::plot(kf_id2, "b*"); 
+        // matplot::xlabel("x [m]");
+        // matplot::ylabel("y [m]");  
+        // matplot::show();
     }
 
 

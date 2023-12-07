@@ -5,16 +5,16 @@ namespace myslam
     void Map::InsertKeyFrame(std::shared_ptr<Frame> frame) 
     {
         current_frame_ = frame;
-        if (!keyframes_.contains(frame->keyframe_id))  //keyframes_.find(frame->keyframe_id) == keyframes_.end()
+        if (!keyframes.contains(frame->keyframe_id))  //keyframes_.find(frame->keyframe_id) == keyframes_.end()
         {
-            keyframes_.insert(make_pair(frame->keyframe_id, frame));
-            active_keyframes_.insert(make_pair(frame->keyframe_id, frame));
+            keyframes.insert(make_pair(frame->keyframe_id, frame));
+            active_keyframes.insert(make_pair(frame->keyframe_id, frame));
         } else {
-            keyframes_[frame->keyframe_id] = frame;
-            active_keyframes_[frame->keyframe_id] = frame;
+            keyframes[frame->keyframe_id] = frame;
+            active_keyframes[frame->keyframe_id] = frame;
         }
 
-        if (active_keyframes_.size() > num_active_keyframes)
+        if (active_keyframes.size() > num_active_keyframes)
         {
             RemoveOldKeyframe();
         }
@@ -22,15 +22,15 @@ namespace myslam
 
     void Map::InsertMapPoint(std::shared_ptr<MapPoint> map_point) 
     {
-        if (!landmarks_.contains(map_point->id_))  //landmarks_.find(map_point->id_) == landmarks_.end()
+        if (!landmarks.contains(map_point->id_))  //landmarks_.find(map_point->id_) == landmarks_.end()
         {
-            landmarks_.insert(make_pair(map_point->id_, map_point));
-            active_landmarks_.insert(make_pair(map_point->id_, map_point));
+            landmarks.insert(make_pair(map_point->id_, map_point));
+            active_landmarks.insert(make_pair(map_point->id_, map_point));
         } 
         else 
         {
-            landmarks_[map_point->id_] = map_point;
-            active_landmarks_[map_point->id_] = map_point;
+            landmarks[map_point->id_] = map_point;
+            active_landmarks[map_point->id_] = map_point;
         }
     }
 
@@ -44,7 +44,8 @@ namespace myslam
         double max_dis = 0, min_dis = 9999;
         double max_kf_id = 0, min_kf_id = 0;
         auto Twc = current_frame_->Pose().inverse();
-        for (auto& kf : active_keyframes_) 
+
+        for (auto& kf : active_keyframes) 
         {
             if (kf.second == current_frame_)
             {
@@ -67,14 +68,14 @@ namespace myslam
         std::shared_ptr<Frame> frame_to_remove = nullptr;
         if (min_dis < min_dis_th) 
         {
-            frame_to_remove = keyframes_.at(min_kf_id);
+            frame_to_remove = keyframes.at(min_kf_id);
         } else {
-            frame_to_remove = keyframes_.at(max_kf_id);
+            frame_to_remove = keyframes.at(max_kf_id);
         }
 
         std::cout  << "remove keyframe " << frame_to_remove->keyframe_id;
         // remove keyframe and landmark observation
-        active_keyframes_.erase(frame_to_remove->keyframe_id);
+        active_keyframes.erase(frame_to_remove->keyframe_id);
 
         for (auto feature : frame_to_remove->features_left_) 
         {
@@ -97,17 +98,16 @@ namespace myslam
                 temp_mappoint->RemoveObservation(feature);
             }
         }
-
         CleanMap();
     }
 
     void Map::CleanMap() {
         int cnt_landmark_removed = 0;
-        for (auto iter = active_landmarks_.begin(); iter != active_landmarks_.end();) 
+        for (auto iter = active_landmarks.begin(); iter != active_landmarks.end();) 
         {
             if (iter->second->observed_times_ == 0)
             {
-                iter = active_landmarks_.erase(iter);
+                iter = active_landmarks.erase(iter);
                 cnt_landmark_removed++;
             } else {
                 ++iter;

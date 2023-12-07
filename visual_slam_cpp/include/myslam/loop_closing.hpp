@@ -32,10 +32,11 @@ namespace myslam
         }
 
         void addCurrentKeyframe(std::shared_ptr<Frame> new_keyframe); 
+
+        std::vector<std::array<std::shared_ptr<Frame>, 2>> keyframe_pairs; 
     private: 
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Map> map = nullptr; 
-        std::shared_ptr<StereoTracking_OPF> tracking = nullptr;  
         std::shared_ptr<LocalMapping> local_mapping = nullptr;  
         std::shared_ptr<DBoW3::Vocabulary> vocabulary = nullptr; 
 

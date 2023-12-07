@@ -40,7 +40,7 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::ORB, use_loop_closing));
             stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;
         case slamType::stereo_matching: 
@@ -71,7 +71,7 @@ namespace myslam
 
     }
 
-    void SLAM::Run() 
+    void SLAM::runMainThread() 
     {
         std::cout << "Running main thread \n";
 
@@ -84,8 +84,11 @@ namespace myslam
         }
 
         if(loop_closer)
+        {
+            kf_pairs = loop_closer->keyframe_pairs; 
             loop_closer->end(); 
-
+        }
+            
         local_mapping->Stop();
         visualizer->Close();
     }
@@ -156,7 +159,10 @@ namespace myslam
         std::cout << "number of created keyframes = " << map->getNumberOfKeyframes() << "\n"; 
         plotPerformance(performance);
         plotPoses(trajectory, dataset->ground_truth_poses, img_size_opt); 
+        if(use_loop_closing)
+            plotPosesWitLoopPairs(trajectory, kf_pairs);
         calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6); 
+         
     } 
 
 }  // namespace myslam
