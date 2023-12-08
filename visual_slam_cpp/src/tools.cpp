@@ -184,11 +184,11 @@ namespace myslam
             std::vector<double> x1, y1, x2, y2, x_c, y_c; 
             std::cout << "loop candidate 1 = " << kf_pairs.at(i).at(0)->keyframe_id << ", loop candidate 2 = " << kf_pairs.at(i).at(1)->keyframe_id<< "\n"; 
     
-            x1.emplace_back(kf_pairs.at(i).at(0)->Pose().inverse().matrix3x4().coeff(0,3)); 
-            y1.emplace_back(kf_pairs.at(i).at(0)->Pose().inverse().matrix3x4().coeff(2,3));
+            x1.emplace_back(kf_pairs.at(i).at(0)->getPose().inverse().matrix3x4().coeff(0,3)); 
+            y1.emplace_back(kf_pairs.at(i).at(0)->getPose().inverse().matrix3x4().coeff(2,3));
 
-            x2.emplace_back(kf_pairs.at(i).at(1)->Pose().inverse().matrix3x4().coeff(0,3)); 
-            y2.emplace_back(kf_pairs.at(i).at(1)->Pose().inverse().matrix3x4().coeff(2,3));
+            x2.emplace_back(kf_pairs.at(i).at(1)->getPose().inverse().matrix3x4().coeff(0,3)); 
+            y2.emplace_back(kf_pairs.at(i).at(1)->getPose().inverse().matrix3x4().coeff(2,3));
 
             std::cout << "x1,y1 = " << x1.at(0) << "," << y1.at(0) << " x2,y2 = " << x2.at(0) << "," << y2.at(0) << "\n"; 
             x_c.emplace_back(x1.at(0)); 
@@ -209,7 +209,6 @@ namespace myslam
    
         }
         
-
 
         // auto fig = matplot::figure();  
         // fig->width(fig->width()*1.3); 

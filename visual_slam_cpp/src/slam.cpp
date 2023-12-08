@@ -145,7 +145,7 @@ namespace myslam
         std::cout  << "Loop time : " << elapsedT.count() << " ms. \n";
 
         performance.emplace_back(elapsedT.count());
-        trajectory.emplace_back(new_frame->Pose().inverse().matrix3x4());
+        trajectory.emplace_back(new_frame->getPose().inverse().matrix3x4());
 
         return success;
     }

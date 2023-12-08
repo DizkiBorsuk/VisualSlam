@@ -5,6 +5,7 @@ namespace myslam {
 
     class Frame;
     class Feature;
+    class FeatureStereo;
 
     class MapPoint 
     {
@@ -16,6 +17,7 @@ namespace myslam {
         std::mutex mappoint_mutex;
         int observed_times_ = 0;  // being observed by feature matching algo.
         std::list<std::weak_ptr<Feature>> observations_;
+        std::list<std::weak_ptr<FeatureStereo>> observations_stereo;
 
         MapPoint() {}
 
@@ -38,12 +40,26 @@ namespace myslam {
             observed_times_++;
         }
 
+        void AddObservation(std::shared_ptr<FeatureStereo> feature) 
+        {
+            std::unique_lock<std::mutex> lock(mappoint_mutex);
+            observations_stereo.push_back(feature);
+            observed_times_++;
+        }
+
         void RemoveObservation(std::shared_ptr<Feature> feat);
+        void RemoveStereoObservation(std::shared_ptr<FeatureStereo> feat);
 
         std::list<std::weak_ptr<Feature>> GetObs() 
         {
             std::unique_lock<std::mutex> lock(mappoint_mutex);
             return observations_;
+        }
+
+        std::list<std::weak_ptr<FeatureStereo>> GetStereoObs() 
+        {
+            std::unique_lock<std::mutex> lock(mappoint_mutex);
+            return observations_stereo;
         }
 
         // factory function

@@ -37,7 +37,7 @@ namespace myslam {
         int TrackLastFrame();
         int EstimateCurrentPose();
         bool InsertKeyframe();
-        bool StereoInit();
+        void StereoInit();
 
         int DetectFeatures();
         int extractFeatures(); // extract features from only left img
@@ -47,8 +47,6 @@ namespace myslam {
         bool BuildInitMap();
 
         int TriangulateNewPoints();
-
-        bool Reset();
 
         // data
         TrackingStatus status = TrackingStatus::INITING;

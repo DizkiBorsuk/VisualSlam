@@ -98,14 +98,14 @@ namespace myslam {
 
     void Visualizer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera) 
     {
-        Sophus::SE3d Twc = current_frame_->Pose().inverse();
+        Sophus::SE3d Twc = current_frame_->getPose().inverse();
         pangolin::OpenGlMatrix m(Twc.matrix());
         vis_camera.Follow(m, true);
     }
 
     void Visualizer::DrawFrame(std::shared_ptr<Frame> frame, const int* frame_color) 
     {
-        Sophus::SE3d Twc = frame->Pose().inverse();
+        Sophus::SE3d Twc = frame->getPose().inverse();
 
         glPushMatrix();
 

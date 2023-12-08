@@ -32,12 +32,30 @@ namespace myslam {
             : frame_(frame), position_(kp), descriptor(in_descriptor),is_on_left_image_(is_on_left) {}
     };
 
+    class FeatureStereo {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        std::weak_ptr<Frame> frame_; 
+        cv::KeyPoint position_in_left;     
+        cv::KeyPoint position_in_right;   
+        cv::Mat descriptor_left, descriptor_right;         
+        std::weak_ptr<MapPoint> map_point_;
+
+        bool is_outlier_ = false;     
+
+        FeatureStereo() {}
+
+        FeatureStereo(std::shared_ptr<Frame> frame, const cv::KeyPoint &kp, const cv::KeyPoint &kp2, cv::Mat in_descriptor, cv::Mat in_descriptor2)
+            : frame_(frame), position_in_left(kp), position_in_right(kp2), descriptor_left(in_descriptor), descriptor_right(in_descriptor2) {}
+    };
+
     class Frame {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-        unsigned int id = 0;          
-        unsigned int keyframe_id = 0;  
+        int id = 0; // int beacuse i want do subtract them      
+        int keyframe_id = 0;  
         bool keyframe = false;                     
         Sophus::SE3d pose_;                       
         std::mutex frame_mutex;           
@@ -48,6 +66,8 @@ namespace myslam {
         // corresponding features in right image, set to nullptr if no corresponding
         std::vector<std::shared_ptr<Feature>> features_right_;
 
+        std::vector<std::shared_ptr<FeatureStereo>> features_stereo;
+
         DBoW3::BowVector bow_vector; // bag of words vector of left img features
 
         // data members
@@ -55,7 +75,7 @@ namespace myslam {
         Frame(unsigned int in_id, const Sophus::SE3d &in_pose, const cv::Mat &left, const cv::Mat &right);
 
         // set and get pose, thread safe
-        Sophus::SE3d Pose() {
+        Sophus::SE3d getPose() {
             std::unique_lock<std::mutex> lock(frame_mutex);
             return pose_;
         }

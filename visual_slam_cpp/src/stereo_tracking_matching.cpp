@@ -39,6 +39,7 @@ namespace myslam
 
     bool StereoTracking_Match::AddFrame(std::shared_ptr<Frame> frame) 
     {
+        auto beginT = std::chrono::steady_clock::now();
         current_frame = frame;
         std::cout << "added frame \n"; 
         switch (status) {
@@ -54,6 +55,60 @@ namespace myslam
         }
 
         last_frame = current_frame;
+        auto endT = std::chrono::steady_clock::now();
+        auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+        std::cout  << "Loop time for tracking: " << elapsedT.count() << " ms. \n";
+        return true;
+    }
+
+    void StereoTracking_Match::StereoInit() 
+    {
+        int num_coor_features = extractStereoFeatures();
+    
+        if (num_coor_features < num_features_init) {
+            return;
+        }
+
+        if (BuildInitMap()) {
+            
+            status = TrackingStatus::TRACKING;
+
+            current_frame->SetKeyFrame();
+            map->InsertKeyFrame(current_frame);
+            local_mapping->UpdateMap();
+
+            visualizer->AddCurrentFrame(current_frame);
+            visualizer->UpdateMap();
+            if(loop_closer)
+                loop_closer->addCurrentKeyframe(current_frame); 
+        
+        }
+    }
+
+    bool StereoTracking_Match::BuildInitMap() 
+    {
+        unsigned int triangulated_mappoints = 0;
+        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
+        {
+            // create map point from triangulation
+            Eigen::Vector3d left_point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_stereo[i]->position_in_left.pt.x, current_frame->features_stereo[i]->position_in_left.pt.y)); 
+            Eigen::Vector3d right_point = camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_stereo[i]->position_in_right.pt.x,current_frame->features_stereo[i]->position_in_right.pt.y));
+
+            std::vector<Eigen::Vector3d> points{left_point, right_point};
+
+            Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+
+            if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) {
+                auto new_map_point = MapPoint::CreateNewMappoint();
+                new_map_point->SetPos(pworld);
+                new_map_point->AddObservation(current_frame->features_stereo[i]);
+            
+                current_frame->features_stereo[i]->map_point_ = new_map_point;
+                triangulated_mappoints++;
+                map->InsertMapPoint(new_map_point);
+            }
+        }
+        std::cout  << "Initial map created with " << triangulated_mappoints << " map points \n";
         return true;
     }
 
@@ -61,7 +116,7 @@ namespace myslam
     {
         if (last_frame) 
         {
-            current_frame->SetPose(relative_motion_ * last_frame->Pose());
+            current_frame->SetPose(relative_motion_ * last_frame->getPose());
         }
 
         int num_track_last = TrackLastFrame();
@@ -81,7 +136,7 @@ namespace myslam
             InsertKeyframe();
         }
 
-        relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
+        relative_motion_ = current_frame->getPose() * (last_frame->getPose().inverse());
 
         visualizer->AddCurrentFrame(current_frame);
         return true;
@@ -95,17 +150,13 @@ namespace myslam
 
         std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
 
-        for (auto &feat : current_frame->features_left_) 
+        for (auto &feat : current_frame->features_stereo) 
         {
             auto mp = feat->map_point_.lock();
             if (mp) mp->AddObservation(feat);
         }
-
-        current_frame->features_left_.clear(); 
-        
+      
         extractStereoFeatures(); 
-
-
         TriangulateNewPoints();
 
         if(loop_closer)
@@ -120,18 +171,21 @@ namespace myslam
 
     int StereoTracking_Match::TriangulateNewPoints() {
 
-        Sophus::SE3d current_pose_Twc = current_frame->Pose().inverse();
-        int cnt_triangulated_pts = 0;
+        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse();
+        int triangulated_pts = 0;
         
         std::cout << "left features size = " << current_frame->features_left_.size() << "\n"; 
         std::cout << "right features size = " << current_frame->features_right_.size() << "\n"; 
 
-        for (std::size_t i = 0; i < current_frame->features_right_.size(); i++) 
+        for (std::size_t i = 0; i < current_frame->features_stereo.size(); i++) 
         {
-            if (current_frame->features_left_.at(i)->map_point_.expired()) 
+            if (current_frame->features_stereo.at(i)->map_point_.expired()) 
             {
-                std::vector<Eigen::Vector3d> points = {camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
-                                                       camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_.at(i)->position_.pt.x, current_frame->features_right_.at(i)->position_.pt.y))};
+                Eigen::Vector3d left_point = camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_stereo[i]->position_in_left.pt.x, current_frame->features_stereo[i]->position_in_left.pt.y)); 
+                Eigen::Vector3d right_point = camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_stereo[i]->position_in_right.pt.x,current_frame->features_stereo[i]->position_in_right.pt.y));
+
+                std::vector<Eigen::Vector3d> points{left_point, right_point};
+                
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
 
                 if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
@@ -140,104 +194,102 @@ namespace myslam
                     pworld = current_pose_Twc * pworld;
                     
                     new_map_point->SetPos(pworld);
-                    new_map_point->AddObservation(current_frame->features_left_[i]);
-                    new_map_point->AddObservation(current_frame->features_right_[i]);
-
-                    current_frame->features_left_[i]->map_point_ = new_map_point;
-                    current_frame->features_right_[i]->map_point_ = new_map_point;
-                    
+                    new_map_point->AddObservation(current_frame->features_stereo[i]);
+                    current_frame->features_stereo[i]->map_point_ = new_map_point;
                     map->InsertMapPoint(new_map_point);
-                    cnt_triangulated_pts++;
+                    triangulated_pts++;
                 }
             }
         }
-        std::cout  << "new landmarks: " << cnt_triangulated_pts << "\n";
-        return cnt_triangulated_pts;
+        std::cout  << "new landmarks: " << triangulated_pts << "\n";
+        return triangulated_pts;
     }
 
     int StereoTracking_Match::TrackLastFrame() 
     {
-        cv::Mat mask(last_frame->left_img_.size(), CV_8UC1, 255);
-        for (auto &feat : current_frame->features_left_) 
-        {
-            cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        }
+        /*
+            track features from previos frame to current frame 
+        */
 
-        std::vector<cv::KeyPoint> kps_last, kps_current; 
-        cv::Mat descriptors_current, descriptors_last;  // each row is diffrent descriptor 
-        std::vector<cv::DMatch> matched_points, good_matches; 
+        cv::Mat descriptors_current_left, descriptors_current_right, descriptors_last_left;  // each row is diffrent descriptor 
+        std::vector<cv::DMatch> matches_current_lr, good_matches_current_lr, matches_prev_current, good_matches; 
         unsigned int found_features = 0; 
         
-        // extract from current left img
-        detector->detect(current_frame->left_img_, kps_current, mask);  
-        extractor->compute(current_frame->left_img_, kps_current, descriptors_current); 
-        
-        //get descriptors from previous img 
-        for(std::size_t i = 0; i < last_frame->features_left_.size(); i++)
+        //get descriptors from previous frame 
+        for(std::size_t i = 0; i < last_frame->features_stereo.size(); i++)
         {
-            descriptors_last.push_back(last_frame->features_left_[i]->descriptor); 
+            descriptors_last_left.push_back(last_frame->features_stereo[i]->descriptor_left); 
         }
+    
+        //! extract features from current img 
+        std::vector<cv::KeyPoint> kps_left, kps_right;
 
-        matcher->match(descriptors_current, descriptors_last, matched_points); 
+        //create mask to find correct features in left img
+        cv::Mat mask_left(last_frame->left_img_.size(), CV_8UC1, 255);
+        cv::Mat mask_right(last_frame->right_img_.size(), CV_8UC1, 255);
+        for (auto &feat : last_frame->features_stereo) 
+        {
+            cv::rectangle(mask_left, feat->position_in_left.pt - cv::Point2f(10, 10), feat->position_in_left.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+            cv::rectangle(mask_right, feat->position_in_right.pt - cv::Point2f(10, 10), feat->position_in_right.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
+        
+        // extract from left img and create bow vector
+        detector->detect(current_frame->left_img_, kps_left, mask_left);  
+        extractor->compute(current_frame->left_img_, kps_left, descriptors_current_left); 
+
+        //extract features from right img (no need for bow)
+        detector->detect(current_frame->right_img_, kps_right, mask_right);  
+        extractor->compute(current_frame->right_img_, kps_right, descriptors_current_right); 
+
+        //! match features current img
+        matcher->match(descriptors_current_left, descriptors_current_right, matches_current_lr); 
 
         double min_dist=10000, max_dist=0;
-
-        for ( int i = 0; i < descriptors_current.rows; i++ )
+        for ( std::size_t i = 0; i < matches_current_lr.size(); i++ )
         {
-            double dist = matched_points[i].distance;
+            double dist = matches_current_lr[i].distance;
             if ( dist < min_dist ) min_dist = dist;
             if ( dist > max_dist ) max_dist = dist;
         }
 
-        for(size_t i = 0; i < matched_points.size(); i++ )
+        cv::Mat good_descriptors_current; 
+        for(size_t i = 0; i < matches_current_lr.size(); i++ )
         {
-            if ( matched_points[i].distance <= std::max( 2*min_dist, 20.0 ) )
+            if ( matches_current_lr[i].distance <= std::max( 2*min_dist, 20.0 ) )
             {
-                good_matches.push_back ( matched_points[i] );
+                good_matches_current_lr.push_back(matches_current_lr[i]);
+                good_descriptors_current.push_back(descriptors_current_left.row(matches_current_lr[i].queryIdx)); 
             }
         }
 
-        for(unsigned int m = 0; m < good_matches.size(); m++)
+        // //! match good matches from current frame (left) with good matches from prev frame (left)
+        matcher->match(descriptors_last_left, good_descriptors_current, matches_prev_current); 
+
+        for(unsigned int m = 0; m < good_matches_current_lr.size(); m++)
         {
-            std::shared_ptr<Feature> new_feature(new Feature(current_frame, kps_current[good_matches[m].queryIdx], descriptors_current.row(good_matches[m].queryIdx))); 
-            auto mp = last_frame->features_left_[good_matches[m].trainIdx]->map_point_.lock(); 
-            if(mp)
-            {
-                new_feature->map_point_ = last_frame->features_left_[good_matches[m].trainIdx]->map_point_; 
-                current_frame->features_left_.emplace_back(new_feature); 
-                found_features++;
-            }
-            else {continue;}
+            
+            good_descriptors_current.push_back(descriptors_current_left.row(matches_current_lr[m].queryIdx));
+
+            // std::shared_ptr<Feature> new_feature(new Feature(current_frame, kps_current[good_matches[m].queryIdx], descriptors_current.row(good_matches[m].queryIdx))); 
+            // auto mp = last_frame->features_left_[good_matches[m].trainIdx]->map_point_.lock(); 
+            // if(mp)
+            // {
+            //     new_feature->map_point_ = last_frame->features_left_[good_matches[m].trainIdx]->map_point_; 
+            //     current_frame->features_left_.emplace_back(new_feature); 
+            //     found_features++;
+            // }
+            // else {continue;}
         }
+
+
+
+
+
         std::cout  << "found " << found_features << " in the last image. \n";
         return found_features; 
     }
 
-    bool StereoTracking_Match::StereoInit() 
-    {
-        int num_coor_features = extractStereoFeatures();
-    
-        if (num_coor_features < num_features_init) {
-            return false;
-        }
 
-        if (BuildInitMap()) {
-            
-            status = TrackingStatus::TRACKING;
-
-            current_frame->SetKeyFrame();
-            map->InsertKeyFrame(current_frame);
-            local_mapping->UpdateMap();
-
-            visualizer->AddCurrentFrame(current_frame);
-            visualizer->UpdateMap();
-            if(loop_closer)
-                loop_closer->addCurrentKeyframe(current_frame); 
-        
-            return true;
-        }
-        return false;
-    }
 
     int StereoTracking_Match::extractStereoFeatures()
     {
@@ -251,22 +303,28 @@ namespace myslam
         std::vector<cv::DMatch> matched_points; 
         unsigned int found_features = 0; 
 
-        // create mask to find correct features in left img
-        // cv::Mat mask(current_frame->left_img_.size(), CV_8UC1, 255);
-        // for (auto &feat : current_frame->features_left_) 
-        // {
-        //     cv::rectangle(mask, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
-        // }
+        //create mask to find correct features in left img
+        cv::Mat mask_left(current_frame->left_img_.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->features_left_) 
+        {
+            cv::rectangle(mask_left, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
+        //create mask to find correct features in right img
+        cv::Mat mask_right(current_frame->right_img_.size(), CV_8UC1, 255);
+        for (auto &feat : current_frame->features_right_) 
+        {
+            cv::rectangle(mask_right, feat->position_.pt - cv::Point2f(10, 10), feat->position_.pt + cv::Point2f(10, 10), 0, cv::FILLED); 
+        }
         
         // extract from left img and create bow vector
-        detector->detect(current_frame->left_img_, kps_left, cv::noArray());  
+        detector->detect(current_frame->left_img_, kps_left, mask_left);  
         extractor->compute(current_frame->left_img_, kps_left, descriptors_left); 
 
         if(vocabulary)
             vocabulary->transform(descriptors_left, current_frame->bow_vector); 
 
         //extract features from right img (no need for bow)
-        detector->detect(current_frame->right_img_, kps_right, cv::noArray());  
+        detector->detect(current_frame->right_img_, kps_right, mask_right);  
         extractor->compute(current_frame->right_img_, kps_right, descriptors_right); 
 
         // match points and filter them based on distance 
@@ -280,48 +338,20 @@ namespace myslam
             if ( dist > max_dist ) max_dist = dist;
         }
 
-        for (std::size_t i = 0; i < kps_left.size(); i++ )
+        for (std::size_t i = 0; i < matched_points.size(); i++ )
         {
             if(matched_points[i].distance <= std::max( 2*min_dist, 20.0 ))
             {
-                current_frame->features_left_.emplace_back(new Feature(current_frame, kps_left.at(matched_points[i].queryIdx), descriptors_left.row(matched_points[i].queryIdx))); 
-                current_frame->features_right_.emplace_back(new Feature(current_frame, kps_right.at(matched_points[i].trainIdx), descriptors_right.row(matched_points[i].trainIdx), true)); 
                 found_features++; 
+                current_frame->features_stereo.emplace_back(new FeatureStereo(current_frame, kps_left.at(matched_points[i].queryIdx), 
+                                                                                             kps_right.at(matched_points[i].trainIdx), 
+                                                                                             descriptors_left.row(matched_points[i].queryIdx), 
+                                                                                             descriptors_right.row(matched_points[i].trainIdx))); 
             }
         }
         return found_features; 
     }
 
-    bool StereoTracking_Match::BuildInitMap() 
-    {
-        unsigned int cnt_init_landmarks = 0;
-        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
-        {
-            if (current_frame->features_right_[i] == nullptr)
-            {
-                continue;
-            }
-            // create map point from triangulation
-            std::vector<Eigen::Vector3d> points{camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y)),
-                                                camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,current_frame->features_right_[i]->position_.pt.y))};
-            Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
-
-            if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) {
-                auto new_map_point = MapPoint::CreateNewMappoint();
-                new_map_point->SetPos(pworld);
-                new_map_point->AddObservation(current_frame->features_left_[i]);
-                new_map_point->AddObservation(current_frame->features_right_[i]);
-                current_frame->features_left_[i]->map_point_ = new_map_point;
-                current_frame->features_right_[i]->map_point_ = new_map_point;
-                cnt_init_landmarks++;
-                map->InsertMapPoint(new_map_point);
-            }
-        }
-        std::cout  << "Initial map created with " << cnt_init_landmarks
-                << " map points \n";
-
-        return true;
-    }
 
     int StereoTracking_Match::EstimateCurrentPose() 
     {
@@ -334,7 +364,7 @@ namespace myslam
         // vertex
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(0);
-        vertex_pose->setEstimate(current_frame->Pose());
+        vertex_pose->setEstimate(current_frame->getPose());
         optimizer.addVertex(vertex_pose);
 
         // K
@@ -343,21 +373,21 @@ namespace myslam
         // edges
         int index = 1;
         std::vector<EdgeProjectionPoseOnly *> edges;
-        std::vector<std::shared_ptr<Feature>> features;
+        std::vector<std::shared_ptr<FeatureStereo>> features;
 
         // edges.reserve(current_frame->features_left_.size()); 
         // features.reserve(current_frame->features_left_.size()); 
 
-        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
+        for (size_t i = 0; i < current_frame->features_stereo.size(); ++i) 
         {
-            auto mp = current_frame->features_left_[i]->map_point_.lock();
+            auto mp = current_frame->features_stereo[i]->map_point_.lock();
             if (mp) 
             {
-                features.emplace_back(current_frame->features_left_[i]);
+                features.emplace_back(current_frame->features_stereo[i]);
                 EdgeProjectionPoseOnly *edge = new EdgeProjectionPoseOnly(mp->pos_, K);
                 edge->setId(index);
                 edge->setVertex(0, vertex_pose);
-                edge->setMeasurement(toVec2(current_frame->features_left_[i]->position_.pt));
+                edge->setMeasurement(toVec2(current_frame->features_stereo[i]->position_in_left.pt));
                 edge->setInformation(Eigen::Matrix2d::Identity());
                 edge->setRobustKernel(new g2o::RobustKernelHuber);
                 edges.emplace_back(edge);
@@ -373,7 +403,7 @@ namespace myslam
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {
-            vertex_pose->setEstimate(current_frame->Pose());
+            vertex_pose->setEstimate(current_frame->getPose());
             optimizer.initializeOptimization();
             optimizer.optimize(10);
             cnt_outlier = 0;

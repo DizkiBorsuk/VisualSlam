@@ -39,7 +39,8 @@ namespace myslam {
         }
     }
 
-    bool StereoTracking_OPF::AddFrame(std::shared_ptr<Frame> frame) {
+    bool StereoTracking_OPF::AddFrame(std::shared_ptr<Frame> frame)
+    {    
         current_frame = frame;
 
         switch (status) {
@@ -60,13 +61,17 @@ namespace myslam {
 
     bool StereoTracking_OPF::Track() 
     {
+        auto beginTrack = std::chrono::steady_clock::now();
         if (last_frame) 
         {
-            current_frame->SetPose(relative_motion_ * last_frame->Pose());
+            current_frame->SetPose(relative_motion_ * last_frame->getPose());
         }
 
         int num_track_last = TrackLastFrame();
-        std::cout << "tracking points = " << num_track_last << "\n"; 
+
+        auto endTrack = std::chrono::steady_clock::now();
+        auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -82,9 +87,10 @@ namespace myslam {
             InsertKeyframe();
         }
 
-        relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
+        relative_motion_ = current_frame->getPose() * (last_frame->getPose().inverse());
 
         visualizer->AddCurrentFrame(current_frame);
+
         return true;
     }
 
@@ -125,7 +131,7 @@ namespace myslam {
 
     int StereoTracking_OPF::TriangulateNewPoints() {
 
-        Sophus::SE3d current_pose_Twc = current_frame->Pose().inverse();
+        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse();
         int cnt_triangulated_pts = 0;
         for (std::size_t i = 0; i < current_frame->features_left_.size(); i++) 
         {
@@ -165,7 +171,7 @@ namespace myslam {
         // vertex
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(0);
-        vertex_pose->setEstimate(current_frame->Pose());
+        vertex_pose->setEstimate(current_frame->getPose());
         optimizer.addVertex(vertex_pose);
 
         // K
@@ -203,7 +209,7 @@ namespace myslam {
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {
-            vertex_pose->setEstimate(current_frame->Pose());
+            vertex_pose->setEstimate(current_frame->getPose());
             optimizer.initializeOptimization();
             optimizer.optimize(10);
             cnt_outlier = 0;
@@ -251,15 +257,15 @@ namespace myslam {
     }
 
     int StereoTracking_OPF::TrackLastFrame() {
-        // use LK flow to estimate points in the right image
+        
         std::vector<cv::Point2f> kps_last, kps_current;
 
         for (auto &kp : last_frame->features_left_) {
             if (kp->map_point_.lock()) 
             {
-                // use projected point
+                // project point into new img
                 auto mp = kp->map_point_.lock();
-                auto px = camera_left->world2pixel(mp->pos_, current_frame->Pose());
+                auto px = camera_left->world2pixel(mp->pos_, current_frame->getPose());
                 kps_last.emplace_back(kp->position_.pt);
                 kps_current.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
@@ -287,12 +293,13 @@ namespace myslam {
             }
         }
 
-        std::cout  << "Find " << num_good_pts << " in the last image. \n";
+        std::cout  << "Found " << num_good_pts << " in the prev image \n";
         return num_good_pts;
     }
 
     bool StereoTracking_OPF::StereoInit() 
     {
+        auto beginINIT = std::chrono::steady_clock::now();
         if(use_descriptors == true)
         {
             extractFeatures(); 
@@ -320,6 +327,10 @@ namespace myslam {
             visualizer->UpdateMap();
             if(loop_closer)
                 loop_closer->addCurrentKeyframe(current_frame); 
+
+            auto endINITT = std::chrono::steady_clock::now();
+            auto elapsedINITT = std::chrono::duration_cast<std::chrono::milliseconds>(endINITT - beginINIT);
+            std::cout  << "Loop time for initialization: " << elapsedINITT.count() << " ms. \n";
         
             return true;
         }
@@ -391,7 +402,7 @@ namespace myslam {
 
         detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
-        vocabulary->transform(descriptors, current_frame->bow_vector); 
+        // vocabulary->transform(descriptors, current_frame->bow_vector); 
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
@@ -416,7 +427,7 @@ namespace myslam {
             auto mp = kp->map_point_.lock();
             if (mp) {
                 // use projected points as initial guess
-                auto px = camera_right->world2pixel(mp->pos_, current_frame->Pose());
+                auto px = camera_right->world2pixel(mp->pos_, current_frame->getPose());
                 kps_right.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
                 // use same pixel in left iamge

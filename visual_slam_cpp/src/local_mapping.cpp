@@ -26,9 +26,14 @@ void LocalMapping::LocalMappingThread() {
         std::unique_lock<std::mutex> lock(local_mapping_mutex);
         map_update_.wait(lock);
 
+        auto beginT = std::chrono::steady_clock::now();
+
         Map::KeyframesType active_kfs = map->GetActiveKeyFrames();
         Map::LandmarksType active_landmarks = map->GetActiveMapPoints();
         LocalBundleAdjustment(active_kfs, active_landmarks);
+        auto endT = std::chrono::steady_clock::now();
+        auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+        std::cout  << "Loop time for local mapping: " << elapsedT.count() << " ms. \n";
     }
 }
 
@@ -46,7 +51,7 @@ void LocalMapping::LocalBundleAdjustment(Map::KeyframesType &keyframes,Map::Land
         auto kf = keyframe.second;
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(kf->keyframe_id);
-        vertex_pose->setEstimate(kf->Pose());
+        vertex_pose->setEstimate(kf->getPose());
         optimizer.addVertex(vertex_pose);
 
         if (kf->keyframe_id > max_kf_id) 

@@ -43,7 +43,7 @@ namespace myslam
 
         double max_dis = 0, min_dis = 9999;
         double max_kf_id = 0, min_kf_id = 0;
-        auto Twc = current_frame_->Pose().inverse();
+        auto Twc = current_frame_->getPose().inverse();
 
         for (auto& kf : active_keyframes) 
         {
@@ -51,7 +51,7 @@ namespace myslam
             {
                 continue;
             }
-            auto dis = (kf.second->Pose() * Twc).log().norm();
+            auto dis = (kf.second->getPose() * Twc).log().norm();
             if (dis > max_dis) 
             {
                 max_dis = dis;

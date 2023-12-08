@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     if(argc > 1)
         kitti_path = argv[1]; 
 
-    std::shared_ptr<myslam::SLAM> slam(new myslam::SLAM(kitti_path, myslam::slamType::stereo_opf, true, 1));
+    std::shared_ptr<myslam::SLAM> slam(new myslam::SLAM(kitti_path, myslam::slamType::stereo_opf, false, 1));
     slam->Init();
     slam->runMainThread();
 
