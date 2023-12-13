@@ -38,9 +38,6 @@ namespace myslam {
         int EstimateCurrentPose();
         bool InsertKeyframe();
         void StereoInit();
-
-        int DetectFeatures();
-        int extractFeatures(); // extract features from only left img
         
         int extractStereoFeatures(); // extract and matches features from both imgs 
 
@@ -81,10 +78,10 @@ namespace myslam {
 
     public:
         // params
-        static constexpr int num_features = 300; //150
+        static constexpr int num_features = 1000; //150
         static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe = 80; //80
+        static constexpr int num_features_needed_for_keyframe = 100; //80
     };
 
 }  // namespace myslam

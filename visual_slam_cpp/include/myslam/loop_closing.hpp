@@ -16,7 +16,9 @@ namespace myslam
         LoopClosing(std::shared_ptr<DBoW3::Vocabulary> vocab); 
         void runLoopCloser(); 
         void globalBundleAdjustment(unsigned int loop_candidate_1_id, unsigned int loop_candidate_2_id); 
+        void PoseGraph(std::shared_ptr<Frame> loop_candidate_kf); 
         void end(); 
+        bool matchLoopFeatures(std::shared_ptr<Frame> loop_candidate_kf); 
 
         void setLoopCloser(std::shared_ptr<Map> map_ptr, 
                            std::shared_ptr<DBoW3::Vocabulary> vocab_ptr, 
@@ -32,6 +34,7 @@ namespace myslam
         }
 
         void addCurrentKeyframe(std::shared_ptr<Frame> new_keyframe); 
+        void letLoopCLoser(); 
 
         std::vector<std::array<std::shared_ptr<Frame>, 2>> keyframe_pairs; 
     private: 
@@ -49,7 +52,9 @@ namespace myslam
         DBoW3::Database database; 
 
         std::condition_variable map_update;
+        std::condition_variable local_mapping_update;
         std::atomic<bool> loop_closer_running;
 
+        cv::Ptr<cv::DescriptorMatcher> matcher;
     }; 
 }

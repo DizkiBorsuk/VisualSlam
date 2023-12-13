@@ -4,11 +4,14 @@
 #include "myslam/frame.hpp"
 #include "myslam/map.hpp"
 
+
 namespace myslam {
 
     class LocalMapping;
     class LoopClosing; 
     class Visualizer;
+
+    
 
     class StereoTracking_OPF
     {
@@ -47,8 +50,6 @@ namespace myslam {
         bool BuildInitMap();
         int TriangulateNewPoints();
 
-        bool Reset();
-
         // data
         TrackingStatus status = TrackingStatus::INITING;
         TrackingType type = TrackingType::GFTT; 
@@ -70,17 +71,19 @@ namespace myslam {
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
+        // SuperPointSLAM::SPDetector SPF_detector; 
         bool use_descriptors = false; 
 
         static constexpr int GRID_SIZE_H = 46;
         static constexpr int GRID_SIZE_W = 68;
+        const std::string w_dir = "./Weights/superpoint_model.pt";
         
     public:
         // params
         static constexpr int num_features = 500; //150
         static constexpr int num_features_init = 50; // 50 
         static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe = 80; //80
+        static constexpr int num_features_needed_for_keyframe = 40; //80
     };
 
 }  // namespace myslam

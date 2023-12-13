@@ -1,6 +1,7 @@
 #include "myslam/local_mapping.hpp"
 #include "myslam/g2o_types.hpp"
 #include "myslam/mappoint.hpp"
+#include "myslam/loop_closing.hpp"
 
 namespace myslam {
 
@@ -31,6 +32,8 @@ void LocalMapping::LocalMappingThread() {
         Map::KeyframesType active_kfs = map->GetActiveKeyFrames();
         Map::LandmarksType active_landmarks = map->GetActiveMapPoints();
         LocalBundleAdjustment(active_kfs, active_landmarks);
+        if(loop_closer)
+            loop_closer->letLoopCLoser(); 
         auto endT = std::chrono::steady_clock::now();
         auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
         std::cout  << "Loop time for local mapping: " << elapsedT.count() << " ms. \n";

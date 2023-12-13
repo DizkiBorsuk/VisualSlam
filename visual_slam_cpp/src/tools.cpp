@@ -80,7 +80,7 @@ namespace myslam
         double gt_x, gt_y, gt_z, x, y, z;
         
 
-        std::vector<double> er_x, er_y, er_z; 
+        std::vector<double> er_x, er_y, er_z, er_x1, er_y1, er_z1; 
 
         for(size_t i = 0; i < poses.size(); i++)
         {
@@ -92,21 +92,30 @@ namespace myslam
             y = poses.at(i).coeff(2,3)*resize_opt;
             z = poses.at(i).coeff(1,3)*resize_opt;
 
-            er_x.emplace_back((gt_x - x)); 
-            er_y.emplace_back((gt_y - y));
-            er_z.emplace_back((gt_z - z));
+            er_x.emplace_back((gt_x - x)*(gt_x - x)); 
+            er_y.emplace_back((gt_y - y)*(gt_y - y));
+            er_z.emplace_back((gt_z - z)*(gt_z - z));
+
+            er_x1.emplace_back((gt_x - x)); 
+            er_y1.emplace_back((gt_y - y));
+            er_z1.emplace_back((gt_z - z));
         } 
 
-        auto abs_value = [](auto value) {return std::abs(value); }; 
+
+        // auto abs_value = [](auto value) {return std::abs(value); }; 
         auto compare_abs = [](auto value1, auto value2) {return std::abs(value1) < std::abs(value2);}; 
 
-        double sum_error_x = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
-        double sum_error_y = std::transform_reduce(PAR er_y.cbegin(), er_y.cend(), 0L, std::plus{}, abs_value);
-        double sum_error_z = std::transform_reduce(PAR er_z.cbegin(), er_z.cend(), 0L, std::plus{}, abs_value);
+        // double sum_error_x = std::transform_reduce(PAR er_x.cbegin(), er_x.cend(), 0L, std::plus{}, abs_value);
+        // double sum_error_y = std::transform_reduce(PAR er_y.cbegin(), er_y.cend(), 0L, std::plus{}, abs_value);
+        // double sum_error_z = std::transform_reduce(PAR er_z.cbegin(), er_z.cend(), 0L, std::plus{}, abs_value);
 
-        double mean_error_x = sum_error_x/er_x.size(); 
-        double mean_error_y = sum_error_y/er_y.size();  
-        double mean_error_z = sum_error_z/er_z.size(); 
+        double sum_error_x = std::accumulate(er_x.begin(), er_x.end(), 0);
+        double sum_error_y = std::accumulate(er_y.begin(), er_y.end(), 0); 
+        double sum_error_z = std::accumulate(er_z.begin(), er_z.end(), 0);
+
+        double mean_error_x = sqrt(sum_error_x/er_x.size()); 
+        double mean_error_y = sqrt(sum_error_y/er_y.size());  
+        double mean_error_z = sqrt(sum_error_z/er_z.size()); 
         double mean_e = (mean_error_x + mean_error_y + mean_error_z)/3; 
         double percent_e = 0; 
 
@@ -115,6 +124,7 @@ namespace myslam
         switch (seq)
         {
         case 0: 
+            // distance = 
             break; 
         case 6:
             distance = 1232.87; 
@@ -137,24 +147,31 @@ namespace myslam
         std::cout << "mean z error = " << mean_error_z << "\n";
         std::cout << "max z error = " << *std::max_element(er_z.begin(), er_z.end(), compare_abs) << ", min z error = " << *std::min_element(er_z.begin(), er_z.end(),compare_abs) << "\n"; 
 
+        for(size_t i =0; i < er_x.size(); i++)
+        {
+            er_x.at(i) = sqrt(er_x.at(i));
+            er_y.at(i) = sqrt(er_y.at(i));
+            er_z.at(i) = sqrt(er_z.at(i));
+        }
+
         auto fig = matplot::figure();  
         fig->width(fig->width()*2); 
         fig->height(fig->height()*2);
         fig->color("white"); 
         auto ax1 = matplot::subplot(3, 1, 0);
-        matplot::plot(er_x)->line_width(2);
+        matplot::plot(er_x1)->line_width(2);
         matplot::grid(ax1, matplot::on);   
         matplot::ylabel("błąd x [m]"); 
         matplot::xlabel(" iteracja []");
 
         auto ax2 = matplot::subplot(3, 1, 1);
-        matplot::plot(er_y)->line_width(2); 
+        matplot::plot(er_y1)->line_width(2); 
         matplot::grid(ax2, matplot::on);  
         matplot::ylabel("błąd y [m]"); 
         matplot::xlabel(" iteracja []");
 
         auto ax3 = matplot::subplot(3, 1, 2);
-        matplot::plot(er_z)->line_width(2);
+        matplot::plot(er_z1)->line_width(2);
         matplot::grid(ax3, matplot::on);   
         matplot::ylabel("błąd z [m]"); 
         matplot::xlabel(" iteracja []");

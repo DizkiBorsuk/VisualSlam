@@ -28,6 +28,7 @@ namespace myslam {
         std::vector<int> performance; 
         std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
         std::vector<std::array<std::shared_ptr<Frame>,2>> kf_pairs; 
+        std::vector<std::shared_ptr<Frame>> all_frames; 
 
     private:
         std::string dataset_path;

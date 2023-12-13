@@ -6,14 +6,18 @@
 namespace myslam {
     
     class Map;
+    class LoopClosing; 
+
     class LocalMapping {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
         LocalMapping();
-        void setLocalMapping(std::shared_ptr<Map> map_ptr, std::shared_ptr<Camera> left, std::shared_ptr<Camera> right)
+        void setLocalMapping(std::shared_ptr<Map> map_ptr, std::shared_ptr<LoopClosing> loop_cl_ptr, 
+                             std::shared_ptr<Camera> left, std::shared_ptr<Camera> right)
         {
             map = map_ptr; 
+            loop_closer = loop_cl_ptr;
             cam_left_ = left;
             cam_right_ = right;
         }
@@ -25,6 +29,7 @@ namespace myslam {
         void LocalBundleAdjustment(Map::KeyframesType& keyframes, Map::LandmarksType& landmarks);
 
         std::shared_ptr<Map> map;
+        std::shared_ptr<LoopClosing> loop_closer;
         std::thread local_mapping_thread;
         std::mutex local_mapping_mutex;
 

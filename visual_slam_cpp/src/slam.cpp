@@ -40,14 +40,14 @@ namespace myslam
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::ORB, use_loop_closing));
+            stereoTracking = std::shared_ptr<StereoTracking_OPF>(new StereoTracking_OPF(TrackingType::GFTT, use_loop_closing));
             stereoTracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;
         case slamType::stereo_matching: 
             left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
             right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
 
-            stereoTracking_with_match = std::shared_ptr<StereoTracking_Match>(new StereoTracking_Match(TrackingType::ORB));
+            stereoTracking_with_match = std::shared_ptr<StereoTracking_Match>(new StereoTracking_Match(TrackingType::GFTT));
             stereoTracking_with_match->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera, vocab);
             break;  
         // case slamType::mono: 
@@ -64,7 +64,7 @@ namespace myslam
         }
 
         // set local mapping and visualizer with pointers 
-        local_mapping->setLocalMapping(map, left_camera, right_camera);
+        local_mapping->setLocalMapping(map, loop_closer, left_camera, right_camera);
         visualizer->SetMap(map);
         if(loop_closer)
             loop_closer->setLoopCloser(map, vocab, local_mapping, left_camera, right_camera); 
@@ -146,6 +146,7 @@ namespace myslam
 
         performance.emplace_back(elapsedT.count());
         trajectory.emplace_back(new_frame->getPose().inverse().matrix3x4());
+        all_frames.emplace_back(new_frame);
 
         return success;
     }
@@ -153,6 +154,11 @@ namespace myslam
     void SLAM::output()
     {
         dataset->getGTposes(); 
+        std::vector<Eigen::Matrix<double, 3,4>>  trajectory2; 
+        for(int i = 0; i < all_frames.size(); i++)
+        {
+            trajectory2.emplace_back(all_frames.at(i)->getPose().inverse().matrix3x4()); 
+        }
 
         std::cout << "------- Results --------- \n"; 
         std::cout << "number of features used " << stereoTracking->num_features << "\n"; 
@@ -160,8 +166,8 @@ namespace myslam
         plotPerformance(performance);
         plotPoses(trajectory, dataset->ground_truth_poses, img_size_opt); 
         if(use_loop_closing)
-            plotPosesWitLoopPairs(trajectory, kf_pairs);
-        calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6); 
+            plotPosesWitLoopPairs(trajectory2, kf_pairs);
+        calculate_error(trajectory2, dataset->ground_truth_poses, img_size_opt, 6); 
          
     } 
 

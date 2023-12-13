@@ -5,20 +5,16 @@
 #include "myslam/visualizer.hpp"
 #include "myslam/loop_closing.hpp"
 
-
 namespace myslam {
 
     MonoTracking::MonoTracking(TrackingType choose_tracking_type, bool descriptors) 
     {
         type = choose_tracking_type; 
         use_descriptors = descriptors; 
-
-        network = cv::dnn::readNetFromONNX(model_path); 
-
         switch(type)
         {
             case TrackingType::GFTT:
-                detector = cv::GFTTDetector::create(num_features, 0.01, 20);
+                detector = cv::GFTTDetector::create(num_features, 0.01, 10);
                 if(use_descriptors == true) 
                     extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
@@ -27,12 +23,28 @@ namespace myslam {
                 if(use_descriptors == true) 
                     extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
+            case TrackingType::FAST_ORB: 
+                detector = cv::FastFeatureDetector::create(10, true, cv::FastFeatureDetector::TYPE_9_16);  
+                if(use_descriptors == true) 
+                    extractor = cv::ORB::create(num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
+                break; 
+            case TrackingType::SIFT: 
+                detector = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false);  
+                if(use_descriptors == true) 
+                    extractor = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false); 
+                break;
+            case TrackingType::SP: 
+                break; 
             default: 
                 break; 
         }
+
+        
     }
 
-    bool MonoTracking::AddFrame(std::shared_ptr<Frame> frame) {
+    bool MonoTracking::AddFrame(std::shared_ptr<Frame> frame)
+    {    
+        auto beginT = std::chrono::steady_clock::now();
         current_frame = frame;
 
         switch (status) {
@@ -43,10 +55,13 @@ namespace myslam {
                 Track();
                 break;
             case TrackingStatus::LOST:
-                std::cout << "lost tracking, try reseting \n"; 
+                std::cout << "tracking lost \n"; 
                 return false; 
                 break;
         }
+        auto endT = std::chrono::steady_clock::now();
+        auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+        std::cout << "whole tracking loop = " << elapsedT.count() << "\n"; 
 
         last_frame = current_frame;
         return true;
@@ -54,12 +69,18 @@ namespace myslam {
 
     bool MonoTracking::Track() 
     {
+        auto beginTrack = std::chrono::steady_clock::now();
         if (last_frame) 
         {
-            current_frame->SetPose(relative_motion_ * last_frame->Pose());
+            current_frame->SetPose(relative_motion_ * last_frame->getPose());
         }
 
         int num_track_last = TrackLastFrame();
+
+        auto endTrack = std::chrono::steady_clock::now();
+        auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+        std::cout << "only tracking = " << elapsedTrack.count() << "\n"; 
+
         tracking_inliers_ = EstimateCurrentPose();
 
         if (tracking_inliers_ > num_features_tracking_bad_) {
@@ -72,26 +93,29 @@ namespace myslam {
         }
 
         if (tracking_inliers_ < num_features_needed_for_keyframe) {
-        InsertKeyframe();
+            InsertKeyframe();
         }
 
-        relative_motion_ = current_frame->Pose() * (last_frame->Pose().inverse());
+        relative_motion_ = current_frame->getPose() * (last_frame->getPose().inverse());
 
         visualizer->AddCurrentFrame(current_frame);
+
         return true;
     }
 
     bool MonoTracking::InsertKeyframe() {
 
+        auto beginTrack = std::chrono::steady_clock::now();
         // current frame is a new keyframe
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
 
-        for (auto &feature : current_frame->features_left_) 
+        //std::cout  << "Set frame " << current_frame->id << " as keyframe " << current_frame->keyframe_id << "\n";
+
+        for (auto &feat : current_frame->features_left_) 
         {
-            auto mappoint = feature->map_point_.lock();
-            if (mappoint) 
-                mappoint->AddObservation(feature);
+            auto mp = feat->map_point_.lock();
+            if (mp) mp->AddObservation(feat);
         }
         
         if(use_descriptors == true)
@@ -104,12 +128,52 @@ namespace myslam {
             DetectFeatures();
         }
 
-        estimateDepth(); 
+        // track in right image
+        findCorrespondensesWithOpticalFlow();
+        // triangulate map points
+        TriangulateNewPoints();
         // update backend because we have a new keyframe
-        //local_mapping->UpdateMap();
+        local_mapping->UpdateMap();
         visualizer->UpdateMap();
 
+        auto endTrack = std::chrono::steady_clock::now();
+        auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+        std::cout << "keyframe insertion = " << elapsedTrack.count() << "\n"; 
+
+
         return true;
+    }
+
+    int MonoTracking::TriangulateNewPoints() {
+
+        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse();
+        int cnt_triangulated_pts = 0;
+        for (std::size_t i = 0; i < current_frame->features_left_.size(); i++) 
+        {
+            if (current_frame->features_left_[i]->map_point_.expired() &&
+                current_frame->features_right_[i] != nullptr) {
+                std::vector<Eigen::Vector3d> points{camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x,current_frame->features_left_[i]->position_.pt.y)),
+                                                    camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x, current_frame->features_right_[i]->position_.pt.y))};
+                Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+
+                if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) 
+                {
+                    auto new_map_point = MapPoint::CreateNewMappoint();
+                    pworld = current_pose_Twc * pworld;
+                    new_map_point->SetPos(pworld);
+                    new_map_point->AddObservation(
+                        current_frame->features_left_[i]);
+                    new_map_point->AddObservation(
+                        current_frame->features_right_[i]);
+
+                    current_frame->features_left_[i]->map_point_ = new_map_point;
+                    current_frame->features_right_[i]->map_point_ = new_map_point;
+                    map->InsertMapPoint(new_map_point);
+                    cnt_triangulated_pts++;
+                }
+            }
+        }
+        return cnt_triangulated_pts;
     }
 
     int MonoTracking::EstimateCurrentPose() {
@@ -122,7 +186,7 @@ namespace myslam {
         // vertex
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(0);
-        vertex_pose->setEstimate(current_frame->Pose());
+        vertex_pose->setEstimate(current_frame->getPose());
         optimizer.addVertex(vertex_pose);
 
         // K
@@ -156,10 +220,11 @@ namespace myslam {
 
         // estimate the Pose the determine the outliers
         const double chi2_th = 5.991;
+        //const double chi2_th = 7.815;
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {
-            vertex_pose->setEstimate(current_frame->Pose());
+            vertex_pose->setEstimate(current_frame->getPose());
             optimizer.initializeOptimization();
             optimizer.optimize(10);
             cnt_outlier = 0;
@@ -207,15 +272,15 @@ namespace myslam {
     }
 
     int MonoTracking::TrackLastFrame() {
-        // use LK flow to estimate points in the right image
+        
         std::vector<cv::Point2f> kps_last, kps_current;
 
         for (auto &kp : last_frame->features_left_) {
             if (kp->map_point_.lock()) 
             {
-                // use projected point
+                // project point into new img
                 auto mp = kp->map_point_.lock();
-                auto px = camera_left->world2pixel(mp->pos_, current_frame->Pose());
+                auto px = camera_left->world2pixel(mp->pos_, current_frame->getPose());
                 kps_last.emplace_back(kp->position_.pt);
                 kps_current.emplace_back(cv::Point2f(px[0], px[1]));
             } else {
@@ -243,12 +308,13 @@ namespace myslam {
             }
         }
 
-        std::cout  << "Find " << num_good_pts << " in the last image. \n";
+        std::cout  << "Found " << num_good_pts << " in the prev image \n";
         return num_good_pts;
     }
 
-    bool MonoTracking::Init() 
+    bool MonoTracking::StereoInit() 
     {
+        auto beginINIT = std::chrono::steady_clock::now();
         if(use_descriptors == true)
         {
             extractFeatures(); 
@@ -258,10 +324,14 @@ namespace myslam {
             DetectFeatures();
         }
         
-        unsigned int created_points = estimateDepth();  
+        int num_coor_features = findCorrespondensesWithOpticalFlow();
 
-        if (created_points >= num_features_init) 
-        {
+        if (num_coor_features < num_features_init) {
+            return false;
+        }
+
+        if (BuildInitMap()) {
+            
             status = TrackingStatus::TRACKING;
 
             current_frame->SetKeyFrame();
@@ -272,6 +342,10 @@ namespace myslam {
             visualizer->UpdateMap();
             if(loop_closer)
                 loop_closer->addCurrentKeyframe(current_frame); 
+
+            auto endINITT = std::chrono::steady_clock::now();
+            auto elapsedINITT = std::chrono::duration_cast<std::chrono::milliseconds>(endINITT - beginINIT);
+            std::cout  << "Loop time for initialization: " << elapsedINITT.count() << " ms. \n";
         
             return true;
         }
@@ -290,9 +364,18 @@ namespace myslam {
         }
 
         std::vector<cv::KeyPoint> keypoints;
+        cv::Mat spf_descriptors; 
         keypoints.reserve(num_features); 
 
-        detector->detect(current_frame->left_img_, keypoints, mask);
+        if(detector!=nullptr)
+            detector->detect(current_frame->left_img_, keypoints, mask);
+        // else 
+        // {
+        //     SuperPointSLAM::SPDetector SPF_detector("./Weight/superpoint_model.pt", torch::cuda::is_available()); 
+        //      SPF_detector.detect(current_frame->left_img_, keypoints, spf_descriptors); 
+        // }
+           
+
         unsigned int detected_features = 0;
 
         for (auto &kp : keypoints) 
@@ -321,10 +404,29 @@ namespace myslam {
         std::vector<cv::KeyPoint> keypoints;
         keypoints.reserve(num_features); 
         cv::Mat descriptors; // each row is diffrent descriptor 
+        
+
+        // for (int y = 0; y < 1241 - GRID_SIZE_H; y += GRID_SIZE_H) 
+        // {
+        //     for (int x = 0; x < 376 - GRID_SIZE_W; x += GRID_SIZE_W) 
+        //     {
+        //         cv::Mat block; 
+        //         block = current_frame->left_img_(cv::Rect(x, y, GRID_SIZE_W, GRID_SIZE_H)).clone(); 
+        //         detector->detect(block, temp_keypoints, cv::noArray());  
+        //         extractor->compute(block, temp_keypoints, descriptors); 
+
+        //         for(auto &kp : temp_keypoints)
+        //         {
+        //             kp.pt.x +=x; 
+        //             kp.pt.y +=y; 
+        //             keypoints.emplace_back(kp); 
+        //         }
+        //     }
+        // }
 
         detector->detect(current_frame->left_img_, keypoints, mask);  
         extractor->compute(current_frame->left_img_, keypoints, descriptors); 
-        vocabulary->transform(descriptors, current_frame->bow_vector); 
+        // vocabulary->transform(descriptors, current_frame->bow_vector); 
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
@@ -333,6 +435,85 @@ namespace myslam {
         }
 
         return detected_features;
+    }
+    
+    int MonoTracking::findCorrespondensesWithOpticalFlow() 
+    {
+        /*
+        after finding keypoints in left img, find the same keypoints in righr img using optical flow 
+        */
+        int num_good_pts = 0;
+
+        std::vector<cv::Point2f> kps_left, kps_right;
+        for (auto &kp : current_frame->features_left_) 
+        {
+            kps_left.emplace_back(kp->position_.pt);
+            auto mp = kp->map_point_.lock();
+            if (mp) {
+                // use projected points as initial guess
+                auto px = camera_right->world2pixel(mp->pos_, current_frame->getPose());
+                kps_right.emplace_back(cv::Point2f(px[0], px[1]));
+            } else {
+                // use same pixel in left iamge
+                kps_right.emplace_back(kp->position_.pt);
+            }
+        }
+
+        std::vector<uchar> status;
+        cv::Mat error;
+        cv::calcOpticalFlowPyrLK( current_frame->left_img_, current_frame->right_img_, kps_left,
+            kps_right, status, error, cv::Size(11, 11), 3,
+            cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01),
+            cv::OPTFLOW_USE_INITIAL_FLOW);
+
+        for (size_t i = 0; i < status.size(); ++i) 
+        {
+            if (status[i]) {
+                cv::KeyPoint kp(kps_right[i], 7);
+                std::shared_ptr<Feature> feat(new Feature(current_frame, kp));
+                feat->is_on_left_image_ = false;
+                current_frame->features_right_.emplace_back(feat);
+                num_good_pts++;
+            } else {
+                current_frame->features_right_.emplace_back(nullptr);
+            }
+        }
+
+        std::cout  << "Find " << num_good_pts << " in the right image. \n";
+        return num_good_pts;
+    }
+
+
+    bool MonoTracking::BuildInitMap() 
+    {
+        unsigned int cnt_init_landmarks = 0;
+        for (size_t i = 0; i < current_frame->features_left_.size(); ++i) 
+        {
+            if (current_frame->features_right_[i] == nullptr)
+            {
+                continue;
+            }
+
+            // create map point from triangulation
+            std::vector<Eigen::Vector3d> points{ camera_left->pixel2camera(Eigen::Vector2d(current_frame->features_left_[i]->position_.pt.x, current_frame->features_left_[i]->position_.pt.y)),
+                                                camera_right->pixel2camera(Eigen::Vector2d(current_frame->features_right_[i]->position_.pt.x,current_frame->features_right_[i]->position_.pt.y))};
+            Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+
+            if (triangulation(camera_left->pose(),camera_right->pose(), points, pworld)) {
+                auto new_map_point = MapPoint::CreateNewMappoint();
+                new_map_point->SetPos(pworld);
+                new_map_point->AddObservation(current_frame->features_left_[i]);
+                new_map_point->AddObservation(current_frame->features_right_[i]);
+                current_frame->features_left_[i]->map_point_ = new_map_point;
+                current_frame->features_right_[i]->map_point_ = new_map_point;
+                cnt_init_landmarks++;
+                map->InsertMapPoint(new_map_point);
+            }
+        }
+        std::cout  << "Initial map created with " << cnt_init_landmarks
+                << " map points \n";
+
+        return true;
     }
 
     unsigned int MonoTracking::estimateDepth()

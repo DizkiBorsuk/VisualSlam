@@ -5,7 +5,6 @@
 #include "myslam/visualizer.hpp"
 #include "myslam/loop_closing.hpp"
 
-
 namespace myslam {
 
     StereoTracking_OPF::StereoTracking_OPF(TrackingType choose_tracking_type, bool descriptors) 
@@ -34,13 +33,18 @@ namespace myslam {
                 if(use_descriptors == true) 
                     extractor = cv::SIFT::create(num_features, 3, 0.04, 10, 1.6, false); 
                 break;
+            case TrackingType::SP: 
+                break; 
             default: 
                 break; 
         }
+
+        
     }
 
     bool StereoTracking_OPF::AddFrame(std::shared_ptr<Frame> frame)
     {    
+        auto beginT = std::chrono::steady_clock::now();
         current_frame = frame;
 
         switch (status) {
@@ -51,9 +55,13 @@ namespace myslam {
                 Track();
                 break;
             case TrackingStatus::LOST:
-                Reset();
+                std::cout << "tracking lost \n"; 
+                return false; 
                 break;
         }
+        auto endT = std::chrono::steady_clock::now();
+        auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+        std::cout << "whole tracking loop = " << elapsedT.count() << "\n"; 
 
         last_frame = current_frame;
         return true;
@@ -71,6 +79,7 @@ namespace myslam {
 
         auto endTrack = std::chrono::steady_clock::now();
         auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+        std::cout << "only tracking = " << elapsedTrack.count() << "\n"; 
 
         tracking_inliers_ = EstimateCurrentPose();
 
@@ -96,6 +105,7 @@ namespace myslam {
 
     bool StereoTracking_OPF::InsertKeyframe() {
 
+        auto beginTrack = std::chrono::steady_clock::now();
         // current frame is a new keyframe
         current_frame->SetKeyFrame();
         map->InsertKeyFrame(current_frame);
@@ -125,6 +135,11 @@ namespace myslam {
         // update backend because we have a new keyframe
         local_mapping->UpdateMap();
         visualizer->UpdateMap();
+
+        auto endTrack = std::chrono::steady_clock::now();
+        auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+        std::cout << "keyframe insertion = " << elapsedTrack.count() << "\n"; 
+
 
         return true;
     }
@@ -349,9 +364,18 @@ namespace myslam {
         }
 
         std::vector<cv::KeyPoint> keypoints;
+        cv::Mat spf_descriptors; 
         keypoints.reserve(num_features); 
 
-        detector->detect(current_frame->left_img_, keypoints, mask);
+        if(detector!=nullptr)
+            detector->detect(current_frame->left_img_, keypoints, mask);
+        // else 
+        // {
+        //     SuperPointSLAM::SPDetector SPF_detector("./Weight/superpoint_model.pt", torch::cuda::is_available()); 
+        //      SPF_detector.detect(current_frame->left_img_, keypoints, spf_descriptors); 
+        // }
+           
+
         unsigned int detected_features = 0;
 
         for (auto &kp : keypoints) 
@@ -492,9 +516,4 @@ namespace myslam {
         return true;
     }
 
-    bool StereoTracking_OPF::Reset() {
-        std::cout  << "Tracking lost \n";
-        return false;
-    }
-
-}  // namespace myslam
+}  

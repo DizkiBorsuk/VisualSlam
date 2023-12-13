@@ -142,4 +142,22 @@ namespace myslam {
         Sophus::SE3d _cam_ext;
     };
 
+    class EdgePoseGraph: public g2o::BaseBinaryEdge<6, Sophus::SE3d, VertexPose, VertexPose>
+    {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        virtual void computeError() override{
+            const VertexPose *vertex0 = static_cast<VertexPose *>(_vertices[0]);
+            const VertexPose *vertex1 = static_cast<VertexPose *>(_vertices[1]);
+            Sophus::SE3d v0 = vertex0->estimate();
+            Sophus::SE3d v1 = vertex1->estimate();
+            _error = (_measurement.inverse() * v0 * v1.inverse()).log();
+        }
+
+        virtual bool read(std::istream &in) override { return true; }
+
+        virtual bool write(std::ostream &out) const override { return true; }
+    };
+
 }  

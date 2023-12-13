@@ -53,6 +53,8 @@ namespace myslam {
             return keyframes.size(); 
         }
 
+        std::mutex public_map_mutex; 
+
     private:
         void RemoveOldKeyframe();
 

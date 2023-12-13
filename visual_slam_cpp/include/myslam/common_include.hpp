@@ -29,4 +29,4 @@
 
 
 enum class TrackingStatus { INITING, TRACKING, LOST };
-enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT};
+enum class TrackingType {GFTT, ORB, FAST_ORB, SIFT, SP};

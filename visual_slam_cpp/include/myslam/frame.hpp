@@ -54,8 +54,8 @@ namespace myslam {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-        int id = 0; // int beacuse i want do subtract them      
-        int keyframe_id = 0;  
+        unsigned int id = 0; // int beacuse i want do subtract them      
+        unsigned int keyframe_id = 0;  
         bool keyframe = false;                     
         Sophus::SE3d pose_;                       
         std::mutex frame_mutex;           

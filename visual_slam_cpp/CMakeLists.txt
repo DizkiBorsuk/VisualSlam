@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 project(myslam VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_BUILD_TYPE Release)
@@ -32,7 +32,7 @@ set(THIRD_PARTY_LIBS
         ${Sophus_LIBRARIES}
         ${Pangolin_LIBRARIES}
         ${DBoW3_LIBS}
-        g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension
+        g2o_core g2o_stuff g2o_types_sba g2o_types_slam3d g2o_solver_csparse g2o_csparse_extension
         pthread
         Eigen3::Eigen 
         Matplot++::matplot
@@ -43,4 +43,4 @@ add_subdirectory(src)
 # add_subdirectory(DBow3)
 
 add_executable(run_SLAM main.cpp)
-target_link_libraries(run_SLAM myslam )
+target_link_libraries(run_SLAM myslam)
