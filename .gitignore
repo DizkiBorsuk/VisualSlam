@@ -1,7 +1,9 @@
 /visual_slam_py/g2o/
 
 /visual_slam_cpp/build
-/visual_slam_py/__pycache__/ 
+/visual_slam_cpp/docs/html/ 
+/visual_slam_cpp/docs/latex
+/scripts/__pycache__/ 
 *.pyc 
 *.log
 build* 
@@ -10,12 +12,13 @@ build*
 *.pyc
 *.onnx
 
+results.csv
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
 Testing
-Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
@@ -30,6 +33,7 @@ _deps
 *.lo
 *.o
 *.obj
+*.so
 
 # Precompiled Headers
 *.gch

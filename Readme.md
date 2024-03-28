@@ -1,4 +1,5 @@
-## Visual SLAM project 
+# Visual SLAM project 
+
 This is a project I did as a part of my master thesis and my intrest in SLAM. It's a Visual SLAM that uses mono or stereo camera. 
 
 ## Libraries that i used or are useful in SLAM project  

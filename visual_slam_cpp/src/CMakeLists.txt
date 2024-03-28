@@ -1,16 +1,14 @@
-add_library(myslam SHARED
-        frame.cpp
-        mappoint.cpp
-        map.cpp
-        camera.cpp
-        stereo_tracking.cpp
-        stereo_tracking_matching.cpp
-        local_mapping.cpp
-        visualizer.cpp
-        slam.cpp
-        read_dataset.cpp
-        tools.cpp
-        loop_closing.cpp
+add_library(mrVSLAM SHARED
+                frame.cpp
+                map.cpp
+                camera.cpp
+                stereo_tracking.cpp
+                mono_tracking.cpp
+                local_mapping.cpp
+                loop_closing.cpp
+                visualizer.cpp
+                slam.cpp
+                read_dataset.cpp 
         )
 
-target_link_libraries(myslam ${THIRD_PARTY_LIBS})
+target_link_libraries(mrVSLAM ${THIRD_PARTY_LIBS})

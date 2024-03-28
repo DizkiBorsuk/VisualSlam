@@ -1,109 +1,57 @@
-#include "myslam/visualizer.hpp"
+/**
+ * @file visualizer.cpp
+ * @author mrostocki
+ * @brief 
+ * @version 0.1
+ * @date 2024-03-16
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "mrVSLAM/visualizer.hpp" 
+#include "mrVSLAM/frame.hpp"
+#include "mrVSLAM/map.hpp"
+#include "mrVSLAM/mappoint.hpp"
 
-using namespace std::chrono_literals;
-
-namespace myslam {
-
-    Visualizer::Visualizer(bool show_whole_map) 
+namespace mrVSLAM
+{
+    Visualizer::Visualizer(bool show_whole_map, bool show_img, bool show_matching_points)
     {
-        whole_map = show_whole_map; 
-        visualizer_thread = std::thread(std::bind(&Visualizer::ThreadLoop, this));
+        this->whole_map = show_whole_map; 
+        this->show_img = show_img; 
+        this->show_matching_points = show_matching_points; 
+        this->visualizer_thread = std::thread(std::bind(&Visualizer::runVisualizerThread, this)); 
     }
 
-    void Visualizer::Close() 
+    void Visualizer::close()
     {
-        visualizer_running = false;
-        visualizer_thread.join();
+        visualizer_running = false; 
+        visualizer_thread.join(); 
     }
 
-    void Visualizer::AddCurrentFrame(std::shared_ptr<Frame> current_frame) 
-    {
-        std::unique_lock<std::mutex> lock(visualizer_mutex);
-        current_frame_ = current_frame;
-    }
-
-    void Visualizer::UpdateMap() 
+    bool Visualizer::updateMap()
     {
         std::unique_lock<std::mutex> lock(visualizer_mutex);
         assert(map != nullptr);
         if(whole_map == true)
         {
-            keyframes = map->GetAllKeyFrames();
-            landmarks = map->GetAllMapPoints();
+            keyframes = map->getAllKeyframes();
+            mappoints = map->getAllMappoints();
         } else {
-            keyframes = map->GetActiveKeyFrames();
-            landmarks = map->GetActiveMapPoints();
+            keyframes = map->getActiveKeyframes();
+            mappoints = map->getActiveMappoints();
         }
-
-        map_updated = true;
+        return true; 
     }
 
-    void Visualizer::ThreadLoop() 
-    {
-        pangolin::CreateWindowAndBind("slam visualizer", width, height);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        pangolin::OpenGlRenderState vis_camera(
-            pangolin::ProjectionMatrix(width, height, 400, 400, 512, 384, 0.1, 1000),
-            pangolin::ModelViewLookAt(0, -5, -10, 0, 0, 0, 0.0, -1.0, 0.0));
-
-        // Add named OpenGL viewport to window and provide 3D Handler
-        pangolin::View& vis_display = pangolin::CreateDisplay().SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f / 768.0f).SetHandler(new pangolin::Handler3D(vis_camera));
-
-        while (!pangolin::ShouldQuit() && visualizer_running) 
-        {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            vis_display.Activate(vis_camera);
-
-            std::unique_lock<std::mutex> lock(visualizer_mutex);
-            if (current_frame_) {
-                DrawFrame(current_frame_, green);
-                FollowCurrentFrame(vis_camera);
-
-                cv::Mat img = PlotFrameImage();
-                cv::imshow("kitti img", img);
-                cv::waitKey(1);
-            }
-        
-            DrawMapPoints(blue);
-
-            pangolin::FinishFrame();
-            // usleep(5000);
-            std::this_thread::sleep_for(5000us); 
-        }
-
-        std::cout << "Stop viewer \n";
-    }
-
-    cv::Mat Visualizer::PlotFrameImage() 
-    {
-        cv::Mat img_out;
-        cv::cvtColor(current_frame_->left_img_, img_out, cv::COLOR_GRAY2BGR);
-        for (size_t i = 0; i < current_frame_->features_left_.size(); ++i) 
-        {
-            if (current_frame_->features_left_[i]->map_point_.lock()) {
-                auto feat = current_frame_->features_left_[i];
-                cv::circle(img_out, feat->position_.pt, 2, cv::Scalar(0, 250, 0), 2);
-            }
-        }
-        return img_out;
-    }
-
-    void Visualizer::FollowCurrentFrame(pangolin::OpenGlRenderState& vis_camera) 
-    {
-        Sophus::SE3d Twc = current_frame_->getPose().inverse();
-        pangolin::OpenGlMatrix m(Twc.matrix());
-        vis_camera.Follow(m, true);
-    }
-
-    void Visualizer::DrawFrame(std::shared_ptr<Frame> frame, const int* frame_color) 
+    /**
+     * @brief create visualization of camera and it's projection in map 
+     * 
+     * @param frame ptr to frame object 
+     * @param frame_color - color in which to draw
+     */
+    void Visualizer::drawFrame(std::shared_ptr<Frame> frame, const int* frame_color)
     {
         Sophus::SE3d Twc = frame->getPose().inverse();
 
@@ -144,20 +92,109 @@ namespace myslam {
         glPopMatrix();
     }
 
-    void Visualizer::DrawMapPoints(const int* point_color)
+    /**
+     * @brief draw all frames and mappoints that are stored in selected hash tables 
+     * @param point_color - color of points in map 
+     */
+    void Visualizer::drawMap(const int* point_color)
     {
-        for (auto& kf : keyframes) {
-            DrawFrame(kf.second, red);
+        for (auto& kf : keyframes) 
+        {
+            drawFrame(kf.second, red);
         }
 
         glPointSize(2);
         glBegin(GL_POINTS);
-        for (auto& landmark : landmarks) {
-            auto pos = landmark.second->Pos();
+        for (auto& landmark : mappoints) {
+            auto pos = landmark.second->getPointPosition();
             glColor3f(point_color[0], point_color[1], point_color[2]);
             glVertex3d(pos[0], pos[1], pos[2]);
         }
         glEnd();
     }
 
-}  
+    /**
+     * @brief move map point of view in a way that follows current frame 
+     * @param vis_camera 
+     */
+    void Visualizer::followNewFrame(pangolin::OpenGlRenderState& vis_camera)
+    {
+        Sophus::SE3d Twc = current_frame->getPose().inverse();
+        pangolin::OpenGlMatrix m(Twc.matrix());
+        vis_camera.Follow(m, true);
+    }
+
+    cv::Mat Visualizer::drawFrameImg(bool draw_matching_points)
+    {
+        cv::Mat processed_img = cv::Mat(current_frame->left_img);
+        cv::cvtColor(processed_img, processed_img, cv::COLOR_GRAY2BGR); 
+
+        for(size_t i = 0; i < current_frame->features_on_left_img.size(); i++)
+        {
+            if(current_frame->features_on_left_img.at(i)->map_point.lock())
+            {
+                auto feature = current_frame->features_on_left_img.at(i); 
+                cv::circle(processed_img, feature->positionOnImg.pt, 2, cv::Scalar(0,250,0),2); 
+            }
+
+            if(draw_matching_points && prev_frame)
+            {
+                
+            }
+
+
+        }
+
+        return processed_img; 
+    }
+
+    /**
+     * @brief main visualizer function that creates map and img visualization in loop 
+     * @details 
+     */
+    void Visualizer::runVisualizerThread()
+    {
+        pangolin::CreateWindowAndBind("slam visualizer", width, height);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        pangolin::OpenGlRenderState vis_camera(
+            pangolin::ProjectionMatrix(width, height, 400, 400, 512, 384, 0.1, 1000),
+            pangolin::ModelViewLookAt(0, -5, -10, 0, 0, 0, 0.0, -1.0, 0.0));
+
+        // Add named OpenGL viewport to window and provide 3D Handler
+        pangolin::View& vis_display = pangolin::CreateDisplay().SetBounds(0.0, 1.0, 0.0, 1.0, -width/height).SetHandler(new pangolin::Handler3D(vis_camera));
+
+        //* Main Visualizer Loop 
+        while (!pangolin::ShouldQuit() && visualizer_running) 
+        {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            vis_display.Activate(vis_camera);
+
+            std::unique_lock<std::mutex> lock(visualizer_mutex);
+            if (current_frame) 
+            {
+                drawFrame(current_frame, green);
+                followNewFrame(vis_camera);
+
+                if(show_img)
+                {
+                    cv::Mat img = drawFrameImg();
+                    cv::imshow("kitti img", img);
+                    cv::waitKey(1);
+                }
+            }
+        
+            drawMap(blue);
+
+            pangolin::FinishFrame();
+            std::this_thread::sleep_for(5000us); 
+            prev_frame = current_frame; 
+        }
+
+        std::cout << "Stop viewer \n";
+    }
+
+} //! end of namespace

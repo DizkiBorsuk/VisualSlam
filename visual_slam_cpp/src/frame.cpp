@@ -1,24 +1,81 @@
-#include "myslam/frame.hpp"
+/**
+ * @file frame.cpp
+ * @author mrostocki 
+ * @brief 
+ * @version 0.1
+ * @date 2024-03-16
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 
-namespace myslam 
+#include "mrVSLAM/frame.hpp"
+
+namespace mrVSLAM
 {
-
-    Frame::Frame(unsigned int in_id, const Sophus::SE3d &in_pose, const cv::Mat &left, const cv::Mat &right)
-            : id(in_id), pose_(in_pose), left_img_(left), right_img_(right) {}
-
-    std::shared_ptr<Frame> Frame::CreateFrame() 
+    /**
+     * @brief Construct a new Frame:: Frame object
+     * 
+     * @param frame_id 
+     * @param leftImg 
+     * @param rightImg 
+     */
+    Frame::Frame(const unsigned int frame_id, const cv::Mat &leftImg, const cv::Mat &rightImg)
     {
-        static unsigned int factory_id = 0;
-        std::shared_ptr<Frame> new_frame(new Frame);
-        new_frame->id = factory_id++;
-        return new_frame;
+        id = frame_id; 
+        left_img = leftImg; 
+        right_img = rightImg; 
+    }
+    /*
+        Frame setters getters 
+    */
+    Sophus::SE3d Frame::getPose()
+    {
+        std::unique_lock<std::mutex> lock(frame_mutex); 
+        return pose; 
+    }
+    Sophus::SE3d Frame::getRelativePose()
+    {
+        std::unique_lock<std::mutex> lock(frame_mutex); 
+        return relativePose; 
+    }
+    void Frame::setPose(const Sophus::SE3d &in_Pose)
+    {
+        std::unique_lock<std::mutex> lock(frame_mutex); 
+        pose = in_Pose; 
     }
 
-    void Frame::SetKeyFrame() 
+    void Frame::setRelativePose(const Sophus::SE3d &in_relativePose)
     {
-        static unsigned int keyframe_factory_id = 0;
-        keyframe = true;
-        keyframe_id = keyframe_factory_id++;
+        std::unique_lock<std::mutex> lock(frame_mutex); 
+        relativePose = in_relativePose; 
     }
 
-}
+    /**
+     * @brief Construct a new Key Frame:: Key Frame object
+     * @details
+     * @param base_frame 
+     */
+    KeyFrame::KeyFrame(std::shared_ptr<Frame> base_frame)
+    {
+        static unsigned int factory_kf_id = 0; 
+        kf_id = factory_kf_id++; 
+
+        this->id = base_frame->id; 
+        this->left_img = base_frame->left_img; 
+        this->right_img = base_frame->right_img; 
+        this->features_on_left_img = base_frame->features_on_left_img; 
+        this->setPose(base_frame->getPose()); 
+
+        for(size_t i = 0; i < base_frame->features_on_left_img.size(); i++)
+        {
+            auto mp = base_frame->features_on_left_img[i]->map_point.lock();
+            if(mp != nullptr)
+            {
+                features_on_left_img[i]->map_point = mp;
+                
+            }
+        }
+    }
+
+} //! end of namespace 

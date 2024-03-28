@@ -1,7 +1,16 @@
-#include "myslam/read_dataset.hpp"
+/**
+ * @file read_dataset.cpp
+ * @author mrostocki
+ * @brief 
+ * @version 0.1
+ * @date 2024-03-16
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+#include "mrVSLAM/read_dataset.hpp" 
 
-
-namespace myslam
+namespace mrVSLAM
 {
     KITTI_Dataset::KITTI_Dataset(const std::string dataset_path)
     {
@@ -9,14 +18,16 @@ namespace myslam
         camera_calibration_path = dataset_path + "/calib.txt";
         gt_poses_path = dataset_path + "/gt_poses.txt";
     }
- 
 
+    /**
+     * @brief Calib.txt contains camera calibration data -> Projection matricies (3x4), 
+     *  projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters. 
+     *  Kitti dataset stores projection matricies in flat shape, that is as a array with 12 elemets, 
+     *  each row is diffrent matrix
+     * 
+     */
     void KITTI_Dataset::readCalibData()
     {
-        /*
-        Calib.txt contains camera calibration data -> Projection matricies (3x4), projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters
-        Kitti dataset stores projection matricies in flat shape, that is as a array with 12 elemets, each row is diffrent matrix
-        */
         std::ifstream calib_file; 
         calib_file.open(camera_calibration_path); //open calibration file 
 
@@ -55,16 +66,17 @@ namespace myslam
         P2.resize(3,4); 
         P3 = calib_data_matrix.row(3); 
         P3.resize(3,4); 
-    }   
 
+    }
 
+    /**
+     * @brief files with ground truth poses contain poses of car thru sequence, poses are represented as 3x4 Transformation matrix
+     *   Kitti dataset stores translation matricies in flat shape, that is as a array with 12 elemets, each row is diffrent matrix
+     *   Output of function is vector of translation matricies
+     * 
+     */
     void KITTI_Dataset::getGTposes()
     {
-        /*
-        files with ground truth poses contain poses of car thru sequence, poses are represented as 3x4 Transformation matrix
-        Kitti dataset stores translation matricies in flat shape, that is as a array with 12 elemets, each row is diffrent matrix
-        Output of function is vector of translation matricies
-        */
         std::ifstream gt_poses_file; 
         gt_poses_file.open(gt_poses_path.c_str()); //open gtround truth poses file
         //gt_poses_file.open(file_path); 
@@ -105,7 +117,6 @@ namespace myslam
         std::cout << "Number of poses in sequence: " << ground_truth_poses.size() << "\n"; 
     }
 
-
     void KITTI_Dataset::showPmatricies() const
     {
         std::cout << "---------------- \n"; 
@@ -115,4 +126,4 @@ namespace myslam
         std::cout << "---------------- \n";
     }
 
-}
+} //! end of namespace
