@@ -47,6 +47,7 @@ namespace mrVSLAM
     void LocalMapping::requestPause()
     {
         pauseRequest.store(true); 
+        fmt::print(bg(fmt::color::yellow), "local mapping thread paused \n"); 
     }
 
     bool LocalMapping::confirmPause()
@@ -57,6 +58,7 @@ namespace mrVSLAM
     void LocalMapping::resume()
     {
         pauseRequest.store(false); 
+        fmt::print(bg(fmt::color::yellow), "local mapping thread restarted \n"); 
     }
 
 //* ------ Main part ------- *// 
@@ -81,7 +83,6 @@ namespace mrVSLAM
 
             localBundleAndjustment(active_kfs, active_landmarks); 
         }
-
     }
     
     void LocalMapping::localBundleAndjustment(Map::KeyframesType& keyframes, Map::LandmarksType& landmarks)
@@ -155,7 +156,6 @@ namespace mrVSLAM
                     optimizer.addVertex(v);
                 }
 
-
                 if (vertices.contains(frame->kf_id) && vertices_landmarks.contains(landmark_id))  //vertices.find(frame->keyframe_id) != vertices.end() && vertices_landmarks.find(landmark_id) != vertices_landmarks.end()
                 {
                         edge->setId(index);
@@ -169,12 +169,9 @@ namespace mrVSLAM
                         edges_and_features.insert({edge, feat});
                         optimizer.addEdge(edge);
                         index++;
-                }
-                else 
-                {
+                } else {
                     delete edge; 
                 }
-                    
             }
         }
 
@@ -214,8 +211,7 @@ namespace mrVSLAM
             }
         }
 
-        std::cout << "Outlier/Inlier in optimization: " << outlier << "/"
-                << inlier << "\n";
+        fmt::print(fg(fmt::color::blue), "Outlier/Inlier in optimization: {}/{} \n", outlier, inlier);
 
         // Set pose and lanrmark position
         for (auto &v : vertices) 
@@ -227,9 +223,12 @@ namespace mrVSLAM
             landmarks.at(v.first)->setPosition(v.second->estimate());
         }
 
+
+        //TODO add removing mappoints outliers 
         /*
         
         
         */
     }
+
 } //! end of namespace

@@ -67,12 +67,12 @@ namespace mrVSLAM
     private: 
         bool stereoInitialize(); 
         bool createInitialMap(); 
-        int triangulateNewPoints(); 
 
         bool track(); 
         int trackLastFrame(); 
         int estimateCurrentPose(); 
         void insertKeyframe(); 
+        int triangulateNewPoints(); 
 
         int findCorrespondingPoints(); 
         int detectFeatures(); 

@@ -48,8 +48,8 @@ namespace mrVSLAM
             case DetectorType::SUPER_POINT: 
                 break; 
         }
-        fmt::print(fg(fmt::color::aqua), "stereo tracking initialized \n"); 
 
+        fmt::print(fg(fmt::color::aqua), "stereo tracking initialized \n"); 
     } // end of StereoTracking::StereoTracking
 
     //!done 
@@ -144,7 +144,7 @@ namespace mrVSLAM
                                                     }; 
             Eigen::Vector3d point_world = Eigen::Vector3d::Zero(); 
 
-            if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world))
+            if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world)) //TODO decide between pose and relativePose 
             {
                 auto new_map_point = std::make_shared<MapPoint>(point_world); 
                 new_map_point->addObservation(current_frame->features_on_left_img.at(i_ft)); //! test if needed 
@@ -158,6 +158,7 @@ namespace mrVSLAM
         }
 
         if(created_landmarks>this->num_features_init) {
+            fmt::print(fg(fmt::color::blue), "Map initialized with {} mappoints", created_landmarks);
             return true; 
         }
 
@@ -172,7 +173,7 @@ namespace mrVSLAM
         //* constant velocity model 
         if(prev_frame) {
             // current_frame->setRelativePose(relative_motion * prev_frame->getRelativePose());  //TODO decide which one 
-            // current_frame->setPose(relative_motion * prev_frame->getPose()); 
+            current_frame->setPose(relative_motion * prev_frame->getPose()); 
         }
 
         //* track points between two frames 
@@ -195,7 +196,7 @@ namespace mrVSLAM
         }
 
         relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
-        //relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); 
+        //relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); //TODO decide between pose and relativePose 
 
         auto endTrack = std::chrono::steady_clock::now();
         auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
@@ -236,20 +237,113 @@ namespace mrVSLAM
         {
             if (status[i]) {
                 cv::KeyPoint kp(kps_current[i], 7);
-                std::shared_ptr<Feature> feature = std::make_shared<Feature>(current_frame, kp);
+                auto feature = std::make_shared<Feature>(current_frame, kp);
                 feature->map_point = prev_frame->features_on_left_img[i]->map_point;
-                current_frame->features_on_right_img.emplace_back(feature);
+                current_frame->features_on_left_img.emplace_back(feature);
                 num_good_pts++;
             }
         }
 
-        std::cout  << "Found " << num_good_pts << " in the prev image \n";
         return num_good_pts;
-    }
+    } //* 
+
 
     int StereoTracking::estimateCurrentPose()
     {
-        return 0; 
+        // setup g2o
+        typedef g2o::LinearSolverDense<g2o::BlockSolver_6_3::PoseMatrixType> LinearSolverType;
+        auto solver = new g2o::OptimizationAlgorithmLevenberg(std::make_unique<g2o::BlockSolver_6_3>(std::make_unique<LinearSolverType>()));
+        g2o::SparseOptimizer optimizer;
+        optimizer.setAlgorithm(solver);
+
+        // vertex
+        VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
+        vertex_pose->setId(0);
+        vertex_pose->setEstimate(current_frame->getPose()); //TODO decide between pose and relativePose 
+        optimizer.addVertex(vertex_pose);
+
+        // K
+        Eigen::Matrix3d K = camera_left->getK();
+
+        // edges
+        int index = 1;
+        std::vector<EdgeProjectionPoseOnly *> edges;
+        std::vector<std::shared_ptr<Feature>> features;
+
+        // edges.reserve(current_frame->features_left_.size()); 
+        // features.reserve(current_frame->features_left_.size()); 
+
+        for (size_t i = 0; i < current_frame->features_on_left_img.size(); ++i) 
+        {
+            auto mp = current_frame->features_on_left_img[i]->map_point.lock();
+            if (mp) 
+            {
+                features.emplace_back(current_frame->features_on_left_img.at(i));
+                EdgeProjectionPoseOnly *edge = new EdgeProjectionPoseOnly(mp->getPointPosition(), K);
+                edge->setId(index);
+                edge->setVertex(0, vertex_pose);
+                edge->setMeasurement(convertToVec(current_frame->features_on_left_img.at(i)->positionOnImg.pt));
+                edge->setInformation(Eigen::Matrix2d::Identity());
+                edge->setRobustKernel(new g2o::RobustKernelHuber);
+                edges.emplace_back(edge);
+                optimizer.addEdge(edge);
+                index++;
+            }
+        }
+
+        // estimate the Pose the determine the outliers
+        const double chi2_th = 5.991;
+        //const double chi2_th = 7.815;
+        int cnt_outlier = 0;
+        for (int iteration = 0; iteration < 4; ++iteration) 
+        {
+            vertex_pose->setEstimate(current_frame->getPose()); //TODO decide between pose and relativePose 
+            optimizer.initializeOptimization();
+            optimizer.optimize(10);
+            cnt_outlier = 0;
+
+            // count the outliers
+            for (size_t i = 0; i < edges.size(); ++i) 
+            {
+                auto e = edges[i];
+                if (features[i]->is_outlier) 
+                {
+                    e->computeError();
+                }
+                if (e->chi2() > chi2_th) 
+                {
+                    features[i]->is_outlier = true;
+                    e->setLevel(1);
+                    cnt_outlier++;
+                } else {
+                    features[i]->is_outlier = false;
+                    e->setLevel(0);
+                };
+
+                if (iteration == 2) 
+                {
+                    e->setRobustKernel(nullptr);
+                }
+            }
+        }
+
+        std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/" << features.size() - cnt_outlier << "\n";
+        // Set pose and outlier
+        current_frame->setPose(vertex_pose->estimate());
+
+        //std::cout  << "Current Pose = \n" << current_frame->Pose().matrix() << "\n";
+
+        for (auto &feat : features) 
+        {
+            if (feat->is_outlier) 
+            {
+                feat->map_point.reset();
+                feat->is_outlier = false;  // maybe we can still use it in future
+
+                //TODO add setting mappoint as an outlier 
+            }
+        }
+        return (features.size() - cnt_outlier);
     }
 
 
@@ -285,11 +379,11 @@ namespace mrVSLAM
         /* ################################# */
         // second part - create keyframe object and pase it to map and other modules 
 
-        if(reference_kf != nullptr)
-        {
-            // set connection between two keyframes 
-            current_frame->setPose(current_frame->getRelativePose() * reference_kf->getPose()); 
-        } 
+        // if(reference_kf != nullptr)
+        // {
+        //     // set connection between two keyframes 
+        //     current_frame->setPose(current_frame->getRelativePose() * reference_kf->getPose()); //TODO 
+        // } 
 
         reference_kf = current_frame; 
 
@@ -299,15 +393,42 @@ namespace mrVSLAM
 
         if(loop_closer)
             loop_closer->insertKeyframe(current_frame); 
-        
+
+        fmt::print(fg(fmt::color::blue), "Inserted new keyframe \n"); 
     } // End of StereoTracking::insertKeyframe
 
-  
-
-
     int StereoTracking::triangulateNewPoints()
-    {
-        return 0; 
+    {   
+        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse(); //TODO decide between pose and relativePose
+        int cnt_triangulated_pts = 0;
+        for (std::size_t i_ft = 0; i_ft < current_frame->features_on_left_img.size(); i_ft++) 
+        {
+            if (current_frame->features_on_left_img[i_ft]->map_point.expired() && // if feature point doesn't have corresponding mappoint and has corresponding feature on right img then create new point
+                current_frame->features_on_right_img[i_ft] != nullptr) 
+            {
+
+                std::vector<Eigen::Vector3d> cam_points {camera_left->pixel2camera(convertToVec(current_frame->features_on_left_img.at(i_ft)->positionOnImg.pt)), 
+                                                         camera_right->pixel2camera(convertToVec(current_frame->features_on_right_img.at(i_ft)->positionOnImg.pt))
+                                                        }; 
+                Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
+
+                if (triangulate(camera_left->getPose(),camera_right->getPose(), cam_points, pworld)) 
+                {
+
+                    pworld = current_pose_Twc * pworld;
+                    auto new_map_point = std::make_shared<MapPoint>(pworld); 
+             
+                    new_map_point->addObservation(current_frame->features_on_left_img[i_ft]);
+                    new_map_point->addObservation(current_frame->features_on_right_img[i_ft]);
+
+                    current_frame->features_on_left_img[i_ft]->map_point = new_map_point;
+                    current_frame->features_on_right_img[i_ft]->map_point = new_map_point;
+                    map->insertNewMappoint(new_map_point);
+                    cnt_triangulated_pts++;
+                }
+            }
+        }
+        return cnt_triangulated_pts;
     }
 
 
@@ -322,14 +443,17 @@ namespace mrVSLAM
         int num_good_pts = 0;
 
         std::vector<cv::Point2f> kps_left, kps_right;
+        kps_left.reserve(current_frame->features_on_left_img.size());
+        kps_right.reserve(current_frame->features_on_left_img.size()); 
+
         for (auto &kp : current_frame->features_on_left_img) 
         {
             kps_left.emplace_back(kp->positionOnImg.pt);
             auto mp = kp->map_point.lock();
             if (mp) {
                 // use projected points as initial guess
-                auto px = camera_right->world2pixel(mp->getPointPosition(), current_frame->getPose());
-                kps_right.emplace_back(cv::Point2f(px[0], px[1]));
+                auto px = camera_right->world2pixel(mp->getPointPosition(), current_frame->getPose()); //TODO decide between pose and relativePose 
+                kps_right.emplace_back(px[0], px[1]);
             } else {
                 // use same pixel in left iamge
                 kps_right.emplace_back(kp->positionOnImg.pt);
@@ -347,16 +471,15 @@ namespace mrVSLAM
         {
             if (status[i]) {
                 cv::KeyPoint kp(kps_right[i], 7);
-                std::shared_ptr<Feature> feat(new Feature(kp));
-                feat->is_on_left_img = false;
-                current_frame->features_on_right_img.emplace_back(feat);
+                auto new_feature = std::make_shared<Feature>(current_frame, kp);
+                new_feature->is_on_left_img = false;
+                current_frame->features_on_right_img.emplace_back(new_feature);
                 num_good_pts++;
             } else {
                 current_frame->features_on_right_img.emplace_back(nullptr);
             }
         }
 
-        std::cout  << "Find " << num_good_pts << " in the right image. \n";
         return num_good_pts;
     }
 
