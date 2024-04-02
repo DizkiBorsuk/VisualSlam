@@ -18,7 +18,6 @@ namespace mrVSLAM
     class Visualizer; 
     class Map; 
     class Frame; 
-    class KeyFrame; 
     class LoopCloser; 
     class LocalMapping; 
 
@@ -91,7 +90,7 @@ namespace mrVSLAM
 
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Frame> prev_frame = nullptr; 
-        std::shared_ptr<KeyFrame> reference_kf = nullptr; 
+        std::shared_ptr<Frame> reference_kf = nullptr; 
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 

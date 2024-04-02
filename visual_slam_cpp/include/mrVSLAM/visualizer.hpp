@@ -15,7 +15,6 @@
 namespace mrVSLAM
 {   
     class Frame; 
-    class KeyFrame; 
     class MapPoint; 
     class Map; 
 
@@ -82,7 +81,7 @@ namespace mrVSLAM
         std::shared_ptr<Frame> prev_frame = nullptr; 
         std::shared_ptr<Map> map = nullptr;
 
-        std::unordered_map<unsigned int, std::shared_ptr<KeyFrame>> keyframes; 
+        std::unordered_map<unsigned int, std::shared_ptr<Frame>> keyframes; 
         std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> mappoints; 
 
         static constexpr float sz = 1.0;

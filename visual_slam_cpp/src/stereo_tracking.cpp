@@ -48,6 +48,8 @@ namespace mrVSLAM
             case DetectorType::SUPER_POINT: 
                 break; 
         }
+        fmt::print(fg(fmt::color::aqua), "stereo tracking initialized \n"); 
+
     } // end of StereoTracking::StereoTracking
 
     //!done 
@@ -68,11 +70,117 @@ namespace mrVSLAM
             break;
         }
 
-        if(visualizer) { visualizer->addNewFrame(current_frame); } 
+        //if(visualizer) { visualizer->addNewFrame(current_frame); } 
         
         prev_frame = current_frame; 
         return true; 
     } //End of StereoTracking::addNewFrame
+
+    
+    /** 
+     * @brief initialization of map for stereo tracking  
+     * @details 
+     * @return true 
+     * @return false 
+     */ 
+    bool StereoTracking::stereoInitialize()
+    {
+        auto beginINIT = std::chrono::steady_clock::now();
+
+        if(this->use_descriptors)
+            extractFeatures(); 
+        else 
+            detectFeatures(); 
+        
+        auto found_point_pairs = findCorrespondingPoints();
+        fmt::print("stereoInitialize: found {} point pairs \n", found_point_pairs); 
+
+        if(found_point_pairs < this->num_features_init)
+            return false; 
+        
+        auto map_created = createInitialMap(); 
+
+        if(map_created == true)
+        {
+            //* set frame to keyframe */ 
+            current_frame->setFrameToKeyframe(); 
+
+            if(map) { map->insertNewKeyframe(current_frame); }
+            if(local_mapping) { local_mapping->updateMap(); }
+            if(loop_closer) { loop_closer->insertKeyframe(current_frame); }
+            
+            visualizer->addNewFrame(current_frame); 
+            visualizer->updateMap(); 
+
+            this->tracking_status = TrackingStatus::TRACKING; 
+        } else {
+            return false; 
+        }
+        
+        auto endINIT = std::chrono::steady_clock::now();
+        auto elapsedINIT = std::chrono::duration_cast<std::chrono::milliseconds>(endINIT - beginINIT);
+        fmt::print(fg(fmt::color::yellow), "stereo tracking initialization time =  {} ms \n", elapsedINIT.count()); 
+        return true; 
+    } //* end of StereoTracking::stereoInitialize()
+
+    /**
+     * @brief function that creates initial map
+     * @details 
+     * @return true 
+     * @return false 
+     */ //!i think it's done 
+    bool StereoTracking::createInitialMap()
+    {
+        unsigned int created_landmarks = 0; 
+
+        for(size_t i_ft = 0; i_ft < current_frame->features_on_left_img.size(); i_ft++)
+        {
+            if(current_frame->features_on_right_img.at(i_ft) == nullptr) {
+                continue;
+            }
+
+            std::vector<Eigen::Vector3d> cam_points {camera_left->pixel2camera(convertToVec(current_frame->features_on_left_img.at(i_ft)->positionOnImg.pt)), 
+                                                     camera_right->pixel2camera(convertToVec(current_frame->features_on_right_img.at(i_ft)->positionOnImg.pt))
+                                                    }; 
+            Eigen::Vector3d point_world = Eigen::Vector3d::Zero(); 
+
+            if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world))
+            {
+                auto new_map_point = std::shared_ptr<MapPoint>(new MapPoint(point_world)); 
+                new_map_point->addObservation(current_frame->features_on_left_img.at(i_ft)); //! test if needed 
+                new_map_point->addObservation(current_frame->features_on_right_img.at(i_ft)); 
+                current_frame->features_on_left_img.at(i_ft)->map_point = new_map_point; 
+                current_frame->features_on_right_img.at(i_ft)->map_point = new_map_point; 
+
+                map->insertNewMappoint(new_map_point); 
+                created_landmarks++; 
+            }
+        }
+
+        if(created_landmarks>this->num_features_init) {
+            return true; 
+        }
+
+        return false; 
+    } //* end of StereoTracking::createInitialMap()
+
+
+    bool StereoTracking::track()
+    {
+        auto beginTrack = std::chrono::steady_clock::now();
+
+
+        return false; 
+    } 
+    int StereoTracking::trackLastFrame()
+    {
+        return 0; 
+    }
+    void StereoTracking::estimateCurrentPose()
+    {
+
+    }
+
 
     //?
     /**
@@ -104,8 +212,7 @@ namespace mrVSLAM
         triangulateNewPoints();
 
         /* ################################# */
-        // second part - create keyframe object 
-        auto new_keyframe = std::shared_ptr<KeyFrame>(new KeyFrame(current_frame)); 
+        // second part - create keyframe object and pase it to map and other modules 
 
         if(reference_kf != nullptr)
         {
@@ -125,68 +232,21 @@ namespace mrVSLAM
         
     } // End of StereoTracking::insertKeyframe
 
-    /** //? 
-     * @brief initialization of map for stereo tracking  
-     * @details 
-     * @return true 
-     * @return false 
-     */
-    bool StereoTracking::stereoInitialize()
-    {
-        auto beginINIT = std::chrono::steady_clock::now();
+  
 
-        if(this->use_descriptors)
-            extractFeatures(); 
-        else 
-            detectFeatures(); 
-        
-        auto found_point_pairs = findCorrespondingPoints();
 
-        if(found_point_pairs < this->num_features_init)
-            return false; 
-        
-        auto map_created = createInitialMap(); 
-
-        if(map_created == true)
-        {
-            this->tracking_status = TrackingStatus::TRACKING; 
-        }
-
-        
-
-        auto endINITT = std::chrono::steady_clock::now();
-        auto elapsedINITT = std::chrono::duration_cast<std::chrono::milliseconds>(endINITT - beginINIT);
-        std::cout  << "Loop time for initialization: " << elapsedINITT.count() << " ms. \n";
-
-        return true; 
-    } // end of StereoTracking::stereoInitialize()
-
-    bool StereoTracking::createInitialMap()
-    {
-        return false; 
-    }
     int StereoTracking::triangulateNewPoints()
     {
         return 0; 
     }
-    bool StereoTracking::track()
-    {
-        return false; 
-    } 
-    int StereoTracking::trackLastFrame()
-    {
-        return 0; 
-    }
-    void StereoTracking::estimateCurrentPose()
-    {
 
-    }
 
     /**
-     * @brief 
-     * @details 
+     * @brief try to find points in right img that corresponds to found points in left point (only for keyframe)
+     * @details function uses lucas-kanade optical flow to find corresponding points, then creates feature objects for every found points pair
+     * and adds it to current frame 
      * @return int 
-     */
+     */ //!done 
     int StereoTracking::findCorrespondingPoints()
     {
         int num_good_pts = 0;

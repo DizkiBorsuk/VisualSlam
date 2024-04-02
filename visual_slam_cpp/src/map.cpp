@@ -13,7 +13,7 @@
 
 namespace mrVSLAM
 {
-    void Map::insertNewKeyframe(std::shared_ptr<KeyFrame> frame)
+    void Map::insertNewKeyframe(std::shared_ptr<Frame> frame)
     {
         this->current_keyframe = frame; 
 
@@ -42,7 +42,7 @@ namespace mrVSLAM
 
     }
 
-    std::shared_ptr<KeyFrame> Map::getKyeframeById(unsigned int keyframe_id)
+    std::shared_ptr<Frame> Map::getKyeframeById(unsigned int keyframe_id)
     {
         std::unique_lock<std::mutex> lock(map_mutex);
         if(allKeyframesDictionary.contains(keyframe_id))

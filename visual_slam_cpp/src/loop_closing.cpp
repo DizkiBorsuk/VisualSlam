@@ -21,7 +21,7 @@ namespace mrVSLAM
         loop_closer_thread.join(); 
     }
 
-    void LoopCloser::insertKeyframe(std::shared_ptr<KeyFrame> kf)
+    void LoopCloser::insertKeyframe(std::shared_ptr<Frame> kf)
     {
         std::unique_lock<std::mutex> lock(loop_closer_mutex); 
         current_keyframe = kf; 
@@ -41,7 +41,7 @@ namespace mrVSLAM
 
 
 
-            bow_database.add(current_keyframe->bow_vector); 
+            bow_database.add(current_keyframe->getBoW_Vector()); 
 
 
         }

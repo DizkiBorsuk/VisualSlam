@@ -26,14 +26,14 @@ namespace mrVSLAM
     {
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; 
-        typedef std::unordered_map<unsigned int, std::shared_ptr<KeyFrame>> KeyframesType; 
+        typedef std::unordered_map<unsigned int, std::shared_ptr<Frame>> KeyframesType; 
         typedef std::unordered_map<unsigned int, std::shared_ptr<MapPoint>> LandmarksType; 
         std::mutex mapUpdate_mutex; 
 
     public: 
         Map() = default; 
 
-        void insertNewKeyframe(std::shared_ptr<KeyFrame> frame); 
+        void insertNewKeyframe(std::shared_ptr<Frame> frame); 
         void insertNewMappoint(std::shared_ptr<MapPoint> map_point); 
 
         /**
@@ -42,7 +42,7 @@ namespace mrVSLAM
          * @param keyframe_id 
          * @return std::shared_ptr<Frame> 
          */
-        std::shared_ptr<KeyFrame> getKyeframeById(unsigned int keyframe_id); 
+        std::shared_ptr<Frame> getKyeframeById(unsigned int keyframe_id); 
 
         void cleanMap(); 
 
@@ -85,7 +85,7 @@ namespace mrVSLAM
         std::mutex map_mutex; 
         std::mutex outliers_mutex; 
 
-        std::shared_ptr<KeyFrame> current_keyframe = nullptr; 
+        std::shared_ptr<Frame> current_keyframe = nullptr; 
         std::list<unsigned int> outlier_mappoints_list; 
         
         LandmarksType allMappointsDictionary; ///< hash map that contains all mappoint objects 

@@ -20,7 +20,6 @@ namespace mrVSLAM
     class Visualizer; 
     class Map; 
     class Frame; 
-    class KeyFrame; 
     class LoopCloser; 
 
     /**

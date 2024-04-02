@@ -29,6 +29,8 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/core/core.hpp>
 
+#include <fmt/core.h>
+#include <fmt/color.h>
 
 enum class TrackingStatus { INITING, TRACKING, LOST };
 enum class DetectorType {GFTT, ORB, SIFT, SUPER_POINT}; 

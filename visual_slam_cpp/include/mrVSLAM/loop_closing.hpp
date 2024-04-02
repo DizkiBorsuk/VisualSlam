@@ -18,7 +18,6 @@ namespace mrVSLAM
     class Camera; 
     class Map; 
     class Frame; 
-    class KeyFrame; 
     class LocalMapping; 
 
     class LoopCloser
@@ -62,7 +61,7 @@ namespace mrVSLAM
          * @brief add new keyframe to loop closer module 
          * @param kf ptr to keyframe object  
          */
-        void insertKeyframe(std::shared_ptr<KeyFrame> kf); 
+        void insertKeyframe(std::shared_ptr<Frame> kf); 
 
     private: 
 
@@ -77,13 +76,14 @@ namespace mrVSLAM
 
     private:
         std::shared_ptr<Map> map = nullptr; 
-        std::shared_ptr<LocalMapping> local_mapping = nullptr; 
+        std::shared_ptr<LocalMapping> local_mapping = nullptr; //!change to weak ptr? 
         std::shared_ptr<Camera> camera_right = nullptr, camera_left = nullptr; 
 
-        std::shared_ptr<KeyFrame> current_keyframe = nullptr;
-        std::shared_ptr<KeyFrame> last_closed_keyframe = nullptr;  
-        std::shared_ptr<KeyFrame> loop_keyframe = nullptr; // keyframe that is connected to current kf 
-        std::shared_ptr<KeyFrame> last_keyframe = nullptr; 
+        std::shared_ptr<Frame> current_keyframe = nullptr;
+        std::shared_ptr<Frame> prev_keyframe = nullptr; 
+        std::shared_ptr<Frame> last_closed_keyframe = nullptr;  
+        std::shared_ptr<Frame> loop_keyframe = nullptr; // keyframe that is connected to current kf 
+
 
         std::mutex loop_closer_mutex; 
         std::thread loop_closer_thread; 

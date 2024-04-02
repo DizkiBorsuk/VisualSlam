@@ -142,7 +142,6 @@ namespace mrVSLAM
                 
             }
 
-
         }
 
         return processed_img; 

@@ -16,11 +16,7 @@
 
 namespace mrVSLAM
 {
-    /**
-     * @brief Construct a new SLAM::SLAM object - //! to implement
-     * 
-     * @param config_path - path to configuration file 
-     */
+    //!to be implemented 
     SLAM::SLAM(std::string config_path)
     {
         
@@ -42,7 +38,7 @@ namespace mrVSLAM
 
     void SLAM::initSLAM()
     {
-        std::cout << "start of slam initialization \n"; 
+        fmt::print(fg(fmt::color::green), "start of slam initialization \n"); 
         //read data
         dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path)); 
         dataset->readCalibData(); 
@@ -77,35 +73,40 @@ namespace mrVSLAM
 
         local_mapping->setLocalMapping(map, loop_closer, left_camera, right_camera); 
         visualizer->setupVisualizer(map); 
+
+        fmt::print(fg(fmt::color::green), "end of slam initialization \n"); 
+        fmt::print("###----------------------### \n");
     }
 
     void SLAM::runSLAM()
     {
-        std::cout << "Start of slam execution \n"; 
+        fmt::print(fg(fmt::color::green), "start of slam execution \n"); 
         // main thread loop 
         while(true)
         {
             try
             {
                 //? maybe i should do everything in loop 
-                if(createNewFrameAndTrack() == false) 
-                {
+                if(createNewFrameAndTrack() == false) {
                     break; 
                 }
             }
             catch(const std::exception &e)
             {
-                std::cout << "cached critical error, ending slam \n"; 
-                std::cout << e.what() << std::endl; 
+                fmt::print(bg(fmt::color::red), "cached critical error, ending slam \n"); 
+                fmt::print(bg(fmt::color::red), e.what()); 
                 break; 
             }
         }
+
         // close all modules and end threads
         if(loop_closer)
             loop_closer->stop(); 
             
         local_mapping->stop(); 
         visualizer->close(); 
+
+        fmt::print(fg(fmt::color::green), "end of slam algorithm execution \n"); 
     }
 
     bool SLAM::createNewFrameAndTrack()
@@ -131,12 +132,14 @@ namespace mrVSLAM
         cv::resize(image_right, img_right_resized, cv::Size(), img_size_opt, img_size_opt, cv::INTER_NEAREST);
 
         auto new_frame = std::shared_ptr<Frame> (new Frame(current_image_index, img_left_resized, img_right_resized)); 
-        current_image_index++; 
-
-        if(new_frame == nullptr)
-        {
+        
+        if(new_frame == nullptr) {
             throw std::runtime_error("frame object wasn't created \n"); 
+        } else {
+            fmt::print(fg(fmt::color::blue), "created new frame with id:{} \n", current_image_index); 
+            current_image_index++; 
         }
+
         
         switch (tracking_type)
         {
@@ -152,7 +155,7 @@ namespace mrVSLAM
 
         auto endT = std::chrono::steady_clock::now();
         auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
-        std::cout << "loop time is = " << elapsedT.count() << "ms \n";  
+        fmt::print(fg(fmt::color::yellow), "main loop time =  {} ms \n", elapsedT.count()); 
         loop_times.emplace_back(elapsedT.count()); 
         all_frames.emplace_back(new_frame); 
         
@@ -161,6 +164,8 @@ namespace mrVSLAM
 
     void SLAM::outputSlamResult()
     {
+        fmt::print("###----------------------### \n");
+        fmt::print(bg(fmt::color::green), "create and save slam output \n"); 
         // dataset->getGTposes(); 
         
         saveResults(); 
