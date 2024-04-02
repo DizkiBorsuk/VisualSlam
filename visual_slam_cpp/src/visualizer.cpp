@@ -22,12 +22,14 @@ namespace mrVSLAM
         this->show_img = show_img; 
         this->show_matching_points = show_matching_points; 
         this->visualizer_thread = std::thread(std::bind(&Visualizer::runVisualizerThread, this)); 
+        fmt::print(fg(fmt::color::aqua), "visualizer thread started \n"); 
     }
 
     void Visualizer::close()
     {
         visualizer_running = false; 
         visualizer_thread.join(); 
+        fmt::print(bg(fmt::color::indian_red), "visualizer thread closed \n"); 
     }
 
     bool Visualizer::updateMap()
@@ -137,9 +139,10 @@ namespace mrVSLAM
                 cv::circle(processed_img, feature->positionOnImg.pt, 2, cv::Scalar(0,250,0),2); 
             }
 
-            if(draw_matching_points && prev_frame)
+            if(draw_matching_points && prev_frame) //! would need to match points of find way to match points based on mappoint 
             {
-                
+                // cv::circle(frame, features.matched_keypoints[p][0], 3, cv::Scalar(0,255,0));
+                // cv::line(frame, features.matched_keypoints[p][1], features.matched_keypoints[p][0], cv::Scalar(255,0,0), 1); 
             }
 
         }

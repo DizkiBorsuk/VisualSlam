@@ -27,6 +27,8 @@ namespace mrVSLAM
         tracking_type = type_of_algorithm; 
         use_loop_closing = loop_closer; 
         dataset_path = path_to_dataset; 
+        fmt::print("SLAM object created \n");
+        fmt::print("###----------------------### \n"); 
     }
     
     void SLAM::setSlamParameters(unsigned int num_of_tracked_points, DetectorType type_of_detector, float resize)
@@ -40,33 +42,32 @@ namespace mrVSLAM
     {
         fmt::print(fg(fmt::color::green), "start of slam initialization \n"); 
         //read data
-        dataset = std::shared_ptr<KITTI_Dataset>(new KITTI_Dataset(dataset_path)); 
+        dataset = std::make_shared<KITTI_Dataset>(dataset_path); 
         dataset->readCalibData(); 
 
         // create map, local mapping and visualizer objects 
-        local_mapping = std::shared_ptr<LocalMapping>(new LocalMapping); 
-        map = std::shared_ptr<Map>(new Map); 
-        visualizer = std::shared_ptr<Visualizer>(new Visualizer(false));
+        local_mapping = std::make_shared<LocalMapping>(); 
+        map = std::make_shared<Map>(); 
+        visualizer = std::make_shared<Visualizer>(false);
 
         // create camera objects
-        left_camera = std::shared_ptr<Camera>(new Camera(dataset->P0, img_size_opt));
-        right_camera = std::shared_ptr<Camera>(new Camera(dataset->P1, img_size_opt));
+        left_camera = std::make_shared<Camera>(dataset->P0, img_size_opt);
+        right_camera = std::make_shared<Camera>(dataset->P1, img_size_opt);
         
         // create and set loop closer object if used  
-        if(use_loop_closing)
-        {
-            loop_closer = std::shared_ptr<LoopCloser>(new LoopCloser(vocab_path)); 
+        if(use_loop_closing) {
+            loop_closer = std::make_shared<LoopCloser>(vocab_path); 
             loop_closer->setLoopCloser(map, local_mapping, left_camera, right_camera); 
         }
 
         switch(tracking_type)
         {
             case SLAM_TYPE::STEREO: 
-                stereo_tracking = std::shared_ptr<StereoTracking>(new StereoTracking(DetectorType::GFTT, use_loop_closing, number_of_points)); 
+                stereo_tracking = std::make_shared<StereoTracking>(DetectorType::GFTT, use_loop_closing, number_of_points); 
                 stereo_tracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera, right_camera); 
                 break; 
             case SLAM_TYPE::MONO:
-                mono_tracking = std::shared_ptr<MonoTracking>(new MonoTracking(DetectorType::GFTT, use_loop_closing, number_of_points)); 
+                mono_tracking = std::make_shared<MonoTracking>(DetectorType::GFTT, use_loop_closing, number_of_points); 
                 mono_tracking->setTracking(map, local_mapping, loop_closer, visualizer, left_camera); 
                 break; 
         }

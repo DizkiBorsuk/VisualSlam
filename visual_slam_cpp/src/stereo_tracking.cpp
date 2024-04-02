@@ -146,7 +146,7 @@ namespace mrVSLAM
 
             if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world))
             {
-                auto new_map_point = std::shared_ptr<MapPoint>(new MapPoint(point_world)); 
+                auto new_map_point = std::make_shared<MapPoint>(point_world); 
                 new_map_point->addObservation(current_frame->features_on_left_img.at(i_ft)); //! test if needed 
                 new_map_point->addObservation(current_frame->features_on_right_img.at(i_ft)); 
                 current_frame->features_on_left_img.at(i_ft)->map_point = new_map_point; 
@@ -169,16 +169,87 @@ namespace mrVSLAM
     {
         auto beginTrack = std::chrono::steady_clock::now();
 
+        //* constant velocity model 
+        if(prev_frame) {
+            // current_frame->setRelativePose(relative_motion * prev_frame->getRelativePose());  //TODO decide which one 
+            // current_frame->setPose(relative_motion * prev_frame->getPose()); 
+        }
 
-        return false; 
+        //* track points between two frames 
+        auto num_track_last = trackLastFrame(); 
+        fmt::print(fg(fmt::color::blue), "number of tracked points is {} \n", num_track_last); 
+        
+        //* small graph optimization to correct constant velocity model
+        tracking_inliers = estimateCurrentPose(); 
+
+        if(tracking_inliers > num_features_tracking_bad_) {
+            tracking_status = TrackingStatus::TRACKING; 
+        } else {
+            tracking_status = TrackingStatus::LOST; 
+            fmt::print(bg(fmt::color::indian_red), "tracking lost, aborting tracking \n"); 
+            return false; 
+        }
+
+        if(tracking_inliers < num_features_needed_for_keyframe){
+            insertKeyframe(); 
+        }
+
+        relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
+        //relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); 
+
+        auto endTrack = std::chrono::steady_clock::now();
+        auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
+        fmt::print(fg(fmt::color::yellow), "stereo tracking 'tracking' time =  {} ms \n", elapsedTrack.count()); 
+
+        return true; 
     } 
+
     int StereoTracking::trackLastFrame()
     {
-        return 0; 
-    }
-    void StereoTracking::estimateCurrentPose()
-    {
+        std::vector<cv::Point2f> kps_last, kps_current;
+        kps_last.reserve(prev_frame->features_on_left_img.size()); 
+        kps_current.reserve(prev_frame->features_on_left_img.size()); 
 
+        for (auto &kp : prev_frame->features_on_left_img) {
+            if (kp->map_point.lock()) 
+            {
+                // project point into new img
+                auto mp = kp->map_point.lock();
+                auto px = camera_left->world2pixel(mp->getPointPosition(), current_frame->getPose()); //TODO getPose or getRelativePose 
+                kps_last.emplace_back(kp->positionOnImg.pt);
+                kps_current.emplace_back(px[0], px[1]); //automatically creates cv::Point2f objects 
+            } else {
+                kps_last.emplace_back(kp->positionOnImg.pt);
+                kps_current.emplace_back(kp->positionOnImg.pt);
+            }
+        }
+
+        std::vector<uchar> status;
+        cv::Mat error;
+        cv::calcOpticalFlowPyrLK( prev_frame->left_img, current_frame->left_img, kps_last,
+                                  kps_current, status, error, cv::Size(11, 11), 3,
+                                  cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01), cv::OPTFLOW_USE_INITIAL_FLOW);
+
+        int num_good_pts = 0;
+
+        for (size_t i = 0; i < status.size(); ++i) 
+        {
+            if (status[i]) {
+                cv::KeyPoint kp(kps_current[i], 7);
+                std::shared_ptr<Feature> feature = std::make_shared<Feature>(current_frame, kp);
+                feature->map_point = prev_frame->features_on_left_img[i]->map_point;
+                current_frame->features_on_right_img.emplace_back(feature);
+                num_good_pts++;
+            }
+        }
+
+        std::cout  << "Found " << num_good_pts << " in the prev image \n";
+        return num_good_pts;
+    }
+
+    int StereoTracking::estimateCurrentPose()
+    {
+        return 0; 
     }
 
 
@@ -193,8 +264,8 @@ namespace mrVSLAM
      */
     void StereoTracking::insertKeyframe()
     {    
-        /* ################################# */
-        // first part - detect new features and triangulate points 
+        current_frame->setFrameToKeyframe(); 
+
         for (auto &feat : current_frame->features_on_left_img) 
         {
             auto mp = feat->map_point.lock();
@@ -217,18 +288,17 @@ namespace mrVSLAM
         if(reference_kf != nullptr)
         {
             // set connection between two keyframes 
-            new_keyframe->prev_kf = reference_kf; 
-            //new_keyframe->setRelativePose(); 
+            current_frame->setPose(current_frame->getRelativePose() * reference_kf->getPose()); 
         } 
 
-        reference_kf = new_keyframe; 
+        reference_kf = current_frame; 
 
-        map->insertNewKeyframe(new_keyframe); 
+        map->insertNewKeyframe(current_frame); 
         local_mapping->updateMap(); 
         visualizer->updateMap(); 
 
         if(loop_closer)
-            loop_closer->insertKeyframe(new_keyframe); 
+            loop_closer->insertKeyframe(current_frame); 
         
     } // End of StereoTracking::insertKeyframe
 

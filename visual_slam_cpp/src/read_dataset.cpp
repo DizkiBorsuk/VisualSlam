@@ -31,9 +31,9 @@ namespace mrVSLAM
         std::ifstream calib_file; 
         calib_file.open(camera_calibration_path); //open calibration file 
 
-        if(calib_file.fail())
-        {
-            std::cerr << "Failed to open calib file \n";  
+        if(calib_file.fail()) {
+            fmt::print(fg(fmt::color::red), "KittiDataset: Failed to open calib file \n") ;  
+            return; 
         }
 
         std::string string_row;

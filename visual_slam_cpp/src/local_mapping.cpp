@@ -27,6 +27,7 @@ namespace mrVSLAM
 
         // start thread 
         local_mapping_thread = std::thread(std::bind(&LocalMapping::runLocalMappingThread, this)); 
+        fmt::print(fg(fmt::color::aqua), "local mapping thread started \n"); 
     }
 
     void LocalMapping::updateMap()
@@ -40,6 +41,7 @@ namespace mrVSLAM
         localMappingRunning.store(false); 
         map_update.notify_one();
         local_mapping_thread.join();
+        fmt::print(bg(fmt::color::indian_red), "local mapping thread closed \n"); 
     }
 
     void LocalMapping::requestPause()

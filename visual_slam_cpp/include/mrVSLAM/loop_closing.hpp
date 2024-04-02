@@ -35,6 +35,7 @@ namespace mrVSLAM
 
             this->loop_closer_running.store(true); 
             this->loop_closer_thread = std::thread(std::bind(&LoopCloser::runLoopCloserThread,this)); 
+            fmt::print(fg(fmt::color::aqua), "loop closer thread started \n"); 
         } 
 
         /**

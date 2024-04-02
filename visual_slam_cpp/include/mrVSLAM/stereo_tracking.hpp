@@ -71,7 +71,7 @@ namespace mrVSLAM
 
         bool track(); 
         int trackLastFrame(); 
-        void estimateCurrentPose(); 
+        int estimateCurrentPose(); 
         void insertKeyframe(); 
 
         int findCorrespondingPoints(); 
@@ -98,12 +98,14 @@ namespace mrVSLAM
         TrackingStatus tracking_status = TrackingStatus::INITING; 
         DetectorType detector_type = DetectorType::GFTT; 
 
-        int tracking_inliers = 0; 
+        unsigned int tracking_inliers = 0; 
 
         unsigned int num_features = 150; 
         static constexpr int num_features_init = 50; 
         static constexpr int num_features_tracking_bad_ = 20; 
         static constexpr int num_features_needed_for_keyframe = 80;
+
+        Sophus::SE3d relative_motion; ///< transformation between two consecutive frames. 
     }; 
 
 } //! end of namespace 

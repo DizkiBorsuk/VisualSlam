@@ -17,8 +17,8 @@ namespace mrVSLAM
     void LoopCloser::stop()
     {
         loop_closer_running.store(false); 
-        
         loop_closer_thread.join(); 
+        fmt::print(bg(fmt::color::indian_red), "loop closer thread closed \n"); 
     }
 
     void LoopCloser::insertKeyframe(std::shared_ptr<Frame> kf)
