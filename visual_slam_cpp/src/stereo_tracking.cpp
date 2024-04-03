@@ -158,7 +158,7 @@ namespace mrVSLAM
         }
 
         if(created_landmarks>this->num_features_init) {
-            fmt::print(fg(fmt::color::blue), "Map initialized with {} mappoints", created_landmarks);
+            fmt::print(fg(fmt::color::blue), "Map initialized with {} mappoints \n", created_landmarks);
             return true; 
         }
 

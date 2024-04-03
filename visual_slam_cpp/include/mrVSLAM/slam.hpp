@@ -30,30 +30,69 @@ namespace mrVSLAM
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         
+        /**
+         * @brief Construct a new SLAM object
+         * @details !NOT IMPLEMENTED YET! construct Visual SLAM algorithm object using configuration file
+         * @param config_path path to configuration file that contains all parameters 
+         */
         SLAM(std::string config_path); 
+        /**
+         * @brief Construct a new SLAM object
+         * @details construct Visual SLAM algorithm object by passing basic parameters 
+         * @param path_to_dataset 
+         * @param type_of_algorithm 
+         * @param loop_closer 
+         */
         SLAM(std::string path_to_dataset, SLAM_TYPE type_of_algorithm, bool loop_closer = false);
 
+        /**
+         * @brief Set the Slam Parameters object
+         * @details if not using config file and want to set more parameters use this function 
+         * @param num_of_tracked_points number of detected points by detector/extractor 
+         * @param type_of_detector 
+         * @param resize 
+         * @param show_cam_img 
+         * @param vocab_path path to BoW vocabulary, needed only for loop closing  
+         */
+        void setSlamParameters(DetectorType type_of_detector = DetectorType::GFTT, unsigned int num_of_tracked_points = 150, float resize = 1.0f, 
+                               bool show_cam_img = true, std::string vocab_path = "./dictionaries/orbvoc.dbow3"); 
+
+        /**
+         * @brief initialize SLAM, read dataset and start all the modules 
+         */
         void initSLAM(); 
+
+        /**
+         * @brief algorithm main loop 
+         */
         void runSLAM(); 
+        /**
+         * @brief Create a New Frame And Track object
+         * 
+         * @return true 
+         * @return false 
+         */
         bool createNewFrameAndTrack(); 
         void outputSlamResult(); 
-        void setSlamParameters(unsigned int num_of_tracked_points, DetectorType type_of_detector, float resize = 1.0f); 
+
 
     private: 
         void saveResults(); 
         void saveTrajectoryAndMap(); 
 
     private: 
-
+        // constructor parameters 
+        std::string dataset_path; 
         bool use_loop_closing = false; 
         SLAM_TYPE tracking_type = SLAM_TYPE::STEREO; 
+        //rest of the parameters 
         DetectorType detector_type = DetectorType::GFTT; 
-        int number_of_points = 500; 
+        int number_of_points = 150; 
         float img_size_opt = 1.0f; 
-
-        std::string dataset_path; 
+        bool show_cam_img = true; 
         std::string vocab_path = "./dictionaries/orbvoc.dbow3"; 
 
+        //ptrs to variosu modules 
         std::shared_ptr<Map> map = nullptr;
         std::shared_ptr<LocalMapping> local_mapping = nullptr;
         std::shared_ptr<LoopCloser> loop_closer= nullptr; 
@@ -63,8 +102,9 @@ namespace mrVSLAM
         std::shared_ptr<MonoTracking> mono_tracking = nullptr; 
         std::shared_ptr<Visualizer> visualizer = nullptr; 
         std::shared_ptr<KITTI_Dataset> dataset = nullptr; 
-
-        std::vector<bool> loop_times; 
+        
+        // result data
+        std::vector<float> loop_times; 
         std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
         std::vector<std::shared_ptr<Frame>> all_frames; 
         ResultStruct results; 

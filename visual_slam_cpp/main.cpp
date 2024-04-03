@@ -22,9 +22,10 @@ int main(int argc, char* argv[])
     std::shared_ptr<mrVSLAM::SLAM> slam = std::make_shared<mrVSLAM::SLAM>(kitti_path,SLAM_TYPE::STEREO, use_loop_closer); 
 
     //run SLAM 
+    slam->setSlamParameters(DetectorType::GFTT,150, 1.0f); 
     slam->initSLAM(); 
-    // slam->outputSlamResult(); 
-    // slam->outputSlamResult(); 
+    slam->runSLAM(); 
+    slam->outputSlamResult(); 
 
     return 0;
 }

@@ -31,11 +31,14 @@ namespace mrVSLAM
         fmt::print("###----------------------### \n"); 
     }
     
-    void SLAM::setSlamParameters(unsigned int num_of_tracked_points, DetectorType type_of_detector, float resize)
+    void SLAM::setSlamParameters(DetectorType type_of_detector, unsigned int num_of_tracked_points, float resize, 
+                                bool show_cam_img, std::string vocab_path)
     {
-        number_of_points = num_of_tracked_points; 
-        detector_type = type_of_detector; 
-        img_size_opt = resize; 
+        this->number_of_points = num_of_tracked_points; 
+        this->detector_type = type_of_detector; 
+        this->img_size_opt = resize; 
+        this->show_cam_img = show_cam_img; 
+        this->vocab_path = vocab_path; 
     }
 
     void SLAM::initSLAM()
