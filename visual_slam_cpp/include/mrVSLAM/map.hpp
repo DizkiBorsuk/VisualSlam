@@ -35,6 +35,7 @@ namespace mrVSLAM
 
         void insertNewKeyframe(std::shared_ptr<Frame> frame); 
         void insertNewMappoint(std::shared_ptr<MapPoint> map_point); 
+        void cleanMap(); 
 
         /**
          * @brief Get the Kyeframe object
@@ -44,35 +45,59 @@ namespace mrVSLAM
          */
         std::shared_ptr<Frame> getKyeframeById(unsigned int keyframe_id); 
 
-        void cleanMap(); 
-
-
+        /**
+         * @brief Get the All Mappoints objects stored in a hash map 
+         * @return LandmarksType - hash map of stored mappoints 
+         */
         LandmarksType getAllMappoints()
         {
             std::unique_lock<std::mutex> lock(map_mutex);
             return allMappointsDictionary; 
         }
+
+        /**
+         * @brief Get the Active Mappoints objects (local map of last 10 frames) stored in a hash map 
+         * @return LandmarksType - hash map of stored mappoints 
+         */
         LandmarksType getActiveMappoints()
         {
             std::unique_lock<std::mutex> lock(map_mutex);
             return activeMappointsDictionary; 
         }
+
+        /**
+         * @brief Get the All Keyframes objects stored in a hash map 
+         * @return KeyframesType - hash map of all stored frame objects (keyframes)
+         */
         KeyframesType getAllKeyframes()
         {
             std::unique_lock<std::mutex> lock(map_mutex);
             return allKeyframesDictionary; 
         }
+
+        /**
+         * @brief Get the Active Keyframes objects (local map of last 10 frames) stored in a hash map 
+         * @return KeyframesType 
+         */
         KeyframesType getActiveKeyframes()
         {
             std::unique_lock<std::mutex> lock(map_mutex);
             return activeKeyframesDictionary; 
         }
 
+        /**
+         * @brief Get the Number Of Keyframe object stored in map
+         * @return int 
+         */
         int getNumberOfKeyframes()
         {
             return allKeyframesDictionary.size(); 
         }
 
+        /**
+         * @brief Get the Number Of Map Point objects stored in map 
+         * @return int 
+         */
         int getNumberOfMapPoints()
         {
             return allMappointsDictionary.size(); 

@@ -20,7 +20,6 @@ namespace mrVSLAM
 
     /**
      * @brief class that represents characteristic point observed in img
-     * 
      */
     class Feature
     {

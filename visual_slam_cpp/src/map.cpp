@@ -10,6 +10,7 @@
  */
 #include "mrVSLAM/map.hpp" 
 #include "mrVSLAM/frame.hpp"
+#include "mrVSLAM/mappoint.hpp"
 
 namespace mrVSLAM
 {
@@ -39,7 +40,18 @@ namespace mrVSLAM
 
     void Map::insertNewMappoint(std::shared_ptr<MapPoint> map_point)
     {
+        std::unique_lock<std::mutex> lock(map_mutex);
 
+        if (!allMappointsDictionary.contains(map_point->id))  //landmarks_.find(map_point->id_) == landmarks_.end()
+        {
+            allMappointsDictionary.insert(make_pair(map_point->id, map_point));
+            activeMappointsDictionary.insert(make_pair(map_point->id, map_point));
+        } 
+        else 
+        {
+            allMappointsDictionary[map_point->id] = map_point;
+            activeMappointsDictionary[map_point->id] = map_point;
+        }
     }
 
     std::shared_ptr<Frame> Map::getKyeframeById(unsigned int keyframe_id)
@@ -48,20 +60,83 @@ namespace mrVSLAM
         if(allKeyframesDictionary.contains(keyframe_id))
             return allKeyframesDictionary.at(keyframe_id); 
         else 
-            std::cerr << "Map::getKyeframeById() - frame doesn't exist \n"; 
+            fmt::print(bg(fmt::color::dark_red), "Map::getKyeframeById() - frame doesn't exist \n"); 
 
         return nullptr; 
     }
 
+    void Map::removeOldKeyframe()
+    {
+        std::unique_lock<std::mutex> lock(map_mutex);
+
+        if (current_keyframe == nullptr) {
+            return;
+        }
+
+        double max_dis = 0, min_dis = 9999;
+        double max_kf_id = 0, min_kf_id = 0;
+        auto Twc = current_keyframe->getPose().inverse();
+
+        for (auto& kf : activeKeyframesDictionary) 
+        {
+            if (kf.second == current_keyframe)
+            {
+                continue;
+            }
+            auto dis = (kf.second->getPose() * Twc).log().norm();
+            if (dis > max_dis) 
+            {
+                max_dis = dis;
+                max_kf_id = kf.first;
+            }
+            if (dis < min_dis) 
+            {
+                min_dis = dis;
+                min_kf_id = kf.first;
+            }
+        }
+
+        const double min_dis_th = 0.2;  
+        std::shared_ptr<Frame> frame_to_remove = nullptr;
+        if (min_dis < min_dis_th) 
+        {
+            frame_to_remove = allKeyframesDictionary.at(min_kf_id);
+        } else {
+            frame_to_remove = allKeyframesDictionary.at(max_kf_id);
+        }
+
+        fmt::print(fg(fmt::color::yellow), "removed keyframe {} \n", frame_to_remove->kf_id); 
+        // remove keyframe and landmark observation
+        activeKeyframesDictionary.erase(frame_to_remove->kf_id);
+
+        for (auto feature : frame_to_remove->features_on_left_img) 
+        {
+            auto temp_mappoint = feature->map_point.lock();
+            if (temp_mappoint) 
+            {
+                temp_mappoint->removeObservation(feature);
+            }
+        }
+
+        for (auto feature : frame_to_remove->features_on_right_img) 
+        {
+            if (feature == nullptr)
+            { 
+                continue;
+            }
+            auto temp_mappoint = feature->map_point.lock();
+            if (temp_mappoint) 
+            {
+                temp_mappoint->removeObservation(feature);
+            }
+        }
+
+        cleanMap();
+    }
+    
     void Map::cleanMap()
     {
 
     }
-
-    void Map::removeOldKeyframe()
-    {
-
-    }
-
 
 } //! end of namespace

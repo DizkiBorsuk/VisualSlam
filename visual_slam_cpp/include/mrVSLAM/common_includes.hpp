@@ -1,4 +1,12 @@
-// Created by MR
+/**
+ * @file common_includes.hpp
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-04-06
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #pragma once 
 
 #include <atomic>
@@ -37,9 +45,13 @@ enum class DetectorType {GFTT, ORB, SIFT, SUPER_POINT};
 enum class SLAM_TYPE{STEREO = 0, MONO = 1}; 
 
 namespace mrVSLAM
-{
+{   
+    /**
+     * @brief struct for storing algorithm results 
+     */
     struct ResultStruct
     {
+        unsigned int sequence_num; 
         SLAM_TYPE tracking_type; 
         DetectorType detector; 
         unsigned int num_of_features; 

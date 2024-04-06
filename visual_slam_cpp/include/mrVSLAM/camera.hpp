@@ -20,10 +20,10 @@ namespace mrVSLAM
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;  
 
         double fx = 0, fy = 0, cx = 0, cy = 0, baseline = 0;  ///< Camera intrinsics
-        Sophus::SE3d pose;      ///< extrinsic, 
-        Sophus::SE3d pose_inv;  ///< inverse of extrinsics
-        Eigen::Matrix3d K;      ///< Intrinsics matrix         
-        Eigen::Vector3d t;      ///< translation vector 
+        Sophus::SE3d pose;      ///< extrinsic matrix that describes camera pose in respect to main coordination system (usually identity matrix)
+        Sophus::SE3d pose_inv;  ///< inverse of extrinsic matrix 
+        Eigen::Matrix3d K;      ///< Intrinsics matrix  
+        Eigen::Vector3d t;      ///< translation vector, position of camera in respect to main coordination system
         //! to add distortionCoef; 
 
     public: 
@@ -73,8 +73,7 @@ namespace mrVSLAM
 
         /**
          * @brief get undistorted (rectified) img //! to be implemented
-         * 
-         * @param img - source img
+         * @param[in/out] img - source img
          */
         void imgRectification(cv::Mat &img); 
 

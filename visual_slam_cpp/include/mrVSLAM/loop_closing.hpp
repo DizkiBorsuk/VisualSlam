@@ -19,7 +19,10 @@ namespace mrVSLAM
     class Map; 
     class Frame; 
     class LocalMapping; 
-
+    
+    /**
+     * @brief loop closer class/module 
+     */
     class LoopCloser
     {
     public: 

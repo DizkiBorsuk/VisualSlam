@@ -4,7 +4,6 @@
  * @brief local mapping (local map optimization) class/thread 
  * @version 0.1
  * @date 2024-03-06
- * 
  * @copyright Copyright (c) 2024
  * 
  */
