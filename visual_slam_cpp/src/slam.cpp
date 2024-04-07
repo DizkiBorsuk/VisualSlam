@@ -135,7 +135,7 @@ namespace mrVSLAM
         cv::resize(image_left, img_left_resized, cv::Size(), img_size_opt, img_size_opt, cv::INTER_NEAREST);
         cv::resize(image_right, img_right_resized, cv::Size(), img_size_opt, img_size_opt, cv::INTER_NEAREST);
 
-        auto new_frame = std::shared_ptr<Frame> (new Frame(current_image_index, img_left_resized, img_right_resized)); 
+        auto new_frame = std::make_shared<Frame> (current_image_index, img_left_resized, img_right_resized); 
         
         if(new_frame == nullptr) {
             throw std::runtime_error("frame object wasn't created \n"); 
@@ -144,7 +144,6 @@ namespace mrVSLAM
             current_image_index++; 
         }
 
-        
         switch (tracking_type)
         {
         case SLAM_TYPE::STEREO:

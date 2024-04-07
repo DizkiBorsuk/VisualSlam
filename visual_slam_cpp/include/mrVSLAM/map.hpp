@@ -35,7 +35,6 @@ namespace mrVSLAM
 
         void insertNewKeyframe(std::shared_ptr<Frame> frame); 
         void insertNewMappoint(std::shared_ptr<MapPoint> map_point); 
-        void cleanMap(); 
 
         /**
          * @brief Get the Kyeframe object
@@ -104,7 +103,10 @@ namespace mrVSLAM
         }
 
     private: 
-        void removeOldKeyframe(); 
+        /**
+         * @brief remove old (older than 10) keyframe and associated with it mappoints 
+         */
+        void removeOldKeyframeAndMappoints(); 
 
     private: 
         std::mutex map_mutex; 

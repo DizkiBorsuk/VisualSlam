@@ -195,8 +195,8 @@ namespace mrVSLAM
             insertKeyframe(); 
         }
 
-        relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
-        //relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); //TODO decide between pose and relativePose 
+        //relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
+        relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); //TODO decide between pose and relativePose 
 
         auto endTrack = std::chrono::steady_clock::now();
         auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
@@ -237,7 +237,7 @@ namespace mrVSLAM
         {
             if (status[i]) {
                 cv::KeyPoint kp(kps_current[i], 7);
-                auto feature = std::make_shared<Feature>(current_frame, kp);
+                auto feature = std::make_shared<Feature>(current_frame, kp, true); // true is on left img
                 feature->map_point = prev_frame->features_on_left_img[i]->map_point;
                 current_frame->features_on_left_img.emplace_back(feature);
                 num_good_pts++;
@@ -290,6 +290,9 @@ namespace mrVSLAM
                 index++;
             }
         }
+        fmt::print(fg(fmt::color::yellow_green), "number of edges in tracking pose optimization = {} \n", index); 
+        fmt::print(fg(fmt::color::yellow_green), "number of features in tracking pose optimization = {} \n", features.size()); 
+
 
         // estimate the Pose the determine the outliers
         const double chi2_th = 5.991;
@@ -372,9 +375,11 @@ namespace mrVSLAM
             detectFeatures();
         }
         // track in right image
-        findCorrespondingPoints();
+        auto corresponding_points = findCorrespondingPoints();
+        fmt::print(fg(fmt::color::blue), "number of found corresponding points = {} \n", corresponding_points); 
         // triangulate map points
-        triangulateNewPoints();
+        auto trian_points = triangulateNewPoints();
+        fmt::print(fg(fmt::color::blue), "number of new triangulated points = {} \n", trian_points); 
 
         /* ################################# */
         // second part - create keyframe object and pase it to map and other modules 
@@ -471,8 +476,7 @@ namespace mrVSLAM
         {
             if (status[i]) {
                 cv::KeyPoint kp(kps_right[i], 7);
-                auto new_feature = std::make_shared<Feature>(current_frame, kp);
-                new_feature->is_on_left_img = false;
+                auto new_feature = std::make_shared<Feature>(current_frame, kp, false); // false = is on right img 
                 current_frame->features_on_right_img.emplace_back(new_feature);
                 num_good_pts++;
             } else {
@@ -505,7 +509,8 @@ namespace mrVSLAM
         unsigned int detected_features = 0;
         for (auto &kp : keypoints) 
         {
-            current_frame->features_on_left_img.emplace_back(new Feature(kp));
+            auto new_feature = std::make_shared<Feature>(current_frame, kp, true);
+            current_frame->features_on_left_img.emplace_back(new_feature);
             detected_features++;
         }
 
@@ -538,7 +543,8 @@ namespace mrVSLAM
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
-            current_frame->features_on_left_img.emplace_back(new Feature(keypoints.at(i), descriptors.row(i))); 
+            auto new_feature = std::make_shared<Feature>(current_frame, keypoints.at(i), descriptors.row(i), true);
+            current_frame->features_on_left_img.emplace_back(new_feature); 
             extracted_features++;
         }
 

@@ -2,6 +2,10 @@
 
 This is a project I did as a part of my master thesis and my intrest in SLAM. It's a Visual SLAM that uses mono or stereo camera. 
 
+## How to install/compile 
+
+## How to run 
+
 ## Libraries that i used or are useful in SLAM project  
 ### C++ 
 1. Eigen - matrix operation library, similar to matlab, 

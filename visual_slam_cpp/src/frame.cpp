@@ -34,21 +34,11 @@ namespace mrVSLAM
         std::unique_lock<std::mutex> lock(frame_mutex); 
         return pose; 
     }
-    Sophus::SE3d Frame::getRelativePose()
-    {
-        std::unique_lock<std::mutex> lock(frame_mutex); 
-        return relativePose; 
-    }
+
     void Frame::setPose(const Sophus::SE3d &in_pose)
     {
         std::unique_lock<std::mutex> lock(frame_mutex); 
         pose = in_pose; 
-    }
-
-    void Frame::setRelativePose(const Sophus::SE3d &in_relativePose)
-    {
-        std::unique_lock<std::mutex> lock(frame_mutex); 
-        relativePose = in_relativePose; 
     }
 
 //* ------------------------ *//
@@ -58,7 +48,7 @@ namespace mrVSLAM
         static unsigned int factory_kf_id = 0; 
         this->kf_id = factory_kf_id; 
         factory_kf_id++; 
-        fmt::print(bg(fmt::color::gray), "frame id: {}, set to keyframe id: {}", this->id, this->kf_id); 
+        fmt::print(bg(fmt::color::gray), "frame id: {}, set to keyframe id: {} \n", this->id, this->kf_id); 
     }
 
     void Frame::setRelativePoseToLastKf(const Sophus::SE3d &in_pose)

@@ -82,7 +82,7 @@ namespace mrVSLAM
         return true; 
     }
 
-        /**
+    /**
      * @brief detect keypoints on image
      * @details create set of masks, detect keypoints and create feature objects assigned to current frame object 
      * @return int number of detected keypoints  
@@ -104,7 +104,8 @@ namespace mrVSLAM
         unsigned int detected_features = 0;
         for (auto &kp : keypoints) 
         {
-            current_frame->features_on_left_img.emplace_back(new Feature(kp));
+            auto new_feature = std::make_shared<Feature>(current_frame, kp, true);
+            current_frame->features_on_left_img.emplace_back(new_feature);
             detected_features++;
         }
 
@@ -137,7 +138,8 @@ namespace mrVSLAM
 
         for(size_t i = 0; i < keypoints.size(); i++)
         {
-            current_frame->features_on_left_img.emplace_back(new Feature(keypoints.at(i), descriptors.row(i))); 
+            auto new_feature = std::make_shared<Feature>(current_frame, keypoints.at(i), descriptors.row(i), true);
+            current_frame->features_on_left_img.emplace_back(new_feature); 
             extracted_features++;
         }
 

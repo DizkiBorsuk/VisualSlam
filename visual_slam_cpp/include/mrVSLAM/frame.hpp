@@ -34,19 +34,11 @@ namespace mrVSLAM
         bool is_on_left_img = true; 
         bool is_outlier = false;
 
-    public: 
-        Feature()=default;  
-        
-        Feature(const cv::KeyPoint &kp, bool on_left_img = true)
-        : positionOnImg(kp), is_on_left_img(on_left_img) {} 
-
-        Feature(const cv::KeyPoint &kp,const cv::Mat &feature_desc, bool on_left_img = true)
-        : positionOnImg(kp), descriptor(feature_desc), is_on_left_img(on_left_img) {} 
-
-        Feature(std::shared_ptr<Frame> kf, const cv::KeyPoint &kp, bool on_left_img = true)
+    public:         
+        Feature(std::shared_ptr<Frame> kf, const cv::KeyPoint &kp, bool on_left_img)
         : keyframe(kf), positionOnImg(kp), is_on_left_img(on_left_img) {} 
 
-        Feature(std::shared_ptr<Frame> kf, const cv::KeyPoint &kp,const cv::Mat &feature_desc, bool on_left_img = true)
+        Feature(std::shared_ptr<Frame> kf, const cv::KeyPoint &kp,const cv::Mat &feature_desc, bool on_left_img)
         : keyframe(kf), positionOnImg(kp), descriptor(feature_desc), is_on_left_img(on_left_img) {} 
 
     }; 
@@ -77,9 +69,7 @@ namespace mrVSLAM
         Frame(const unsigned int frame_id, const cv::Mat &leftImg, const cv::Mat &rightImg); 
 
         Sophus::SE3d getPose(); 
-        Sophus::SE3d getRelativePose(); 
         void setPose(const Sophus::SE3d &in_pose); 
-        void setRelativePose(const Sophus::SE3d &in_relativePose); 
 
         void setFrameToKeyframe(); 
         void setRelativePoseToLastKf(const Sophus::SE3d &in_pose); 
@@ -94,7 +84,6 @@ namespace mrVSLAM
     private:     
         //? sophus SE3 objects are initialize by default as identity matrix 
         Sophus::SE3d pose; ///< pose of camera/frame in map 
-        Sophus::SE3d relativePose; ///< pose of camera/frame relative to last frame 
 
         Sophus::SE3d relativePoseToLastKf; 
         Sophus::SE3d relativePoseToLoopKf; ///< 

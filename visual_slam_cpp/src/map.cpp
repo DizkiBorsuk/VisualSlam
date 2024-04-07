@@ -33,7 +33,7 @@ namespace mrVSLAM
         
         if (activeKeyframesDictionary.size() > this->num_of_active_keyframes)
         {
-            removeOldKeyframe();
+            removeOldKeyframeAndMappoints();
         }
 
     }
@@ -65,7 +65,7 @@ namespace mrVSLAM
         return nullptr; 
     }
 
-    void Map::removeOldKeyframe()
+    void Map::removeOldKeyframeAndMappoints()
     {
         std::unique_lock<std::mutex> lock(map_mutex);
 
@@ -79,11 +79,12 @@ namespace mrVSLAM
 
         for (auto& kf : activeKeyframesDictionary) 
         {
-            if (kf.second == current_keyframe)
-            {
+            if (kf.second == current_keyframe) {
                 continue;
             }
-            auto dis = (kf.second->getPose() * Twc).log().norm();
+
+            // get distance of n keyframe from current keyframe
+            auto dis = (kf.second->getPose() * Twc).log().norm();  
             if (dis > max_dis) 
             {
                 max_dis = dis;
@@ -131,12 +132,19 @@ namespace mrVSLAM
             }
         }
 
-        cleanMap();
+        int landmarks_removed = 0;
+        for (auto iter = activeMappointsDictionary.begin(); iter != activeMappointsDictionary.end();) 
+        {
+            if (iter->second->observed_times == 0)
+            {
+                iter = activeMappointsDictionary.erase(iter);
+                landmarks_removed++;
+            } else {
+                ++iter;
+            }
+        }
+        fmt::print(fg(fmt::color::yellow), "Removed {} old mappoints from local map \n", landmarks_removed);
     }
     
-    void Map::cleanMap()
-    {
-
-    }
 
 } //! end of namespace
