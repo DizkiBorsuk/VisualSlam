@@ -187,7 +187,7 @@ namespace mrVSLAM
             tracking_status = TrackingStatus::TRACKING; 
         } else {
             tracking_status = TrackingStatus::LOST; 
-            fmt::print(bg(fmt::color::indian_red), "tracking lost, aborting tracking \n"); 
+            fmt::print(fg(fmt::color::indian_red), "tracking lost, aborting tracking \n"); 
             return false; 
         }
 
@@ -197,6 +197,8 @@ namespace mrVSLAM
 
         //relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
         relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); //TODO decide between pose and relativePose 
+
+        visualizer->addNewFrame(current_frame); 
 
         auto endTrack = std::chrono::steady_clock::now();
         auto elapsedTrack = std::chrono::duration_cast<std::chrono::milliseconds>(endTrack - beginTrack);
@@ -290,8 +292,8 @@ namespace mrVSLAM
                 index++;
             }
         }
-        fmt::print(fg(fmt::color::yellow_green), "number of edges in tracking pose optimization = {} \n", index); 
-        fmt::print(fg(fmt::color::yellow_green), "number of features in tracking pose optimization = {} \n", features.size()); 
+        // fmt::print(fg(fmt::color::yellow_green), "number of edges in tracking pose optimization = {} \n", index); 
+        // fmt::print(fg(fmt::color::yellow_green), "number of features in tracking pose optimization = {} \n", features.size()); 
 
 
         // estimate the Pose the determine the outliers
@@ -333,6 +335,7 @@ namespace mrVSLAM
         std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/" << features.size() - cnt_outlier << "\n";
         // Set pose and outlier
         current_frame->setPose(vertex_pose->estimate());
+        // fmt::print("Estimated pose = {} \n", current_frame->getPose().matrix()); 
 
         //std::cout  << "Current Pose = \n" << current_frame->Pose().matrix() << "\n";
 

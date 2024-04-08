@@ -60,7 +60,7 @@ namespace mrVSLAM
         if(allKeyframesDictionary.contains(keyframe_id))
             return allKeyframesDictionary.at(keyframe_id); 
         else 
-            fmt::print(bg(fmt::color::dark_red), "Map::getKyeframeById() - frame doesn't exist \n"); 
+            fmt::print(fg(fmt::color::dark_red), "Map::getKyeframeById() - frame doesn't exist \n"); 
 
         return nullptr; 
     }

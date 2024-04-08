@@ -29,7 +29,7 @@ namespace mrVSLAM
     {
         visualizer_running = false; 
         visualizer_thread.join(); 
-        fmt::print(bg(fmt::color::indian_red), "visualizer thread closed \n"); 
+        fmt::print(fg(fmt::color::indian_red), "visualizer thread closed \n"); 
     }
 
     bool Visualizer::updateMap()
@@ -195,8 +195,6 @@ namespace mrVSLAM
             std::this_thread::sleep_for(5000us); 
             prev_frame = current_frame; 
         }
-
-        std::cout << "Stop viewer \n";
     }
 
 } //! end of namespace

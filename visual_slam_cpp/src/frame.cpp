@@ -48,7 +48,7 @@ namespace mrVSLAM
         static unsigned int factory_kf_id = 0; 
         this->kf_id = factory_kf_id; 
         factory_kf_id++; 
-        fmt::print(bg(fmt::color::gray), "frame id: {}, set to keyframe id: {} \n", this->id, this->kf_id); 
+        fmt::print(fg(fmt::color::gray), "frame id: {}, set to keyframe id: {} \n", this->id, this->kf_id); 
     }
 
     void Frame::setRelativePoseToLastKf(const Sophus::SE3d &in_pose)

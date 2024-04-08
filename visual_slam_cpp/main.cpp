@@ -12,11 +12,11 @@ int main(int argc, char* argv[])
     //input argumes handling 
     if(argc>1)
     {
-        fmt::print(bg(fmt::color::green), "using terminal input arguments \n"); 
+        fmt::print(fg(fmt::color::green), "using terminal input arguments \n"); 
         kitti_path = argv[1]; 
         use_loop_closer = argv[2]; 
 
-    } else { fmt::print(bg(fmt::color::red),"no input arguments, using default inputs \n"); }
+    } else { fmt::print(fg(fmt::color::red),"no input arguments, using default inputs \n"); }
     
     //creat SLAM class instance 
     std::shared_ptr<mrVSLAM::SLAM> slam = std::make_shared<mrVSLAM::SLAM>(kitti_path,SLAM_TYPE::STEREO, use_loop_closer); 

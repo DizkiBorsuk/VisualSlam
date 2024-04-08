@@ -66,18 +66,22 @@ namespace mrVSLAM
          * @brief algorithm main loop 
          */
         void runSLAM(); 
+
         /**
-         * @brief Create a New Frame And Track object
-         * 
-         * @return true 
-         * @return false 
+         * @brief get results of slam 
          */
-        bool createNewFrameAndTrack(); 
         void outputSlamResult(); 
 
 
     private: 
-        void saveResults(); 
+        /**
+         * @brief Create a New Frame and add it to tracking, runs
+         * 
+         * @return true 
+         * @return false 
+         */
+        bool createNewFrameAndTrack();
+        void saveResults(const ResultStruct &results); 
         void saveTrajectoryAndMap(); 
 
     private: 
@@ -107,7 +111,6 @@ namespace mrVSLAM
         std::vector<float> loop_times; 
         std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
         std::vector<std::shared_ptr<Frame>> all_frames; 
-        ResultStruct results; 
     }; 
 
 } //! end of namespace 

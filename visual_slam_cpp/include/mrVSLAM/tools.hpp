@@ -11,7 +11,7 @@
 
 #pragma once 
 #include "mrVSLAM/common_includes.hpp" 
-#include <matplot/matplot.h>
+// #include <matplot/matplot.h>
 
 namespace mrVSLAM
 {   
@@ -66,68 +66,142 @@ namespace mrVSLAM
         return Eigen::Vector3d(point.x, point.y, point.z); 
     }
 
-    /**
-     * @brief function that plots estimated and ground truth camera trajectory 
-     * 
-     * @param poses - camera poses [matrix 3x4] estimated by algorithm
-     * @param gt_poses - true camera poses 
-     * @param resize_opt - resize img option that 
-     */
-    inline void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
-                   std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
+    inline void calculate_error(const std::vector<Eigen::Matrix<double, 3,4>> &poses, 
+                                const std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, 
+                                const float resize_opt, const int seq, ResultStruct &out_struct)
     {
-        std::vector<double> gt_x, gt_y, x, y; 
- 
-        for(std::size_t i = 0; i < poses.size(); i++)
-        {
-            gt_x.emplace_back(gt_poses.at(i).coeff(0,3));  
-            gt_y.emplace_back(gt_poses.at(i).coeff(2,3));
+        float seq0_dist = 3724.18f; 
+        float seq6_dist = 1232.87f; 
+        float seq7_dist = 694.69f; 
 
-            x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);  
-            y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+        float gt_x, gt_y, gt_z, x, y, z;
+        std::vector<float> er_x, er_y, er_z; 
+
+        for(size_t i = 0; i < poses.size(); i++)
+        {
+            gt_x = gt_poses.at(i).coeff(0,3);
+            gt_y = gt_poses.at(i).coeff(2,3);
+            gt_z = gt_poses.at(i).coeff(1,3);
+
+            x = poses.at(i).coeff(0,3)*resize_opt;
+            y = poses.at(i).coeff(2,3)*resize_opt;
+            z = poses.at(i).coeff(1,3)*resize_opt;
         }
 
-        // set figure size anf color 
-        auto fig = matplot::figure();  
-        fig->width(fig->width()*1.3); 
-        fig->height(fig->height()*1.3);
-        fig->color("white"); 
+        auto compare_abs = [](auto value1, auto value2) {return std::abs(value1) < std::abs(value2); }; 
 
-        matplot::plot(gt_x, gt_y)->line_width(2); 
-        matplot::hold(matplot::on); 
-        matplot::plot(x, y, "r--")->line_width(2);
-        matplot::xlabel("x [m]");
-        matplot::ylabel("y [m]");  
-        matplot::legend({"prawdziwa trasa", "estymowana trasa"}); 
-        matplot::show();
+        float sum_error_x = std::accumulate(er_x.begin(), er_x.end(), 0.0f);
+        float sum_error_y = std::accumulate(er_y.begin(), er_y.end(), 0.0f); 
+        float sum_error_z = std::accumulate(er_z.begin(), er_z.end(), 0.0f);
+
+        float mean_error_x = sqrt(sum_error_x/static_cast<float>(er_x.size())); 
+        float mean_error_y = sqrt(sum_error_y/static_cast<float>(er_y.size()));  
+        float mean_error_z = sqrt(sum_error_z/static_cast<float>(er_z.size())); 
+        float mean_error = (mean_error_x + mean_error_y + mean_error_z)/3.0f; 
+        
+        float min_error_x = *std::min_element(er_x.begin(), er_x.end(), compare_abs); 
+        float min_error_y = *std::min_element(er_y.begin(), er_y.end(), compare_abs); 
+        float min_error_z = *std::min_element(er_z.begin(), er_z.end(), compare_abs); 
+
+        float max_error_x = *std::max_element(er_x.begin(), er_x.end(), compare_abs); 
+        float max_error_y = *std::max_element(er_y.begin(), er_y.end(), compare_abs); 
+        float max_error_z = *std::max_element(er_z.begin(), er_z.end(), compare_abs); 
+        
+        float percent_error = 0.0f; 
+
+        switch (seq)
+        {
+        case 0:
+            percent_error = (mean_error/seq0_dist) * 100.0f; 
+            break;
+        case 6:
+            percent_error = (mean_error/seq6_dist) * 100.0f; 
+            break;
+        case 7:
+            percent_error = (mean_error/seq7_dist) * 100.0f;
+            break;
+        default:
+            break;
+        }
+
+        out_struct.mean_error = mean_error; 
+        out_struct.percent_error = percent_error; 
+        out_struct.mean_error_x = mean_error_x; 
+        out_struct.mean_error_y = mean_error_y; 
+        out_struct.mean_error_z = mean_error_z; 
+        out_struct.max_error_x = max_error_x; 
+        out_struct.max_error_y = max_error_y; 
+        out_struct.max_error_z = max_error_z; 
+        out_struct.min_error_x = min_error_x; 
+        out_struct.min_error_y = min_error_y; 
+        out_struct.min_error_z = min_error_z; 
+
+        fmt::print("mean error = {} \nmean_error_x = {}, mean_error_y = {}, mean_error_z = {} \n", mean_error, mean_error_x, mean_error_y, mean_error_z); 
+        fmt::print("percatantage error = {} \n", percent_error); 
     }
 
-    /**
-     * @brief function to plot loop times and calculate mean/min times
-     * 
-     * @param loopTimes - vector of times of each loop 
-     * @param results_object 
-     */
-    inline void plotPerformance(const std::vector<int> &loopTimes, ResultStruct &results_object)
-    {
-        int sum = std::accumulate(loopTimes.begin(), loopTimes.end(), 0.0); 
-        double mean = sum/loopTimes.size(); 
+    // /**
+    //  * @brief function that plots estimated and ground truth camera trajectory 
+    //  * 
+    //  * @param poses - camera poses [matrix 3x4] estimated by algorithm
+    //  * @param gt_poses - true camera poses 
+    //  * @param resize_opt - resize img option that 
+    //  */
+    // inline void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
+    //                std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
+    // {
+    //     std::vector<double> gt_x, gt_y, x, y; 
+ 
+    //     for(std::size_t i = 0; i < poses.size(); i++)
+    //     {
+    //         gt_x.emplace_back(gt_poses.at(i).coeff(0,3));  
+    //         gt_y.emplace_back(gt_poses.at(i).coeff(2,3));
 
-        results_object.mean_time = mean; 
-        results_object.min_time = *std::min_element(loopTimes.begin(), loopTimes.end()); 
+    //         x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);  
+    //         y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+    //     }
 
-        std::cout << "mean time = " << mean << "ms \n"; 
-        std::cout << "min value = " << *std::min_element(loopTimes.begin(), loopTimes.end()) << "\n"; 
+    //     // set figure size anf color 
+    //     auto fig = matplot::figure();  
+    //     fig->width(fig->width()*1.3); 
+    //     fig->height(fig->height()*1.3);
+    //     fig->color("white"); 
 
-        auto fig = matplot::figure();  
-        fig->width(fig->width()*1.3); 
-        fig->height(fig->height()*1.3);
-        fig->color("white");  
-        matplot::plot(loopTimes); 
-        matplot::xlabel(" iteracja []");
-        matplot::ylabel("czas [ms]"); 
-        matplot::show(); 
-    }
+    //     matplot::plot(gt_x, gt_y)->line_width(2); 
+    //     matplot::hold(matplot::on); 
+    //     matplot::plot(x, y, "r--")->line_width(2);
+    //     matplot::xlabel("x [m]");
+    //     matplot::ylabel("y [m]");  
+    //     matplot::legend({"prawdziwa trasa", "estymowana trasa"}); 
+    //     matplot::show();
+    // }
+
+    // /**
+    //  * @brief function to plot loop times and calculate mean/min times
+    //  * 
+    //  * @param loopTimes - vector of times of each loop 
+    //  * @param results_object 
+    //  */
+    // inline void plotPerformance(const std::vector<int> &loopTimes, ResultStruct &results_object)
+    // {
+    //     int sum = std::accumulate(loopTimes.begin(), loopTimes.end(), 0.0); 
+    //     double mean = sum/loopTimes.size(); 
+
+    //     results_object.mean_time = mean; 
+    //     results_object.min_time = *std::min_element(loopTimes.begin(), loopTimes.end()); 
+
+    //     std::cout << "mean time = " << mean << "ms \n"; 
+    //     std::cout << "min value = " << *std::min_element(loopTimes.begin(), loopTimes.end()) << "\n"; 
+
+    //     auto fig = matplot::figure();  
+    //     fig->width(fig->width()*1.3); 
+    //     fig->height(fig->height()*1.3);
+    //     fig->color("white");  
+    //     matplot::plot(loopTimes); 
+    //     matplot::xlabel(" iteracja []");
+    //     matplot::ylabel("czas [ms]"); 
+    //     matplot::show(); 
+    // }
 
     template <typename E>
     constexpr auto to_underlying(E e) noexcept

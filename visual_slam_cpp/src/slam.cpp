@@ -95,10 +95,9 @@ namespace mrVSLAM
                     break; 
                 }
             }
-            catch(const std::exception &e)
+            catch(...)
             {
-                fmt::print(bg(fmt::color::red), "cached critical error, ending slam \n"); 
-                fmt::print(bg(fmt::color::red), e.what()); 
+                fmt::print(fg(fmt::color::red), "cached critical error, ending slam \n"); 
                 break; 
             }
         }
@@ -168,13 +167,21 @@ namespace mrVSLAM
     void SLAM::outputSlamResult()
     {
         fmt::print("###----------------------### \n");
-        fmt::print(bg(fmt::color::green), "create and save slam output \n"); 
-        // dataset->getGTposes(); 
+        fmt::print(fg(fmt::color::green), "create and save slam output \n"); 
+
+        ResultStruct results; 
+
+        dataset->getGTposes(); 
+
+        results.sequence = dataset->getCurrentSequence(); 
+        results.detector = detector_type; 
+        results.tracking_type = tracking_type; 
+        results.num_of_features = number_of_points;
         
-        saveResults(); 
+        saveResults(results); 
     }
 
-    void SLAM::saveResults()
+    void SLAM::saveResults(const ResultStruct &results)
     {
         std::ofstream outputFile;
         outputFile.open("results.csv", std::ios_base::app);

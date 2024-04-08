@@ -41,13 +41,13 @@ namespace mrVSLAM
         localMappingRunning.store(false); 
         map_update.notify_one();
         local_mapping_thread.join();
-        fmt::print(bg(fmt::color::indian_red), "local mapping thread closed \n"); 
+        fmt::print(fg(fmt::color::indian_red), "local mapping thread closed \n"); 
     }
 
     void LocalMapping::requestPause()
     {
         pauseRequest.store(true); 
-        fmt::print(bg(fmt::color::yellow), "local mapping thread paused \n"); 
+        fmt::print(fg(fmt::color::yellow), "local mapping thread paused \n"); 
     }
 
     bool LocalMapping::confirmPause()
@@ -58,7 +58,7 @@ namespace mrVSLAM
     void LocalMapping::resume()
     {
         pauseRequest.store(false); 
-        fmt::print(bg(fmt::color::yellow), "local mapping thread restarted \n"); 
+        fmt::print(fg(fmt::color::yellow), "local mapping thread restarted \n"); 
     }
 
 //* ------ Main part ------- *// 

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <sstream>
 #include <type_traits>
+#include <exception>
 		
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Dense"
@@ -51,18 +52,22 @@ namespace mrVSLAM
      */
     struct ResultStruct
     {
-        unsigned int sequence_num; 
+        std::string sequence; 
         SLAM_TYPE tracking_type; 
         DetectorType detector; 
         unsigned int num_of_features; 
 
         float mean_error; 
+        float percent_error; 
         float mean_error_x; 
         float mean_error_y; 
         float mean_error_z; 
         float max_error_x;
         float max_error_y; 
         float max_error_z; 
+        float min_error_x;
+        float min_error_y; 
+        float min_error_z; 
 
         double mean_time;
         double min_time;  

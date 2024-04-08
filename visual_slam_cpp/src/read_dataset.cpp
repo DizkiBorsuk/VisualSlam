@@ -114,7 +114,7 @@ namespace mrVSLAM
             ground_truth_poses.push_back(pose_matrix); 
             pose_vec.clear(); //clear vector 
         }
-        std::cout << "Number of poses in sequence: " << ground_truth_poses.size() << "\n"; 
+        fmt::print("Number of poses in sequence: {} \n",ground_truth_poses.size()); 
     }
 
     void KITTI_Dataset::showPmatricies() const
@@ -124,6 +124,19 @@ namespace mrVSLAM
         std::cout << "\n"; 
         std::cout << "Right grayscale camera projection matrix = \n" << P3 << "\n"; 
         std::cout << "---------------- \n";
+    }
+
+    std::string KITTI_Dataset::getCurrentSequence()
+    {
+        // std::size_t index = std::string:find(); 
+        std::string sequence; 
+        sequence = path_to_dataset.back(); 
+        if(sequence != "0" | sequence != "6" | sequence != "7")
+        {
+            fmt::print(fg(fmt::color::red), "probably smth went wrong in reading which sequence, output = {} \n", sequence);
+        }
+
+        return sequence; 
     }
 
 } //! end of namespace
