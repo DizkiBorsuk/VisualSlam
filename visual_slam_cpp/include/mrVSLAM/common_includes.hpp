@@ -71,6 +71,7 @@ namespace mrVSLAM
 
         double mean_time;
         double min_time;  
+        double max_time; 
     };
 }
 

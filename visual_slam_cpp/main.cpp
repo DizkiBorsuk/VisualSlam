@@ -5,7 +5,8 @@ int main(int argc, char* argv[])
 {
     std::string kitti_path = "/home/maciek/dev/projects_cpp/VisualSlam/KITTY_dataset/sequences/06"; 
     bool use_loop_closer = false; 
-
+    SLAM_TYPE slam_trackin_type = SLAM_TYPE::STEREO; 
+    unsigned int n_points = 150; 
 
     fmt::print("Hello mrVSLAM \n"); 
 
@@ -13,16 +14,29 @@ int main(int argc, char* argv[])
     if(argc>1)
     {
         fmt::print(fg(fmt::color::green), "using terminal input arguments \n"); 
-        kitti_path = argv[1]; 
-        use_loop_closer = argv[2]; 
+        try
+        {
+            kitti_path = argv[1]; 
+            slam_trackin_type = static_cast<SLAM_TYPE>(std::stoi(argv[2])); 
+            use_loop_closer = std::stoi(argv[3]); 
+            n_points = std::stoi(argv[4]); 
+
+            fmt::print(fg(fmt::color::green), "kitti path = {}, usle_loop_closer = {}, n_points = {} \n", kitti_path, use_loop_closer, n_points); 
+        } 
+        catch(const std::exception& e)
+        {
+            fmt::print(fg(fmt::color::red), "Error in reading input parameters {}, using default", e.what()); 
+        }
+
+
 
     } else { fmt::print(fg(fmt::color::red),"no input arguments, using default inputs \n"); }
     
     //creat SLAM class instance 
-    std::shared_ptr<mrVSLAM::SLAM> slam = std::make_shared<mrVSLAM::SLAM>(kitti_path,SLAM_TYPE::STEREO, use_loop_closer); 
+    std::shared_ptr<mrVSLAM::SLAM> slam = std::make_shared<mrVSLAM::SLAM>(kitti_path, slam_trackin_type, use_loop_closer); 
 
-    //run SLAM 
-    slam->setSlamParameters(DetectorType::GFTT,150, 1.0f); 
+    // run SLAM 
+    slam->setSlamParameters(DetectorType::GFTT, 150, 1.0f); 
     slam->initSLAM(); 
     slam->runSLAM(); 
     slam->outputSlamResult(); 

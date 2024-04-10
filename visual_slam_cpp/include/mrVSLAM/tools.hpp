@@ -74,6 +74,13 @@ namespace mrVSLAM
         float seq6_dist = 1232.87f; 
         float seq7_dist = 694.69f; 
 
+        if(poses.size()!=gt_poses.size())
+        {
+            fmt::print(fg(fmt::color::red), "size of poses vector doesn't match size of ground truth poses \n"); 
+            fmt::print("poses.size() = {}, gt_poses.size() = {} \n", poses.size(), gt_poses.size()); 
+            return; 
+        }
+
         float gt_x, gt_y, gt_z, x, y, z;
         std::vector<float> er_x, er_y, er_z; 
 
@@ -86,6 +93,10 @@ namespace mrVSLAM
             x = poses.at(i).coeff(0,3)*resize_opt;
             y = poses.at(i).coeff(2,3)*resize_opt;
             z = poses.at(i).coeff(1,3)*resize_opt;
+
+            er_x.emplace_back((gt_x - x)*(gt_x - x)); 
+            er_y.emplace_back((gt_y - y)*(gt_y - y));
+            er_z.emplace_back((gt_z - z)*(gt_z - z));
         }
 
         auto compare_abs = [](auto value1, auto value2) {return std::abs(value1) < std::abs(value2); }; 
@@ -138,6 +149,17 @@ namespace mrVSLAM
 
         fmt::print("mean error = {} \nmean_error_x = {}, mean_error_y = {}, mean_error_z = {} \n", mean_error, mean_error_x, mean_error_y, mean_error_z); 
         fmt::print("percatantage error = {} \n", percent_error); 
+    }
+
+    inline void calculate_time(const std::vector<float>& loop_times, ResultStruct &out_struct)
+    {
+        float sum = std::accumulate(loop_times.begin(), loop_times.end(), 0.0f); 
+        double mean = sum / static_cast<double>(loop_times.size()); 
+        out_struct.mean_time = mean; 
+        out_struct.min_time = *std::min_element(loop_times.begin(), loop_times.end()); 
+        out_struct.max_time = *std::max_element(loop_times.begin(), loop_times.end());
+
+        fmt::print("mean time = {}, min time = {}, max_time = {}", mean, out_struct.min_time, out_struct.max_time); 
     }
 
     // /**

@@ -171,13 +171,20 @@ namespace mrVSLAM
 
         ResultStruct results; 
 
-        dataset->getGTposes(); 
+        dataset->getGTposes();
+        std::vector<Eigen::Matrix<double, 3,4>>  trajectory2; 
+        for(int i = 0; i < all_frames.size(); i++)
+        {
+            trajectory2.emplace_back(all_frames.at(i)->getPose().inverse().matrix3x4()); 
+        }
 
-        results.sequence = dataset->getCurrentSequence(); 
+
+        // results.sequence = dataset->getCurrentSequence(); 
         results.detector = detector_type; 
         results.tracking_type = tracking_type; 
         results.num_of_features = number_of_points;
-        
+
+        calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6 , results); 
         saveResults(results); 
     }
 

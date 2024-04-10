@@ -22,8 +22,8 @@
 namespace mrVSLAM
 {
     /**
-     * @class SLAM 
      * @brief main visual slam algorithm class 
+     * @details 
      */
     class SLAM 
     {
