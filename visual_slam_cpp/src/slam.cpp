@@ -179,7 +179,7 @@ namespace mrVSLAM
         }
 
 
-        // results.sequence = dataset->getCurrentSequence(); 
+        results.sequence = dataset->getCurrentSequence(); 
         results.detector = detector_type; 
         results.tracking_type = tracking_type; 
         results.num_of_features = number_of_points;

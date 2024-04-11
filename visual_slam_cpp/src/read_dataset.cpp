@@ -126,17 +126,23 @@ namespace mrVSLAM
         std::cout << "---------------- \n";
     }
 
-    std::string KITTI_Dataset::getCurrentSequence()
+    unsigned int KITTI_Dataset::getCurrentSequence()
     {
         // std::size_t index = std::string:find(); 
-        std::string sequence; 
-        sequence = path_to_dataset.back(); 
-        if(sequence != "0" | sequence != "6" | sequence != "7")
-        {
-            fmt::print(fg(fmt::color::red), "probably smth went wrong in reading which sequence, output = {} \n", sequence);
-        }
+        std::string str_sequence; 
+        unsigned int seq; 
 
-        return sequence; 
+        try
+        {
+            str_sequence = path_to_dataset.back(); 
+            seq = std::stoi(str_sequence); 
+        } 
+        catch(std::exception& e)
+        {
+            fmt::print(fg(fmt::color::red), "probably smth went wrong in reading which sequence, error = {}", e.what());
+        }
+        fmt::print("return sequence is = {} \n", seq); 
+        return seq; 
     }
 
 } //! end of namespace

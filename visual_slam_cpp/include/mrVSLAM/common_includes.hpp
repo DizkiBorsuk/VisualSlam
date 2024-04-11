@@ -52,7 +52,7 @@ namespace mrVSLAM
      */
     struct ResultStruct
     {
-        std::string sequence; 
+        unsigned int sequence; 
         SLAM_TYPE tracking_type; 
         DetectorType detector; 
         unsigned int num_of_features; 
