@@ -172,10 +172,11 @@ namespace mrVSLAM
         ResultStruct results; 
 
         dataset->getGTposes();
-        std::vector<Eigen::Matrix<double, 3,4>>  trajectory2; 
-        for(int i = 0; i < all_frames.size(); i++)
+        // std::vector<Eigen::Matrix<double, 3,4>>  kf_trajectory;
+        // auto keyframes = map->getAllKeyframes();  
+        for(size_t i = 0; i < all_frames.size(); i++)
         {
-            trajectory2.emplace_back(all_frames.at(i)->getPose().inverse().matrix3x4()); 
+            trajectory.emplace_back(all_frames.at(i)->getPose().inverse().matrix3x4()); 
         }
 
 
@@ -185,6 +186,7 @@ namespace mrVSLAM
         results.num_of_features = number_of_points;
 
         calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6 , results); 
+        calculate_time(loop_times, results);
         saveResults(results); 
     }
 
@@ -199,18 +201,23 @@ namespace mrVSLAM
             std::exit(1); 
         }
 
-        outputFile << "NEW TEST: \n Tracking type, " << to_underlying(tracking_type)  << "\n"; 
-        outputFile << "Detector type, " << to_underlying(detector_type) << "\n"; 
-        outputFile << "Number of detected features, " << 1 << "\n";  
+        outputFile << "NEW TEST:, sequence number: ," << results.sequence << "\n" ;
+        outputFile << "Tracking type, " << to_underlying(results.tracking_type)  << "\n"; 
+        outputFile << "Detector type, " << to_underlying(results.detector) << "\n"; 
+        outputFile << "Number of detected features, " << results.num_of_features << "\n";  
         outputFile << "Loop closing?, " << use_loop_closing << "\n"; 
         outputFile << "\n"; 
         
         outputFile << "Number of generated keyframes," << map->getNumberOfKeyframes() << "\n";  
-        outputFile << "total mean error: ," << 1 << "," << 1 << "\n"; 
+        outputFile << "total mean error: ," << results.mean_error << "," << results.percent_error << "\n"; 
         outputFile << "mean error:, x , y , z \n"; 
-        outputFile << "," << 1 << "," << 1 << "," << 1 << "\n"; 
+        outputFile << "," << results.mean_error_x << "," << results.mean_error_y << "," << results.mean_error_z << "\n"; 
         outputFile << "max error:, x, y, z \n"; 
-        outputFile << "," << 1 << "," << 1 << "," << 1 << "\n"; 
+        outputFile << "," << results.max_error_x << "," << results.max_error_y << "," << results.max_error_z << "\n"; 
+        outputFile << "mean loop time: , " << results.mean_time << "\n"; 
+        outputFile << "max loop time: , " << results.max_time << "\n";
+        outputFile << "min loop time: , " << results.min_time << "\n"; 
+
 
         outputFile << "END OF TEST RESULTS \n"; 
         outputFile << "\n"; 

@@ -32,7 +32,7 @@ namespace mrVSLAM
         void readCalibData(); //get camera projection matrixies from calibration file 
         void getGTposes(); //get set of ground truth poses 
         void showPmatricies() const; 
-        unsigned int getCurrentSequence(); 
+        int getCurrentSequence(); 
 
     private: 
         std::string path_to_dataset; 

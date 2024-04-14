@@ -126,11 +126,11 @@ namespace mrVSLAM
         std::cout << "---------------- \n";
     }
 
-    unsigned int KITTI_Dataset::getCurrentSequence()
+    int KITTI_Dataset::getCurrentSequence()
     {
         // std::size_t index = std::string:find(); 
         std::string str_sequence; 
-        unsigned int seq; 
+        int seq = -1; 
 
         try
         {

@@ -11,9 +11,21 @@
 
 #include "mrVSLAM/loop_closing.hpp" 
 #include "mrVSLAM/frame.hpp"
+#include "mrVSLAM/map.hpp"
 
 namespace mrVSLAM
 {
+    LoopCloser::LoopCloser(std::string vocab_path)
+    {
+        DBoW3::Vocabulary vocab(vocab_path); 
+        this->bow_database = DBoW3::Database(vocab); 
+        this->matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
+        this->loop_closer_running.store(true); 
+        this->loop_closer_thread = std::thread(std::bind(&LoopCloser::runLoopCloserThread,this)); 
+        fmt::print(fg(fmt::color::aqua), "loop closer thread started \n"); 
+    } 
+
+
     void LoopCloser::stop()
     {
         loop_closer_running.store(false); 
@@ -42,6 +54,10 @@ namespace mrVSLAM
 
 
             bow_database.add(current_keyframe->getBoW_Vector()); 
+            if(bow_database.size() > 20)
+            {
+
+            }
 
 
         }

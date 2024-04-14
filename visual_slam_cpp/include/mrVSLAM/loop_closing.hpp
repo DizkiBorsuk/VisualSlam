@@ -30,17 +30,8 @@ namespace mrVSLAM
          * @brief Construct a new Loop Closer object
          * @param vocab_path - path to Bag of words vocabulary 
          */
-        LoopCloser(std::string vocab_path)
-        {
-            DBoW3::Vocabulary vocab(vocab_path); 
-            this->bow_database = DBoW3::Database(vocab); 
-            this->matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
-
-            this->loop_closer_running.store(true); 
-            this->loop_closer_thread = std::thread(std::bind(&LoopCloser::runLoopCloserThread,this)); 
-            fmt::print(fg(fmt::color::aqua), "loop closer thread started \n"); 
-        } 
-
+        LoopCloser(std::string vocab_path); 
+        
         /**
          * @brief Set the Loop Closer object
          * @param map_ptr - pointer to map object 
@@ -77,6 +68,12 @@ namespace mrVSLAM
          * @return false 
          */
         bool matchKeyframes(std::shared_ptr<Frame> loop_candidate_kf); 
+
+        /**
+         * @brief 
+         * 
+         */
+        void loopOptimization(); 
 
     private:
         std::shared_ptr<Map> map = nullptr; 

@@ -110,13 +110,13 @@ namespace mrVSLAM
         float mean_error_z = sqrt(sum_error_z/static_cast<float>(er_z.size())); 
         float mean_error = (mean_error_x + mean_error_y + mean_error_z)/3.0f; 
         
-        float min_error_x = *std::min_element(er_x.begin(), er_x.end(), compare_abs); 
-        float min_error_y = *std::min_element(er_y.begin(), er_y.end(), compare_abs); 
-        float min_error_z = *std::min_element(er_z.begin(), er_z.end(), compare_abs); 
+        float min_error_x = sqrt(*std::min_element(er_x.begin(), er_x.end(), compare_abs)); 
+        float min_error_y = sqrt(*std::min_element(er_y.begin(), er_y.end(), compare_abs)); 
+        float min_error_z = sqrt(*std::min_element(er_z.begin(), er_z.end(), compare_abs)); 
 
-        float max_error_x = *std::max_element(er_x.begin(), er_x.end(), compare_abs); 
-        float max_error_y = *std::max_element(er_y.begin(), er_y.end(), compare_abs); 
-        float max_error_z = *std::max_element(er_z.begin(), er_z.end(), compare_abs); 
+        float max_error_x = sqrt(*std::max_element(er_x.begin(), er_x.end(), compare_abs)); 
+        float max_error_y = sqrt(*std::max_element(er_y.begin(), er_y.end(), compare_abs)); 
+        float max_error_z = sqrt(*std::max_element(er_z.begin(), er_z.end(), compare_abs)); 
         
         float percent_error = 0.0f; 
 
@@ -148,7 +148,7 @@ namespace mrVSLAM
         out_struct.min_error_z = min_error_z; 
 
         fmt::print("mean error = {} \nmean_error_x = {}, mean_error_y = {}, mean_error_z = {} \n", mean_error, mean_error_x, mean_error_y, mean_error_z); 
-        fmt::print("percatantage error = {} \n", percent_error); 
+        fmt::print("percent error = {} \n", percent_error); 
     }
 
     inline void calculate_time(const std::vector<float>& loop_times, ResultStruct &out_struct)
@@ -159,7 +159,7 @@ namespace mrVSLAM
         out_struct.min_time = *std::min_element(loop_times.begin(), loop_times.end()); 
         out_struct.max_time = *std::max_element(loop_times.begin(), loop_times.end());
 
-        fmt::print("mean time = {}, min time = {}, max_time = {}", mean, out_struct.min_time, out_struct.max_time); 
+        fmt::print("mean time = {}, min time = {}, max_time = {} \n" , mean, out_struct.min_time, out_struct.max_time); 
     }
 
     // /**
