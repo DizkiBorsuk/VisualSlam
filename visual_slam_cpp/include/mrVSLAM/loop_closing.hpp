@@ -92,6 +92,7 @@ namespace mrVSLAM
         std::condition_variable map_updated; ///< informs loop closer module that there is new keyframe to be processed  
 
         DBoW3::Database bow_database; ///< database of keyframes or rather their BoW descriptions 
+        DBoW3::Vocabulary vocabulary; 
 
         cv::Ptr<cv::DescriptorMatcher> matcher; // matcher to match two keyframes features 
 

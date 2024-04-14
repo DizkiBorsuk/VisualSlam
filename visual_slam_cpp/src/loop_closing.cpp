@@ -17,8 +17,8 @@ namespace mrVSLAM
 {
     LoopCloser::LoopCloser(std::string vocab_path)
     {
-        DBoW3::Vocabulary vocab(vocab_path); 
-        this->bow_database = DBoW3::Database(vocab); 
+        this->vocabulary = DBoW3::Vocabulary(vocab_path); 
+        this->bow_database = DBoW3::Database(vocabulary); 
         this->matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING); 
         this->loop_closer_running.store(true); 
         this->loop_closer_thread = std::thread(std::bind(&LoopCloser::runLoopCloserThread,this)); 
@@ -48,12 +48,23 @@ namespace mrVSLAM
     {
         while(loop_closer_running.load())
         {
+
+            
             std::unique_lock<std::mutex> lock(loop_closer_mutex);
+            cv::Mat descriptors; 
+            for(auto &feature : current_keyframe->features_on_left_img)
+            {
+                descriptors.push_back(feature->descriptor); 
+            }
+            
+            DBoW3::BowVector temp_vector; 
+            vocabulary.transform(descriptors, temp_vector); 
+            current_keyframe->setBoW_Vector(temp_vector); 
+            
+            bow_database.add(temp_vector); 
+            
 
 
-
-
-            bow_database.add(current_keyframe->getBoW_Vector()); 
             if(bow_database.size() > 20)
             {
 

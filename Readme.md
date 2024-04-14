@@ -3,8 +3,23 @@
 This is a project I did as a part of my master thesis and my intrest in SLAM. It's a Visual SLAM that uses mono or stereo camera. 
 
 ## How to install/compile 
+### Dependecies 
+This project uses following libs: 
+1. Eigen - matrix operation library, similar to matlab, 
+2. OpenCV - computer vision library, 
+3. Sophus - wrapper around Eigen library that allows easy use of Lie groups i.e transformation matricies, 
+4. G2O - library that implements graph optimization, used for bundle adjustment etc., 
+5. Boost - boost.config for easy data reading 
+6. Pangolin - visualization library based on OpenGL, popular in SLAM, 
+7. DBoW/FBoW 
+8. FMT - logging library, 
+9. Matplot++
 
-## How to run 
+## How to run
+In visual_slam_cpp directory: 
+- With default parameters: ./run_SLAM 
+- With custom parameters: ./run_SLAM ~/dev/projects_cpp/VisualSlam/KITTY_dataset/sequences/07 
+
 
 ## Libraries that i used or are useful in SLAM project  
 ### C++ 
