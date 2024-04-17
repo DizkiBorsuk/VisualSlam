@@ -185,6 +185,11 @@ namespace mrVSLAM
         results.tracking_type = tracking_type; 
         results.num_of_features = number_of_points;
 
+        if(true)
+        {
+            plotPoses(trajectory, dataset->ground_truth_poses, 1); 
+        }
+
         calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6 , results); 
         calculate_time(loop_times, results);
         saveResults(results); 

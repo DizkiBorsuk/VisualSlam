@@ -80,19 +80,21 @@ namespace mrVSLAM
         std::shared_ptr<LocalMapping> local_mapping = nullptr; //!change to weak ptr? 
         std::shared_ptr<Camera> camera_right = nullptr, camera_left = nullptr; 
 
-        std::shared_ptr<Frame> current_keyframe = nullptr;
+        std::shared_ptr<Frame> current_keyframe = nullptr; ///< currently processed keyframe 
+        std::shared_ptr<Frame> loop_keyframe_candidate = nullptr; ///<  
+
         std::shared_ptr<Frame> prev_keyframe = nullptr; 
         std::shared_ptr<Frame> last_closed_keyframe = nullptr;  
-        std::shared_ptr<Frame> loop_keyframe = nullptr; // keyframe that is connected to current kf 
 
 
         std::mutex loop_closer_mutex; 
         std::thread loop_closer_thread; 
         std::atomic<bool> loop_closer_running; 
-        std::condition_variable map_updated; ///< informs loop closer module that there is new keyframe to be processed  
+        std::condition_variable new_kf_update; ///< informs loop closer module that there is new keyframe to be processed  
 
         DBoW3::Database bow_database; ///< database of keyframes or rather their BoW descriptions 
         DBoW3::Vocabulary vocabulary; 
+        
 
         cv::Ptr<cv::DescriptorMatcher> matcher; // matcher to match two keyframes features 
 

@@ -24,7 +24,7 @@ find_package(Pangolin REQUIRED)
 find_package(Sophus REQUIRED)
 find_package(g2o REQUIRED)
 find_package(DBoW3)
-# find_package(Matplot++ REQUIRED)
+find_package(Matplot++ REQUIRED)
 # find_package(Torch REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS}
@@ -42,7 +42,7 @@ set(THIRD_PARTY_LIBS
         g2o_core g2o_stuff g2o_types_sba g2o_types_slam3d g2o_solver_csparse g2o_csparse_extension
         pthread
         Eigen3::Eigen 
-        # Matplot++::matplot
+        Matplot++::matplot
         Sophus::Sophus
         )
 

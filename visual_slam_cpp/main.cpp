@@ -4,7 +4,7 @@
 int main(int argc, char* argv[]) 
 {
     std::string kitti_path = "/home/maciek/dev/projects_cpp/VisualSlam/KITTY_dataset/sequences/06"; 
-    bool use_loop_closer = false; 
+    bool use_loop_closer = true; 
     SLAM_TYPE slam_trackin_type = SLAM_TYPE::STEREO; 
     unsigned int n_points = 150; 
 

@@ -59,8 +59,6 @@ namespace mrVSLAM
             return false; 
             break;
         }
-
-        if(visualizer) { visualizer->addNewFrame(current_frame); } 
         
         prev_frame = current_frame; 
         return true;  
