@@ -71,7 +71,7 @@ namespace mrVSLAM
 
             if(bow_database.size() > 20)
             {
-                bow_database.query(current_bow_vector, similarity, 10); 
+                bow_database.query(current_bow_vector, similarity, 7); 
 
                 for (size_t s = 0; s < similarity.size(); s++)
                 {
@@ -88,8 +88,8 @@ namespace mrVSLAM
             }
 
             if(loop_candidate_ids.size() > 3) {
-                fmt::print(fg(fmt::color::green_yellow), "too many loop candidates \n"); 
-                continue;
+                fmt::print(fg(fmt::color::green_yellow), "(too) many loop candidates \n"); 
+                // continue;
             }
             
             int best_loop_candidate_id = loop_candidate_ids.at(0); 
@@ -101,8 +101,10 @@ namespace mrVSLAM
             }
             
             // if all checks are passed then match features of both 
+            fmt::print(fg(fmt::color::royal_blue), "kf {} is loop close candidate \n", best_loop_candidate_id); 
             loop_keyframe_candidate = map->getKyeframeById(best_loop_candidate_id); 
-            // matchKeyframes(loop_keyframe_candidate); 
+            
+            matchKeyframes(loop_keyframe_candidate); 
 
 
         }
@@ -125,14 +127,49 @@ namespace mrVSLAM
         //match keyframes 
         matcher->match(descriptors_current, descriptors_loop_candidate, matches); 
 
-        for(auto &match : matches)
+        double min_dist=10000, max_dist=0;
+        for (auto& match : matches )
         {
-
+            double dist = match.distance;
+            if ( dist < min_dist ) min_dist = dist;
+            if ( dist > max_dist ) max_dist = dist;
         }
 
+        unsigned int found_matches = 0; 
+        std::set<std::pair<int, int> > valid_mathces_ids; 
 
-        if(valid_matches.size() < 10)
+        for (std::size_t i = 0; i < matches.size(); i++ )
+        {
+            if(matches[i].distance <= std::max( 2*min_dist, 30.0 ))
+            {
+                int featId_loop_candidate = matches[i].queryIdx; 
+                int featId_current_kframe = matches[i].trainIdx; 
+
+                if(valid_mathces_ids.contains({featId_current_kframe, featId_loop_candidate})){
+                    continue;
+                }
+                valid_mathces_ids.insert({featId_current_kframe, featId_loop_candidate});              
+                found_matches++;                                                        
+            }
+        }
+
+        if(found_matches < 10) {
+            fmt::print(fg(fmt::color::red), "not enough matched features between keyframes \n"); 
             return false; 
+        }
+
+        fmt::print(fg(fmt::color::red), "loop  closer : number of valid features is = {} \n", found_matches); 
+
+        // ----- END of Matching Part ----- // 
+
+        // ----- Start of Pose correction pose  ----- // 
+        std::vector<cv::DMatch> matches_with_mappoints;
+        for(auto it = valid_mathces_ids.begin(); it != valid_mathces_ids.end(); )
+        {
+            int featId_current_kframe = (*it).first; 
+
+        } 
+
 
         return true; 
     }

@@ -164,7 +164,7 @@ namespace mrVSLAM
         return status; 
     }
 
-    void SLAM::outputSlamResult()
+    void SLAM::outputSlamResult(const bool plot)
     {
         fmt::print("###----------------------### \n");
         fmt::print(fg(fmt::color::green), "create and save slam output \n"); 
@@ -185,7 +185,7 @@ namespace mrVSLAM
         results.tracking_type = tracking_type; 
         results.num_of_features = number_of_points;
 
-        if(true)
+        if(plot)
         {
             plotPoses(trajectory, dataset->ground_truth_poses, 1); 
         }

@@ -70,7 +70,7 @@ namespace mrVSLAM
         /**
          * @brief get results of slam 
          */
-        void outputSlamResult(); 
+        void outputSlamResult(const bool plot = true); 
 
 
     private: 
