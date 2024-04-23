@@ -12,6 +12,9 @@
 #include "mrVSLAM/loop_closing.hpp" 
 #include "mrVSLAM/frame.hpp"
 #include "mrVSLAM/map.hpp"
+#include "mrVSLAM/mappoint.hpp"
+#include "mrVSLAM/camera.hpp"
+
 
 namespace mrVSLAM
 {
@@ -164,13 +167,54 @@ namespace mrVSLAM
 
         // ----- Start of Pose correction pose  ----- // 
         std::vector<cv::DMatch> matches_with_mappoints;
+        std::vector<cv::Point2f> current_2d_points; 
+        std::vector<cv::Point2f> loop_candidate_2d_points;
+        std::vector<cv::Point3f> loop_candidate_3d_points;
+
         for(auto it = valid_mathces_ids.begin(); it != valid_mathces_ids.end(); )
         {
             int featId_current_kframe = (*it).first; 
+            int featId_loop_candidate = (*it).second; 
 
+            auto map_point = loop_keyframe_candidate->features_on_left_img[featId_loop_candidate]->map_point.lock(); 
+            if(map_point) 
+            {
+                current_2d_points.emplace_back(current_keyframe->features_on_left_img[featId_current_kframe]->positionOnImg.pt); 
+                
+                Eigen::Vector3d position = map_point->getPointPosition(); 
+                loop_candidate_3d_points.emplace_back((position(0), position(1), position(2))); 
+                loop_candidate_2d_points.emplace_back(loop_keyframe_candidate->features_on_left_img[featId_loop_candidate]->positionOnImg.pt); 
+
+                // cv::DMatch valid_match(featId_current_kframe, featId_loop_candidate, 10); 
+                matches_with_mappoints.emplace_back(featId_current_kframe, featId_loop_candidate, 10); 
+                it++; 
+            } else {
+                it = valid_mathces_ids.erase(it); 
+            }
         } 
 
+        fmt::print("number of points after map checking ", loop_candidate_3d_points.size()); 
+        if(loop_candidate_3d_points.size() < 10){
+            return false; 
+        }
 
+        //* solve PnP 
+
+        cv::Mat rotation_vec, translation_vec, R, K;
+        cv::Mat dist_coeff; // imgs are rectified so this is empty 
+        cv::eigen2cv(camera_left->getK(), K); 
+
+        try{
+            cv::solvePnPRansac(loop_candidate_3d_points, current_2d_points, K, dist_coeff, 
+                     rotation_vec, translation_vec, false, 100, 5.991, 9.99, cv::noArray(), cv::SOLVEPNP_ITERATIVE); 
+        } catch(...){
+            fmt::print("smth wit ransac"); 
+        }
+        //convert rotation vector to matrix 
+        cv::Rodrigues(rotation_vec, R); 
+
+        Eigen::Matrix3d 
+        
         return true; 
     }
 
