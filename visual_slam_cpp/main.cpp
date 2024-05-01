@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     auto slam = std::make_shared<mrVSLAM::SLAM>(kitti_path, slam_trackin_type, use_loop_closer); 
 
     // run SLAM 
-    slam->setSlamParameters(DetectorType::GFTT, n_points, img_size); 
+    slam->setSlamParameters(DetectorType::GFTT, n_points, img_size, plot_results); 
     slam->initSLAM(); 
     slam->runSLAM(); 
     slam->outputSlamResult(plot_results); 
