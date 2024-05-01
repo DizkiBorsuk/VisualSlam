@@ -102,6 +102,18 @@ namespace mrVSLAM
             return allMappointsDictionary.size(); 
         }
 
+        void addMatchedKeyframes(std::shared_ptr<Frame> older_kf, std::shared_ptr<Frame> current_kf)
+        {
+            std::unique_lock<std::mutex> lock(map_mutex);
+            matched_keyframes.emplace_back(std::make_pair(older_kf, current_kf)); 
+        }
+
+        std::vector<std::pair<std::shared_ptr<Frame>, std::shared_ptr<Frame>>> getAllMatchedKeyframes()
+        {
+            std::unique_lock<std::mutex> lock(map_mutex);
+            return matched_keyframes; 
+        }
+
     private: 
         /**
          * @brief remove old (older than 10) keyframe and associated with it mappoints 
@@ -119,6 +131,8 @@ namespace mrVSLAM
         LandmarksType activeMappointsDictionary; ///< hash map that contains only map points in local map 
         KeyframesType allKeyframesDictionary; ///< hash map that contains all keyframe objects
         KeyframesType activeKeyframesDictionary; ///< hash map that contains only keyframes of local map
+
+        std::vector< std::pair< std::shared_ptr<Frame>, std::shared_ptr<Frame> >> matched_keyframes; 
 
         static constexpr int num_of_active_keyframes = 10; ///< size of local map (number of stored keyframes)
     }; 

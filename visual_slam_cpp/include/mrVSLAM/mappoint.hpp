@@ -63,10 +63,39 @@ namespace mrVSLAM
             observed_times++; 
         }
 
+        void addActiveObservation(std::shared_ptr<Feature> feature)
+        {   
+            std::unique_lock<std::mutex> lock(mappoint_mutex);
+            active_observations.emplace_back(feature); 
+            active_observed_times++; 
+        }
+        std::list<std::weak_ptr<Feature>> getActiveObservations()
+        {
+            std::unique_lock<std::mutex> lock(mappoint_mutex);
+            return active_observations; 
+        }
+
         std::list<std::weak_ptr<Feature>> getObservations()
         {
             std::unique_lock<std::mutex> lock(mappoint_mutex);
             return observations; 
+        }
+
+        /**
+         * @brief remove observation of a point from list of active observations  
+         * @param feature ptr to feature to be removed 
+         */
+        void removeActiveObservation(std::shared_ptr<Feature> feature)
+        {
+            std::unique_lock<std::mutex> lock(mappoint_mutex); 
+            for (auto iter = active_observations.begin(); iter != active_observations.end(); iter++) 
+            {
+                if (iter->lock() == feature) {
+                    active_observations.erase(iter);
+                    active_observed_times--;
+                    break;
+                }
+            } 
         }
 
         /**
@@ -78,8 +107,7 @@ namespace mrVSLAM
             std::unique_lock<std::mutex> lock(mappoint_mutex); 
             for (auto iter = observations.begin(); iter != observations.end(); iter++) 
             {
-                if (iter->lock() == feature) 
-                {
+                if (iter->lock() == feature) {
                     observations.erase(iter);
                     feature->map_point.reset();
                     observed_times--;
@@ -92,15 +120,15 @@ namespace mrVSLAM
         bool is_outlier = false;
         unsigned int id = 0; ///< map point id number 
         unsigned int observed_times = 0; ///< number of times that point was observed by camera 
-    
+        unsigned int active_observed_times = 0; ///< number of times that point was observed by camera in local map 
+
     private: 
 
         Eigen::Vector3d poinst_pos = Eigen::Vector3d::Zero(); ///< 3D position of point in space (x,y,z)
 
-        std::list<std::weak_ptr<Feature>> observations; ///< List of features - observation of point by camera
+        std::list<std::weak_ptr<Feature>> observations; ///< List of features/observations of point by camera
+        std::list<std::weak_ptr<Feature>> active_observations; //< List of features/observations of point by camera in local map 
 
         std::mutex mappoint_mutex; 
-
-
     }; 
 } //! end of namespace 

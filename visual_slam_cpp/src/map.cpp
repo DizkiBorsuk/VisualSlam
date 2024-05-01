@@ -30,6 +30,13 @@ namespace mrVSLAM
                 activeKeyframesDictionary[frame->kf_id] = frame;
             }
         }
+
+        for(auto &feature : frame->features_on_left_img){
+            auto mp = feature->map_point.lock(); 
+            if(mp) {
+                mp->addActiveObservation(feature); 
+            }
+        }
         
         if (activeKeyframesDictionary.size() > this->num_of_active_keyframes)
         {
@@ -85,13 +92,11 @@ namespace mrVSLAM
 
             // get distance of n keyframe from current keyframe
             auto dis = (kf.second->getPose() * Twc).log().norm();  
-            if (dis > max_dis) 
-            {
+            if (dis > max_dis) {
                 max_dis = dis;
                 max_kf_id = kf.first;
             }
-            if (dis < min_dis) 
-            {
+            if (dis < min_dis) {
                 min_dis = dis;
                 min_kf_id = kf.first;
             }
@@ -115,7 +120,7 @@ namespace mrVSLAM
             auto temp_mappoint = feature->map_point.lock();
             if (temp_mappoint) 
             {
-                temp_mappoint->removeObservation(feature);
+                temp_mappoint->removeActiveObservation(feature);
             }
         }
 
@@ -128,14 +133,14 @@ namespace mrVSLAM
             auto temp_mappoint = feature->map_point.lock();
             if (temp_mappoint) 
             {
-                temp_mappoint->removeObservation(feature);
+                temp_mappoint->removeActiveObservation(feature);
             }
         }
 
         int landmarks_removed = 0;
         for (auto iter = activeMappointsDictionary.begin(); iter != activeMappointsDictionary.end();) 
         {
-            if (iter->second->observed_times == 0)
+            if (iter->second->active_observed_times == 0)
             {
                 iter = activeMappointsDictionary.erase(iter);
                 landmarks_removed++;
