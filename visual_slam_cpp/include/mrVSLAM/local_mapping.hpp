@@ -34,11 +34,9 @@ namespace mrVSLAM
          * @brief Construct a new Local Mapping object
          */
         LocalMapping(); 
-        void setLocalMapping(std::shared_ptr<Map> map_ptr, std::shared_ptr<LoopCloser> loop_closer_ptr, 
-                             std::shared_ptr<Camera> l_cam_ptr, std::shared_ptr<Camera> r_cam_ptr)
+        void setLocalMapping(std::shared_ptr<Map> map_ptr, std::shared_ptr<Camera> l_cam_ptr, std::shared_ptr<Camera> r_cam_ptr)
         {
             map = map_ptr; 
-            loop_closer = loop_closer_ptr; 
             camera_left = l_cam_ptr; 
             camera_right = r_cam_ptr; 
         }
@@ -76,7 +74,6 @@ namespace mrVSLAM
 
         std::shared_ptr<Camera> camera_left = nullptr, camera_right = nullptr; 
         std::shared_ptr<Map> map = nullptr; 
-        std::shared_ptr<LoopCloser> loop_closer = nullptr; 
         
         std::thread local_mapping_thread; 
         std::atomic<bool> localMappingRunning; 

@@ -51,7 +51,7 @@ namespace mrVSLAM
         // create map, local mapping and visualizer objects 
         local_mapping = std::make_shared<LocalMapping>(); 
         map = std::make_shared<Map>(); 
-        visualizer = std::make_shared<Visualizer>(false);
+        visualizer = std::make_shared<Visualizer>(false, this->show_cam_img);
 
         // create camera objects
         left_camera = std::make_shared<Camera>(dataset->P0, img_size_opt);
@@ -75,7 +75,7 @@ namespace mrVSLAM
                 break; 
         }
 
-        local_mapping->setLocalMapping(map, loop_closer, left_camera, right_camera); 
+        local_mapping->setLocalMapping(map, left_camera, right_camera); 
         visualizer->setupVisualizer(map); 
 
         fmt::print(fg(fmt::color::green), "end of slam initialization \n"); 
@@ -164,7 +164,7 @@ namespace mrVSLAM
         return status; 
     }
 
-    void SLAM::outputSlamResult(const bool plot)
+    void SLAM:: outputSlamResult(const bool plot)
     {
         fmt::print("###----------------------### \n");
         fmt::print(fg(fmt::color::green), "create and save slam output \n"); 
@@ -188,6 +188,14 @@ namespace mrVSLAM
         if(plot)
         {
             plotPoses(trajectory, dataset->ground_truth_poses, 1); 
+            
+            if(this->use_loop_closing)
+            {
+                auto matched_keyframes = map->getAllMatchedKeyframes(); 
+                fmt::print("Loop Closing module found {} matching keyframe pairs", matched_keyframes.size()); 
+                plotLoopClosingMatches(matched_keyframes, trajectory, 1); 
+            }
+
         }
 
         calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6 , results); 

@@ -11,6 +11,7 @@
 
 #pragma once 
 #include "mrVSLAM/common_includes.hpp" 
+#include "mrVSLAM/graph_structures.hpp"
 #include "DBoW3/DBoW3.h"
 
 namespace mrVSLAM
@@ -67,13 +68,15 @@ namespace mrVSLAM
          * @return true 
          * @return false 
          */
-        bool matchKeyframes(std::shared_ptr<Frame> loop_candidate_kf); 
+        bool matchKeyframesAndCorrectPose(); 
 
         /**
          * @brief 
          * 
          */
-        void loopOptimization(); 
+        int optimizePose(Sophus::SE3d& corrected_pose, std::set<std::pair<int, int>> valid_frame_matches); 
+
+        void optimizeLoop(); 
 
     private:
         std::shared_ptr<Map> map = nullptr; 
@@ -84,7 +87,7 @@ namespace mrVSLAM
         std::shared_ptr<Frame> loop_keyframe_candidate = nullptr; ///<  
 
         std::shared_ptr<Frame> prev_keyframe = nullptr; 
-        std::shared_ptr<Frame> last_closed_keyframe = nullptr;  
+        std::shared_ptr<Frame> last_corected_keyframe = nullptr;  
 
 
         std::mutex loop_closer_mutex; 
@@ -95,8 +98,7 @@ namespace mrVSLAM
         DBoW3::Database bow_database; ///< database of keyframes or rather their BoW descriptions 
         DBoW3::Vocabulary vocabulary; 
         
-
-        cv::Ptr<cv::DescriptorMatcher> matcher; // matcher to match two keyframes features 
+        cv::Ptr<cv::DescriptorMatcher> matcher; ///< matcher to match two keyframes features 
 
         std::set<std::pair<int, int>> valid_matches; 
 

@@ -12,6 +12,7 @@
 #pragma once 
 #include "mrVSLAM/common_includes.hpp" 
 #include <matplot/matplot.h>
+#include "mrVSLAM/frame.hpp"
 
 namespace mrVSLAM
 {   
@@ -214,9 +215,50 @@ namespace mrVSLAM
         fig->height(fig->height()*1.3);
         fig->color("white"); 
 
-        matplot::plot(x, y, "r--")->line_width(2);
+        matplot::plot(x, y, "b")->line_width(2);
         matplot::xlabel("x [m]");
         matplot::ylabel("y [m]");  
+        matplot::show();
+    }
+
+    inline void plotLoopClosingMatches(std::vector<std::pair<std::shared_ptr<Frame>, std::shared_ptr<Frame>>> matched_keyframes, 
+                                       std::vector<Eigen::Matrix<double, 3,4>> &poses,  float resize_opt)
+    {
+        std::vector<double> x, y; 
+ 
+        for(std::size_t i = 0; i < poses.size(); i++)
+        {
+            x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);  
+            y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+        }
+
+        // set figure size anf color 
+        auto fig = matplot::figure();  
+        fig->width(fig->width()*1.3); 
+        fig->height(fig->height()*1.3);
+        fig->color("white"); 
+
+        matplot::plot(x, y, "k")->line_width(2);
+        matplot::xlabel("x [m]");
+        matplot::ylabel("y [m]");  
+        matplot::hold(matplot::on); 
+        
+        for (auto& kf_pair : matched_keyframes)
+        {
+            auto older_kf_pose = kf_pair.first->getPose(); 
+            auto newer_kf_pose = kf_pair.second->getPose(); 
+            std::string kf_info = std::to_string(kf_pair.first->kf_id) + " + " + std::to_string(kf_pair.second->kf_id); 
+
+            std::vector<double> x , y; 
+            x.emplace_back(older_kf_pose.matrix3x4().coeff(0,3)*resize_opt); 
+            x.emplace_back(newer_kf_pose.matrix3x4().coeff(0,3)*resize_opt); 
+            y.emplace_back(older_kf_pose.matrix3x4().coeff(2,3)*resize_opt); 
+            y.emplace_back(newer_kf_pose.matrix3x4().coeff(2,3)*resize_opt); 
+
+            matplot::plot(x, y, "--o"); 
+            matplot::text(x[0], y[0], kf_info); 
+        }
+        
         matplot::show();
     }
 
