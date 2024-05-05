@@ -66,7 +66,7 @@ namespace mrVSLAM
     private: 
 
         void insertKeyframe(); 
-        bool monoInitialize(); 
+        bool monoInitialization(); 
         bool createInitialMap(); 
 
         bool track(); 
@@ -85,7 +85,10 @@ namespace mrVSLAM
 
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Frame> prev_frame = nullptr; 
+
+        std::shared_ptr<Frame> reference_kf = nullptr; 
         std::shared_ptr<Frame> current_kf = nullptr; 
+        std::shared_ptr<Frame> prev_kf = nullptr; 
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
@@ -96,7 +99,7 @@ namespace mrVSLAM
         unsigned int tracking_inliers = 0; 
         unsigned int initialization_counter = 0; 
 
-        unsigned int num_features = 150; 
+        unsigned int num_features = 300; 
         static constexpr int num_features_init = 50; 
         static constexpr int num_features_tracking_bad_ = 20; 
         static constexpr int num_features_needed_for_keyframe = 80;

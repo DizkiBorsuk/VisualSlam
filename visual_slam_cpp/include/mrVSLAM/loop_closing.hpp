@@ -31,7 +31,7 @@ namespace mrVSLAM
          * @brief Construct a new Loop Closer object
          * @param vocab_path - path to Bag of words vocabulary 
          */
-        LoopCloser(std::string vocab_path); 
+        LoopCloser(std::string vocab_path, bool create_new_descriptors); 
         
         /**
          * @brief Set the Loop Closer object
@@ -79,8 +79,11 @@ namespace mrVSLAM
         void optimizeLoop(); 
 
     private:
+        bool create_descriptors = false; 
+        int loop_closing_counter = 0; 
+
         std::shared_ptr<Map> map = nullptr; 
-        std::shared_ptr<LocalMapping> local_mapping = nullptr; //!change to weak ptr? 
+        std::shared_ptr<LocalMapping> local_mapping = nullptr; 
         std::shared_ptr<Camera> camera_right = nullptr, camera_left = nullptr; 
 
         std::shared_ptr<Frame> current_keyframe = nullptr; ///< currently processed keyframe 
@@ -99,6 +102,7 @@ namespace mrVSLAM
         DBoW3::Vocabulary vocabulary; 
         
         cv::Ptr<cv::DescriptorMatcher> matcher; ///< matcher to match two keyframes features 
+        cv::Ptr<cv::DescriptorExtractor> sift_detector; 
 
         std::set<std::pair<int, int>> valid_matches; 
 

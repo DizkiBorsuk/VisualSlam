@@ -1,0 +1,85 @@
+NEW TEST:, sequence number: ,6
+Tracking type, 0
+Detector type, 0
+Number of detected features, 400
+Loop closing?, 0
+
+Number of generated keyframes,125
+total mean error: ,3.28136,0.266156
+mean error:, x , y , z 
+,3.20055,4.30063,2.34289
+max error:, x, y, z 
+,6.42646,8.84473,3.88585
+mean loop time: , 10.4705
+max loop time: , 41
+min loop time: , 7
+END OF TEST RESULTS 
+
+NEW TEST:, sequence number: ,6
+Tracking type, 0
+Detector type, 0
+Number of detected features, 400
+Loop closing?, 0
+
+Number of generated keyframes,125
+total mean error: ,2.66013,0.215767
+mean error:, x , y , z 
+,1.86832,4.29723,1.81483
+max error:, x, y, z 
+,3.30476,8.43628,3.64509
+mean loop time: , 10.5686
+max loop time: , 162
+min loop time: , 7
+END OF TEST RESULTS 
+
+NEW TEST:, sequence number: ,6
+Tracking type, 0
+Detector type, 0
+Number of detected features, 400
+Loop closing?, 0
+
+Number of generated keyframes,124
+total mean error: ,2.65569,0.215407
+mean error:, x , y , z 
+,2.20108,3.51411,2.25189
+max error:, x, y, z 
+,3.94261,6.71964,3.46516
+mean loop time: , 10.6921
+max loop time: , 205
+min loop time: , 7
+END OF TEST RESULTS 
+
+NEW TEST:, sequence number: ,6
+Tracking type, 0
+Detector type, 0
+Number of detected features, 400
+Loop closing?, 0
+
+Number of generated keyframes,126
+total mean error: ,2.85707,0.231741
+mean error:, x , y , z 
+,2.02473,3.76171,2.78477
+max error:, x, y, z 
+,4.79884,6.65189,4.34134
+mean loop time: , 10.7039
+max loop time: , 97
+min loop time: , 7
+END OF TEST RESULTS 
+
+NEW TEST:, sequence number: ,6
+Tracking type, 0
+Detector type, 0
+Number of detected features, 400
+Loop closing?, 0
+
+Number of generated keyframes,127
+total mean error: ,2.47604,0.200836
+mean error:, x , y , z 
+,1.93254,3.8034,1.69219
+max error:, x, y, z 
+,3.01562,7.52917,3.36992
+mean loop time: , 10.7584
+max loop time: , 91
+min loop time: , 7
+END OF TEST RESULTS 
+

@@ -245,8 +245,8 @@ namespace mrVSLAM
         
         for (auto& kf_pair : matched_keyframes)
         {
-            auto older_kf_pose = kf_pair.first->getPose(); 
-            auto newer_kf_pose = kf_pair.second->getPose(); 
+            auto older_kf_pose = kf_pair.first->getPose().inverse(); 
+            auto newer_kf_pose = kf_pair.second->getPose().inverse(); 
             std::string kf_info = std::to_string(kf_pair.first->kf_id) + " + " + std::to_string(kf_pair.second->kf_id); 
 
             std::vector<double> x , y; 
@@ -255,7 +255,7 @@ namespace mrVSLAM
             y.emplace_back(older_kf_pose.matrix3x4().coeff(2,3)*resize_opt); 
             y.emplace_back(newer_kf_pose.matrix3x4().coeff(2,3)*resize_opt); 
 
-            matplot::plot(x, y, "--o"); 
+            matplot::plot(x, y, "--o")->line_width(1.5); 
             matplot::text(x[0], y[0], kf_info); 
         }
         

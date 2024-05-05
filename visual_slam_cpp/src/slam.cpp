@@ -59,7 +59,7 @@ namespace mrVSLAM
         
         // create and set loop closer object if used  
         if(use_loop_closing) {
-            loop_closer = std::make_shared<LoopCloser>(vocab_path); 
+            loop_closer = std::make_shared<LoopCloser>(vocab_path, false); 
             loop_closer->setLoopCloser(map, local_mapping, left_camera, right_camera); 
         }
 
@@ -192,7 +192,7 @@ namespace mrVSLAM
             if(this->use_loop_closing)
             {
                 auto matched_keyframes = map->getAllMatchedKeyframes(); 
-                fmt::print("Loop Closing module found {} matching keyframe pairs", matched_keyframes.size()); 
+                fmt::print("Loop Closing module found {} matching keyframe pairs \n", matched_keyframes.size()); 
                 plotLoopClosingMatches(matched_keyframes, trajectory, 1); 
             }
 

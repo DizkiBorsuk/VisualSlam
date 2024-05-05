@@ -218,7 +218,7 @@ namespace mrVSLAM
             {
                 // project point into new img
                 auto mp = kp->map_point.lock();
-                auto px = camera_left->world2pixel(mp->getPointPosition(), current_frame->getPose()); //TODO getPose or getRelativePose 
+                auto px = camera_left->world2pixel(mp->getPointPosition(), current_frame->getPose()); 
                 kps_last.emplace_back(kp->positionOnImg.pt);
                 kps_current.emplace_back(px[0], px[1]); //automatically creates cv::Point2f objects 
             } else {

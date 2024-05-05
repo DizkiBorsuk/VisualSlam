@@ -11,6 +11,7 @@
 #include "mrVSLAM/mono_tracking.hpp" 
 #include "mrVSLAM/frame.hpp"
 #include "mrVSLAM/visualizer.hpp"
+#include "mrVSLAM/camera.hpp"
 
 namespace mrVSLAM
 {   
@@ -50,7 +51,10 @@ namespace mrVSLAM
         switch (tracking_status)
         {
         case TrackingStatus::INITING:
-            monoInitialize(); 
+
+            if(monoInitialization()){
+                this->tracking_status = TrackingStatus::TRACKING; 
+            }
             break;
         case TrackingStatus::TRACKING:
             track(); 
@@ -70,8 +74,72 @@ namespace mrVSLAM
     }
 
     
-    bool MonoTracking::monoInitialize()
+    bool MonoTracking::monoInitialization()
     {
+        //set first frame as a reference frame and detect features 
+        if(!reference_kf){
+            this->reference_kf = current_frame; 
+
+                    //detect features 
+            if(this->use_descriptors)
+                extractFeatures(); 
+            else 
+                detectFeatures(); 
+            
+            //if there is only one frame than can't do anything more 
+            return false; 
+        }
+
+
+        std::vector<cv::Point2f> kps_reference, kps_current; 
+
+        for(auto& ref_features : reference_kf->features_on_left_img){
+            kps_reference.emplace_back(ref_features->positionOnImg.pt); 
+        }
+
+        for(auto& prev_features : prev_frame->features_on_left_img){
+            kps_current.emplace_back(prev_features->positionOnImg.pt); 
+        }
+
+        std::vector<uchar> status;
+        cv::Mat error;
+        cv::calcOpticalFlowPyrLK( reference_kf->left_img, current_frame->left_img, kps_reference,
+                                  kps_current, status, error, cv::Size(21, 21), 3,
+                                  cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01), cv::OPTFLOW_USE_INITIAL_FLOW);
+
+        int num_good_pts = 0; 
+        for (size_t i = 0; i < status.size(); ++i) 
+        {
+            if (status[i]) {
+                cv::KeyPoint kp(kps_current[i], 7);
+                auto new_feature = std::make_shared<Feature>(current_frame, kp, false); // false = is on right img 
+                current_frame->features_on_left_img.emplace_back(new_feature);
+                num_good_pts++;
+            } else {
+                current_frame->features_on_left_img.emplace_back(nullptr);
+            }
+        }
+
+
+        if(std::abs(int(reference_kf->id) - int(current_frame->id)) > 5) 
+        {
+            std::vector<cv::Point2f> current_good_points, reference_good_points; 
+            assert(current_frame->features_on_left_img.size() == reference_kf->features_on_left_img.size()); 
+            for(size_t i = 0; i < current_frame->features_on_left_img.size(); i++)
+            {
+                if(current_frame->features_on_left_img[i])
+                {
+                    current_good_points.emplace_back(current_frame->features_on_left_img[i]->positionOnImg.pt); 
+                    reference_good_points.emplace_back(reference_kf->features_on_left_img[i]->positionOnImg.pt); 
+                }
+            }
+
+            cv::Mat K; 
+            cv::eigen2cv(camera_left->getK(), K); 
+            auto essentialMatrix = cv::findEssentialMat(current_good_points, reference_good_points, K, cv::RANSAC, 0.99, 1.0, 100); 
+        }
+
+
         return false; 
     }
 

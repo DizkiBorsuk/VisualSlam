@@ -87,32 +87,15 @@ namespace mrVSLAM
         return bow_vector; 
     }
 
-
-    // /**
-    //  * @brief Construct a new Key Frame:: Key Frame object
-    //  * @details
-    //  * @param base_frame 
-    //  */
-    // KeyFrame::KeyFrame(std::shared_ptr<Frame> base_frame)
-    // {
-    //     static unsigned int factory_kf_id = 0; 
-    //     kf_id = factory_kf_id++; 
-
-    //     this->id = base_frame->id; 
-    //     this->left_img = base_frame->left_img; 
-    //     this->right_img = base_frame->right_img; 
-    //     this->features_on_left_img = base_frame->features_on_left_img; 
-    //     this->setPose(base_frame->getPose()); 
-
-    //     for(size_t i = 0; i < base_frame->features_on_left_img.size(); i++)
-    //     {
-    //         auto mp = base_frame->features_on_left_img[i]->map_point.lock();
-    //         if(mp != nullptr)
-    //         {
-    //             features_on_left_img[i]->map_point = mp;
-                
-    //         }
-    //     }
-    // }
+    std::vector<cv::KeyPoint> Frame::getFrameKeypoints()
+    {
+        std::unique_lock<std::mutex> lock(frame_mutex);
+        std::vector<cv::KeyPoint> detected_keypoints (features_on_left_img.size()); 
+        for (size_t i = 0; i < features_on_left_img.size(); i++)
+        {
+            detected_keypoints.at(i) = features_on_left_img.at(i)->positionOnImg; 
+        }
+        return detected_keypoints; 
+    }
 
 } //! end of namespace 

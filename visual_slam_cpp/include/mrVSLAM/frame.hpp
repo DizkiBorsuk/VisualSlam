@@ -53,6 +53,7 @@ namespace mrVSLAM
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         
+        bool used_in_loop_closing = false; 
         unsigned int id = 0; 
         unsigned int kf_id = 0; 
 
@@ -80,6 +81,7 @@ namespace mrVSLAM
         void setBoW_Vector(DBoW3::BowVector &bow_vec); 
         DBoW3::BowVector getBoW_Vector(); 
 
+        std::vector<cv::KeyPoint> getFrameKeypoints(); 
 
     private:     
         //? sophus SE3 objects are initialize by default as identity matrix 
