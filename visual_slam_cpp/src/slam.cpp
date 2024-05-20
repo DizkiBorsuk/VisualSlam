@@ -59,7 +59,7 @@ namespace mrVSLAM
         
         // create and set loop closer object if used  
         if(use_loop_closing) {
-            loop_closer = std::make_shared<LoopCloser>(vocab_path, false); 
+            loop_closer = std::make_shared<LoopCloser>(vocab_path, true); 
             loop_closer->setLoopCloser(map, local_mapping, left_camera, right_camera); 
         }
 
@@ -214,19 +214,16 @@ namespace mrVSLAM
             std::exit(1); 
         }
 
-        outputFile << "NEW TEST:, sequence number: ," << results.sequence << "\n" ;
+        outputFile << "NEW TEST:, sequence number: ," << results.sequence << ", \n" ;
         outputFile << "Tracking type, " << to_underlying(results.tracking_type)  << "\n"; 
         outputFile << "Detector type, " << to_underlying(results.detector) << "\n"; 
         outputFile << "Number of detected features, " << results.num_of_features << "\n";  
         outputFile << "Loop closing?, " << use_loop_closing << "\n"; 
-        outputFile << "\n"; 
         
         outputFile << "Number of generated keyframes," << map->getNumberOfKeyframes() << "\n";  
         outputFile << "total mean error: ," << results.mean_error << "," << results.percent_error << "\n"; 
-        outputFile << "mean error:, x , y , z \n"; 
-        outputFile << "," << results.mean_error_x << "," << results.mean_error_y << "," << results.mean_error_z << "\n"; 
-        outputFile << "max error:, x, y, z \n"; 
-        outputFile << "," << results.max_error_x << "," << results.max_error_y << "," << results.max_error_z << "\n"; 
+        outputFile << "mean error:," << results.mean_error_x << "," << results.mean_error_y << "," << results.mean_error_z << "\n"; 
+        outputFile << "max error:," << results.max_error_x << "," << results.max_error_y << "," << results.max_error_z << "\n"; 
         outputFile << "mean loop time: , " << results.mean_time << "\n"; 
         outputFile << "max loop time: , " << results.max_time << "\n";
         outputFile << "min loop time: , " << results.min_time << "\n"; 

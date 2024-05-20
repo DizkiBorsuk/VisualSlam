@@ -63,7 +63,7 @@ namespace mrVSLAM
             for(auto &feature : current_keyframe->features_on_left_img) {
                 descriptors.push_back(feature->descriptor); 
             }
-            
+
             // create BoW vector for current keyframe and add to database and current frame object 
             DBoW3::BowVector current_bow_vector; 
             vocabulary.transform(descriptors, current_bow_vector); 
@@ -145,16 +145,33 @@ namespace mrVSLAM
 
         std::cout << "loop closer : matching \n"; 
         // get features from both keyframes 
-        for(size_t i=0; i < current_keyframe->features_on_left_img.size(); i++) {
-            descriptors_current.push_back(current_keyframe->features_on_left_img.at(i)->descriptor); 
-        }
 
-        for(size_t i=0; i < this->loop_keyframe_candidate->features_on_left_img.size(); i++) {
-            descriptors_loop_candidate.push_back(this->loop_keyframe_candidate->features_on_left_img.at(i)->descriptor); 
+        if(create_descriptors){
+            std::vector<cv::KeyPoint> keypoints_current, keypoints_candidate; 
+            for(auto &feature : current_keyframe->features_on_left_img){
+                keypoints_current.emplace_back(feature->positionOnImg); 
+            }
+
+            sift_detector->compute(current_keyframe->left_img, keypoints_current, descriptors_current); 
+
+            for(auto &feature : loop_keyframe_candidate->features_on_left_img){
+                keypoints_candidate.emplace_back(feature->positionOnImg); 
+            }
+
+            sift_detector->compute(loop_keyframe_candidate->left_img, keypoints_candidate, descriptors_loop_candidate); 
+
+        } else {
+            for(size_t i=0; i < current_keyframe->features_on_left_img.size(); i++) {
+                descriptors_current.push_back(current_keyframe->features_on_left_img.at(i)->descriptor); 
+            }
+
+            for(size_t i=0; i < this->loop_keyframe_candidate->features_on_left_img.size(); i++) {
+                descriptors_loop_candidate.push_back(this->loop_keyframe_candidate->features_on_left_img.at(i)->descriptor); 
+            }
+
+            descriptors_current.convertTo(descriptors_current, CV_32F); 
+            descriptors_loop_candidate.convertTo(descriptors_loop_candidate, CV_32F); 
         }
-        
-        descriptors_current.convertTo(descriptors_current, CV_32F); 
-        descriptors_loop_candidate.convertTo(descriptors_loop_candidate, CV_32F); 
 
         fmt::print("loop closer : current frame num of descriptors = {}, second frame num of descriptors = {} \n", current_keyframe->features_on_left_img.size(), loop_keyframe_candidate->features_on_left_img.size()); 
 
@@ -224,7 +241,7 @@ namespace mrVSLAM
             loop_closing_counter++;
         }
 
-        if(found_matches < 30) {
+        if(found_matches < 50) {
             fmt::print(fg(fmt::color::red), "not enough matched features between keyframes \n"); 
             return false; 
         }

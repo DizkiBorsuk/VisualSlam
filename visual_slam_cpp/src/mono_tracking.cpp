@@ -134,13 +134,31 @@ namespace mrVSLAM
                 }
             }
 
-            cv::Mat K; 
+            cv::Mat K, R, t; 
             cv::eigen2cv(camera_left->getK(), K); 
-            auto essentialMatrix = cv::findEssentialMat(current_good_points, reference_good_points, K, cv::RANSAC, 0.99, 1.0, 100); 
+            auto essentialMatrix = cv::findEssentialMat( reference_good_points, current_good_points, K, cv::RANSAC, 0.99, 1.0, 100); 
+            cv::recoverPose(essentialMatrix, reference_good_points, current_good_points, K, R, t, cv::noArray()); 
+
+            Eigen::Matrix3d temp_R; 
+            Eigen::Vector3d temp_t; 
+            cv::cv2eigen(R, temp_R); 
+            cv::cv2eigen(t, temp_t);
+
+            Sophus::SE3d temp_pose(temp_R, temp_t); 
+
+            current_frame->setPose(temp_pose); 
+
+            // createInitialMap(); 
+            return true; 
         }
 
 
         return false; 
+    }
+
+    bool MonoTracking::createInitialMap()
+    {
+        return true; 
     }
 
     bool MonoTracking::track()
