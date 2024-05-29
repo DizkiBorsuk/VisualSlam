@@ -13,6 +13,7 @@
 #include "mrVSLAM/frame.hpp" 
 #include <boost/config.hpp>
 #include <boost/format.hpp>
+#include <netcdf>
 
 namespace mrVSLAM
 {
@@ -201,6 +202,7 @@ namespace mrVSLAM
         calculate_error(trajectory, dataset->ground_truth_poses, img_size_opt, 6 , results); 
         calculate_time(loop_times, results);
         saveResults(results); 
+        saveTrajectoryAndMap(); 
     }
 
     void SLAM::saveResults(const ResultStruct &results)
@@ -214,30 +216,69 @@ namespace mrVSLAM
             std::exit(1); 
         }
 
-        outputFile << "NEW TEST:, sequence number: ," << results.sequence << ", \n" ;
-        outputFile << "Tracking type, " << to_underlying(results.tracking_type)  << "\n"; 
-        outputFile << "Detector type, " << to_underlying(results.detector) << "\n"; 
+        outputFile << "NEW TEST, NEW TEST \n"; 
+        outputFile << "sequence number: ,"  << results.sequence << "\n" ;
+        outputFile << "Tracking type, "     << to_underlying(results.tracking_type)  << "\n"; 
+        outputFile << "Detector type, "     << to_underlying(results.detector) << "\n"; 
+        outputFile << "Loop closing?, "     << use_loop_closing << "\n"; 
         outputFile << "Number of detected features, " << results.num_of_features << "\n";  
-        outputFile << "Loop closing?, " << use_loop_closing << "\n"; 
         
         outputFile << "Number of generated keyframes," << map->getNumberOfKeyframes() << "\n";  
-        outputFile << "total mean error: ," << results.mean_error << "," << results.percent_error << "\n"; 
-        outputFile << "mean error:," << results.mean_error_x << "," << results.mean_error_y << "," << results.mean_error_z << "\n"; 
-        outputFile << "max error:," << results.max_error_x << "," << results.max_error_y << "," << results.max_error_z << "\n"; 
-        outputFile << "mean loop time: , " << results.mean_time << "\n"; 
-        outputFile << "max loop time: , " << results.max_time << "\n";
-        outputFile << "min loop time: , " << results.min_time << "\n"; 
+        outputFile << "total mean error:,"      << results.mean_error << "\n";  
+        outputFile << "total mean error %:,"    << results.percent_error << "\n"; 
+        outputFile << "mean error x:,"          << results.mean_error_x << "\n"; 
+        outputFile << "mean error y:,"          << results.mean_error_y << "\n";
+        outputFile << "mean error z:,"          << results.mean_error_z << "\n";
+        outputFile << "max error x:,"           << results.max_error_x << "\n";  
+        outputFile << "max error y:,"           << results.max_error_y << "\n"; 
+        outputFile << "max error y:,"           << results.max_error_z << "\n"; 
+        outputFile << "mean loop time:, "       << results.mean_time << "\n"; 
+        outputFile << "max loop time:, "        << results.max_time << "\n";
+        outputFile << "min loop time:, "        << results.min_time << "\n"; 
 
-
-        outputFile << "END OF TEST RESULTS \n"; 
+        outputFile << "END OF TEST, END OF TEST RESULTS  \n"; 
         outputFile << "\n"; 
-
         outputFile.close(); 
     }
 
-    void saveTrajectoryAndMap()
+    void SLAM::saveTrajectoryAndMap()
     {
+        std::string filename = "test_no.nc"; 
+        netCDF::NcFile mapFile(filename, netCDF::NcFile::replace); 
         
+        constexpr int matrix_width = 4; // num of columns 
+        constexpr int matrix_height = 4; //num of rows 
+        int num_of_frames = map->getNumberOfKeyframes(); \
+
+        float output_poses[num_of_frames][matrix_height][matrix_width]; 
+
+        for (size_t t = 0; t < num_of_frames; t++) {
+            for (size_t i_r = 0; i_r < matrix_height; i_r++) {
+                for (size_t i_c = 0; i_c < matrix_width; i_c++) {
+
+                    output_poses[t][i_r][i_c] = 0.0; 
+                }    
+            }
+        }
+        
+        //create dimmensions 
+        auto matrix_width_dim   = mapFile.addDim("matrix_width"  , matrix_width); 
+        auto matrix_height_dim  = mapFile.addDim("matrix_height" , matrix_height); 
+        auto time_dim           = mapFile.addDim("time", num_of_frames); //TODO maybe change to poses 
+
+        //create variable 
+        auto pose_matricies = mapFile.addVar("pose_matricies_T", netCDF::ncFloat ,{time_dim, matrix_height_dim, matrix_width_dim}); 
+
+        try
+        {
+            pose_matricies.putVar(output_poses); 
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        fmt::print("saved map"); 
     }
 
 } //! end of namespace 

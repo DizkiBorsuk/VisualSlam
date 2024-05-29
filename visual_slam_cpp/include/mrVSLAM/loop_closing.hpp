@@ -74,13 +74,15 @@ namespace mrVSLAM
          * @brief 
          * 
          */
-        int optimizePose(Sophus::SE3d& corrected_pose, std::set<std::pair<int, int>> valid_frame_matches); 
+        int optimizePose(Sophus::SE3d& corrected_pose); 
 
         void optimizeLoop(); 
 
     private:
         bool create_descriptors = false; 
         int loop_closing_counter = 0; 
+
+        Sophus::SE3d corrected_kf_pose; 
 
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<LocalMapping> local_mapping = nullptr; 

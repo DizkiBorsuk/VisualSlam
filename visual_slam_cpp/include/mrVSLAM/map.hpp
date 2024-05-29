@@ -114,6 +114,7 @@ namespace mrVSLAM
             return matched_keyframes; 
         }
 
+        void removeMapPoint(std::shared_ptr<MapPoint> mappoint); 
     private: 
         /**
          * @brief remove old (older than 10) keyframe and associated with it mappoints 

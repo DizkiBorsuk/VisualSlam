@@ -11,4 +11,4 @@ add_library(mrVSLAM SHARED
                 read_dataset.cpp 
         )
 
-target_link_libraries(mrVSLAM ${THIRD_PARTY_LIBS})
+target_link_libraries(mrVSLAM PUBLIC ${THIRD_PARTY_LIBS})

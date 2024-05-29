@@ -332,7 +332,7 @@ namespace mrVSLAM
             }
         }
 
-        std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/" << features.size() - cnt_outlier << "\n";
+        // std::cout  << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/" << features.size() - cnt_outlier << "\n";
         // Set pose and outlier
         current_frame->setPose(vertex_pose->estimate());
         // fmt::print("Estimated pose = {} \n", current_frame->getPose().matrix()); 

@@ -151,5 +151,13 @@ namespace mrVSLAM
         fmt::print(fg(fmt::color::yellow), "Removed {} old mappoints from local map \n", landmarks_removed);
     }
     
+    void Map::removeMapPoint(std::shared_ptr<MapPoint> mappoint)
+    {
+        std::unique_lock<std::mutex> lock(map_mutex); 
+        
+        auto id = mappoint->id; 
+        allMappointsDictionary.erase(id); 
+        activeMappointsDictionary.erase(id);
+    }
 
 } //! end of namespace
