@@ -11,6 +11,7 @@
 #include "mrVSLAM/slam.hpp" 
 #include "mrVSLAM/tools.hpp"
 #include "mrVSLAM/frame.hpp" 
+#include "mrVSLAM/mappoint.hpp"
 #include <boost/config.hpp>
 #include <boost/format.hpp>
 #include <netcdf>
@@ -246,32 +247,51 @@ namespace mrVSLAM
         std::string filename = "test_no.nc"; 
         netCDF::NcFile mapFile(filename, netCDF::NcFile::replace); 
         
-        constexpr int matrix_width = 4; // num of columns 
-        constexpr int matrix_height = 4; //num of rows 
-        int num_of_frames = map->getNumberOfKeyframes(); \
+        auto keyframes = map->getAllKeyframes(); 
+        auto mappoints = map->getAllMappoints(); 
 
+        constexpr int matrix_width = 4; // num of columns 
+        constexpr int matrix_height = 3; //num of rows 
+        constexpr int vector_length = 3; 
+        int num_of_frames = keyframes.size(); 
+        int num_of_mappoints = mappoints.size(); 
+        
+        std::map<unsigned int, std::shared_ptr<Frame>> keyframes_in_order(keyframes.begin(), keyframes.end()); 
         float output_poses[num_of_frames][matrix_height][matrix_width]; 
 
-        for (size_t t = 0; t < num_of_frames; t++) {
+        for(auto& [key, frame] : keyframes_in_order) {
+            Eigen::Matrix<double,3,4> pose = frame->getPose().inverse().matrix3x4(); 
             for (size_t i_r = 0; i_r < matrix_height; i_r++) {
                 for (size_t i_c = 0; i_c < matrix_width; i_c++) {
-
-                    output_poses[t][i_r][i_c] = 0.0; 
+                    output_poses[key][i_r][i_c] = pose.coeff(i_r,i_c); 
                 }    
             }
         }
-        
+
+        float output_mappoints[num_of_mappoints][vector_length]; 
+
+        for(auto& [key, mappoint] : mappoints) {
+            Eigen::Vector3d position = mappoint->getPointPosition(); 
+            output_mappoints[key][0] = position.coeff(0); 
+            output_mappoints[key][1] = position.coeff(1); 
+            output_mappoints[key][2] = position.coeff(2); 
+        }
+
         //create dimmensions 
         auto matrix_width_dim   = mapFile.addDim("matrix_width"  , matrix_width); 
         auto matrix_height_dim  = mapFile.addDim("matrix_height" , matrix_height); 
-        auto time_dim           = mapFile.addDim("time", num_of_frames); //TODO maybe change to poses 
+        auto poses_num_dim      = mapFile.addDim("poses", num_of_frames); //TODO maybe change to poses 
+        auto vector_length_dim  = mapFile.addDim("vector_length", vector_length); 
+        auto mappoints_num_dim  = mapFile.addDim("mappoints", num_of_mappoints); 
 
         //create variable 
-        auto pose_matricies = mapFile.addVar("pose_matricies_T", netCDF::ncFloat ,{time_dim, matrix_height_dim, matrix_width_dim}); 
+        auto pose_matricies = mapFile.addVar("pose_matricies_T", netCDF::ncFloat ,{poses_num_dim, matrix_height_dim, matrix_width_dim}); 
+        auto mappoints_var  = mapFile.addVar("mappoints_set", netCDF::ncFloat, {mappoints_num_dim, vector_length_dim}); 
 
         try
         {
             pose_matricies.putVar(output_poses); 
+            mappoints_var.putVar(output_mappoints); 
         }
         catch(const std::exception& e)
         {
