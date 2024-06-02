@@ -90,7 +90,7 @@ namespace mrVSLAM
 
         std::shared_ptr<Frame> current_frame = nullptr; 
         std::shared_ptr<Frame> prev_frame = nullptr; 
-        std::shared_ptr<Frame> reference_kf = nullptr; 
+        std::shared_ptr<Frame> prev_kf = nullptr; 
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 

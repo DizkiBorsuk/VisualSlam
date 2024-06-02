@@ -144,7 +144,7 @@ namespace mrVSLAM
                                                     }; 
             Eigen::Vector3d point_world = Eigen::Vector3d::Zero(); 
 
-            if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world)) //TODO decide between pose and relativePose 
+            if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world))  
             {
                 auto new_map_point = std::make_shared<MapPoint>(point_world); 
                 new_map_point->addObservation(current_frame->features_on_left_img.at(i_ft)); //! test if needed 
@@ -196,7 +196,7 @@ namespace mrVSLAM
         }
 
         //relative_motion = current_frame->getRelativePose() * prev_frame->getRelativePose().inverse(); 
-        relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); //TODO decide between pose and relativePose 
+        relative_motion = current_frame->getPose() * prev_frame->getPose().inverse(); 
 
         visualizer->addNewFrame(current_frame); 
 
@@ -261,7 +261,7 @@ namespace mrVSLAM
         // vertex
         VertexPose *vertex_pose = new VertexPose();  // camera vertex_pose
         vertex_pose->setId(0);
-        vertex_pose->setEstimate(current_frame->getPose()); //TODO decide between pose and relativePose 
+        vertex_pose->setEstimate(current_frame->getPose()); 
         optimizer.addVertex(vertex_pose);
 
         // K
@@ -302,7 +302,7 @@ namespace mrVSLAM
         int cnt_outlier = 0;
         for (int iteration = 0; iteration < 4; ++iteration) 
         {
-            vertex_pose->setEstimate(current_frame->getPose()); //TODO decide between pose and relativePose 
+            vertex_pose->setEstimate(current_frame->getPose()); 
             optimizer.initializeOptimization();
             optimizer.optimize(10);
             cnt_outlier = 0;
@@ -365,6 +365,8 @@ namespace mrVSLAM
     void StereoTracking::insertKeyframe()
     {    
         current_frame->setFrameToKeyframe(); 
+        current_frame->prev_kf = prev_kf; 
+        current_frame->setRelativePoseToLastKf(current_frame->getPose()*prev_kf->getPose().inverse()); // TODO check if correct 
 
         for (auto &feat : current_frame->features_on_left_img) 
         {
@@ -384,16 +386,7 @@ namespace mrVSLAM
         auto trian_points = triangulateNewPoints();
         fmt::print(fg(fmt::color::blue), "number of new triangulated points = {} \n", trian_points); 
 
-        /* ################################# */
-        // second part - create keyframe object and pase it to map and other modules 
-
-        // if(reference_kf != nullptr)
-        // {
-        //     // set connection between two keyframes 
-        //     current_frame->setPose(current_frame->getRelativePose() * reference_kf->getPose()); //TODO 
-        // } 
-
-        reference_kf = current_frame; 
+        prev_kf = current_frame; //TODO make sure that correct
 
         map->insertNewKeyframe(current_frame); 
         local_mapping->updateMap(); 
@@ -407,7 +400,7 @@ namespace mrVSLAM
 
     int StereoTracking::triangulateNewPoints()
     {   
-        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse(); //TODO decide between pose and relativePose
+        Sophus::SE3d current_pose_Twc = current_frame->getPose().inverse(); 
         int cnt_triangulated_pts = 0;
         for (std::size_t i_ft = 0; i_ft < current_frame->features_on_left_img.size(); i_ft++) 
         {
@@ -460,7 +453,7 @@ namespace mrVSLAM
             auto mp = kp->map_point.lock();
             if (mp) {
                 // use projected points as initial guess
-                auto px = camera_right->world2pixel(mp->getPointPosition(), current_frame->getPose()); //TODO decide between pose and relativePose 
+                auto px = camera_right->world2pixel(mp->getPointPosition(), current_frame->getPose()); 
                 kps_right.emplace_back(px[0], px[1]);
             } else {
                 // use same pixel in left iamge

@@ -557,16 +557,72 @@ namespace mrVSLAM
             auto prev_kf = keyframe->prev_kf.lock(); 
             assert(prev_kf != nullptr); 
 
-            // create edges between two kf, length of edge is distance between them i.e 
+            // create edges between two kf adjecteted in time, length of edge is distance between them i.e 
             if(prev_kf) {
                 EdgePoseGraph * edge = new EdgePoseGraph(); 
                 edge->setId(index); 
                 edge->setVertex(0, kf_verticies.at(kf_id)); 
                 edge->setVertex(1, kf_verticies.at(prev_kf->kf_id)); 
                 edge->setMeasurement(keyframe->getRelativePoseToLastKf()); 
-            }         
+                edge->setInformation(Eigen::Matrix<double, 6, 6>::Identity()); 
+                optimizer.addEdge(edge); 
+                edges.insert({index, edge}); 
+                index++; 
+            }      
+
+            //create edge for loop frames 
+            auto loop_kf = keyframe->loop_kf.lock(); 
+            if( loop_kf ) 
+            {
+                EdgePoseGraph *edge = new EdgePoseGraph();
+                edge->setId(index);
+                edge->setVertex(0, kf_verticies.at(kf_id));
+                edge->setVertex(1, kf_verticies.at(loop_kf->kf_id));
+                edge->setMeasurement(keyframe->getRelativePoseToLoopKf());
+                edge->setInformation(Eigen::Matrix<double, 6, 6>::Identity());
+                optimizer.addEdge(edge);
+                edges.insert({index, edge});
+                index++;
+            }
         }
 
+        optimizer.initializeOptimization();
+        optimizer.optimize(20);
+
+        { // mutex
+            std::unique_lock<std::mutex> lock(map->mapUpdate_mutex); 
+
+            // set the mappoints' positions according to its first observing KF's optimized pose
+            auto all_mappoints = map->getAllMappoints();
+            auto active_mappoints = map->getActiveMappoints();
+            for(auto iter = active_mappoints.begin(); iter != active_mappoints.end(); iter++){
+                all_mappoints.erase((*iter).first);
+            }
+            for(auto &mappoint: all_mappoints){
+                auto mp = mappoint.second;
+
+                assert(!mp->getObservations().empty());
+
+                auto feat = mp->getObservations().front().lock();
+                auto observe_kf = feat->keyframe.lock();
+                if(kf_verticies.find(observe_kf->kf_id) == kf_verticies.end()){ //TODO change to !contains 
+                    // NOTICE: this is for the case that one mappoint is inserted into map in frontend thread
+                    // but the KF which first observes it hasn't been inserted into map in backend thread
+                    continue;
+                }
+                
+                Eigen::Vector3d cam_pose = observe_kf->getPose() * mp->getPointPosition();
+
+                Sophus::SE3d T_optimized = kf_verticies.at(observe_kf->kf_id)->estimate();
+                mp->setPosition(T_optimized.inverse() * cam_pose);
+            }
+
+            // set the KFs' optimized poses
+            for (auto &v: kf_verticies) {
+                all_keyframes.at(v.first)->setPose(v.second->estimate());
+            }
+        
+        } 
 
         //*resume local mapping 
         local_mapping->resume(); 

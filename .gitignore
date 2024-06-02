@@ -11,6 +11,10 @@ build*
 *.json
 *.pyc
 *.onnx
+*.nc
+*.csv
+*.jpg
+
 
 results.csv
 

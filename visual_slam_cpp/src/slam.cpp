@@ -217,7 +217,6 @@ namespace mrVSLAM
             std::exit(1); 
         }
 
-        outputFile << "NEW TEST, NEW TEST \n"; 
         outputFile << "sequence number: ,"  << results.sequence << "\n" ;
         outputFile << "Tracking type, "     << to_underlying(results.tracking_type)  << "\n"; 
         outputFile << "Detector type, "     << to_underlying(results.detector) << "\n"; 
@@ -236,15 +235,12 @@ namespace mrVSLAM
         outputFile << "mean loop time:, "       << results.mean_time << "\n"; 
         outputFile << "max loop time:, "        << results.max_time << "\n";
         outputFile << "min loop time:, "        << results.min_time << "\n"; 
-
-        outputFile << "END OF TEST, END OF TEST RESULTS  \n"; 
-        outputFile << "\n"; 
         outputFile.close(); 
     }
 
     void SLAM::saveTrajectoryAndMap()
     {
-        std::string filename = "test_no.nc"; 
+        std::string filename = "map_trajectory.nc"; 
         netCDF::NcFile mapFile(filename, netCDF::NcFile::replace); 
         
         auto keyframes = map->getAllKeyframes(); 
