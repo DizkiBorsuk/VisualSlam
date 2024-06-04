@@ -104,6 +104,7 @@ namespace mrVSLAM
         {
             //* set frame to keyframe */ 
             current_frame->setFrameToKeyframe(); 
+            prev_kf = current_frame; 
 
             if(map) { map->insertNewKeyframe(current_frame); }
             if(local_mapping) { local_mapping->updateMap(); }

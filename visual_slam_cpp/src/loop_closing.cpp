@@ -555,8 +555,8 @@ namespace mrVSLAM
             auto keyframe = kf_map_entry.second; 
 
             auto prev_kf = keyframe->prev_kf.lock(); 
-            assert(prev_kf != nullptr); 
-
+            if(kf_id != 0) {assert(prev_kf != nullptr); }
+            
             // create edges between two kf adjecteted in time, length of edge is distance between them i.e 
             if(prev_kf) {
                 EdgePoseGraph * edge = new EdgePoseGraph(); 
