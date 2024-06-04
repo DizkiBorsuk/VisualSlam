@@ -109,7 +109,6 @@ namespace mrVSLAM
         
         // result data
         std::vector<float> loop_times; 
-        std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
         std::vector<std::shared_ptr<Frame>> all_frames; 
     }; 
 

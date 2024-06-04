@@ -171,17 +171,21 @@ namespace mrVSLAM
      * @param resize_opt - resize img option that 
      */
     inline void plotPoses(std::vector<Eigen::Matrix<double, 3,4>> &poses, 
-                          std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt)
+                          std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, float resize_opt, 
+                          std::string title)
     {
         std::vector<double> gt_x, gt_y, x, y; 
  
-        for(std::size_t i = 0; i < poses.size(); i++)
+        for(auto& pose : poses)
         {
-            gt_x.emplace_back(gt_poses.at(i).coeff(0,3));  
-            gt_y.emplace_back(gt_poses.at(i).coeff(2,3));
+            x.emplace_back(pose.coeff(0,3)*resize_opt);  
+            y.emplace_back(pose.coeff(2,3)*resize_opt);
+        }
 
-            x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);  
-            y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+        for(auto gt_pose : gt_poses) 
+        {
+           gt_x.emplace_back(gt_pose.coeff(0,3));  
+           gt_y.emplace_back(gt_pose.coeff(2,3));
         }
 
         // set figure size anf color 
@@ -196,6 +200,7 @@ namespace mrVSLAM
         matplot::xlabel("x [m]");
         matplot::ylabel("y [m]");  
         matplot::legend({"prawdziwa trasa", "estymowana trasa"}); 
+        matplot::title(title); 
         matplot::show();
     }
 

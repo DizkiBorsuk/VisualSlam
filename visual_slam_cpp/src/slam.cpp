@@ -174,13 +174,20 @@ namespace mrVSLAM
         ResultStruct results; 
 
         dataset->getGTposes();
-        // std::vector<Eigen::Matrix<double, 3,4>>  kf_trajectory;
-        // auto keyframes = map->getAllKeyframes();  
-        for(size_t i = 0; i < all_frames.size(); i++)
-        {
-            trajectory.emplace_back(all_frames.at(i)->getPose().inverse().matrix3x4()); 
-        }
+        std::vector<Eigen::Matrix<double, 3,4>> trajectory;  
+        std::vector<Eigen::Matrix<double, 3,4>> kf_trajectory;
+        std::vector<Eigen::Matrix<double, 3,4>> no_kf_trajectory;  
 
+        // auto keyframes = map->getAllKeyframes();  
+        for(auto& frame: all_frames)
+        {
+            trajectory.emplace_back(frame->getPose().inverse().matrix3x4()); 
+            if(frame->is_keyframe) {
+                kf_trajectory.emplace_back(frame->getPose().inverse().matrix3x4()); 
+            } else {
+                no_kf_trajectory.emplace_back(frame->getPose().inverse().matrix3x4()); 
+            }
+        }
 
         results.sequence = dataset->getCurrentSequence(); 
         results.detector = detector_type; 
@@ -189,7 +196,9 @@ namespace mrVSLAM
 
         if(plot)
         {
-            plotPoses(trajectory, dataset->ground_truth_poses, 1); 
+            plotPoses(trajectory, dataset->ground_truth_poses, 1, "All frames"); 
+            plotPoses(kf_trajectory, dataset->ground_truth_poses, 1, "Only optimized frames"); 
+            plotPoses(no_kf_trajectory, dataset->ground_truth_poses, 1, "Only nonoptimized frames"); 
             
             if(this->use_loop_closing)
             {
