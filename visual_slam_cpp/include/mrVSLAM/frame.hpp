@@ -53,6 +53,7 @@ namespace mrVSLAM
     public: 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         
+        bool is_keyframe = false; 
         bool used_in_loop_closing = false; 
         unsigned int id = 0; 
         unsigned int kf_id = 0; 
@@ -94,29 +95,5 @@ namespace mrVSLAM
 
         std::mutex frame_mutex; 
     }; 
-
-    // /**
-    //  * @brief 
-    //  * 
-    //  */
-    // class KeyFrame : public Frame
-    // {
-    // public: 
-    //     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-    //     unsigned int kf_id; 
-
-    //     std::weak_ptr<KeyFrame> prev_kf; ///< ptr to previous keyframe object 
-    //     std::weak_ptr<KeyFrame> loop_kf; ///< ptr to keyframe that was selected by loop closer to be the same keyframe as current one 
-    //     Sophus::SE3d relativePoseToLastKf; 
-    //     Sophus::SE3d relativePoseToLoopKf; ///< 
-    //     DBoW3::BowVector bow_vector; ///< Bag Of Words vector that describes left img based on descriptors, used for loop closing 
-
-    // public: 
-    //     KeyFrame(std::shared_ptr<Frame> base_frame); 
-    //     std::vector<cv::KeyPoint> getAllFeaturePoints(); 
-
-    // private: 
-    //     std::mutex kf_mutex; 
-    // }; 
     
 } //! end of namespace 

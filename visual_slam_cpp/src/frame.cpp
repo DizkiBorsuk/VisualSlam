@@ -46,6 +46,7 @@ namespace mrVSLAM
     void Frame::setFrameToKeyframe()
     {
         static unsigned int factory_kf_id = 0; 
+        is_keyframe = true; 
         this->kf_id = factory_kf_id; 
         factory_kf_id++; 
         fmt::print(fg(fmt::color::gray), "frame id: {}, set to keyframe id: {} \n", this->id, this->kf_id); 
