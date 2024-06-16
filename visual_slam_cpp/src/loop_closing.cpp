@@ -41,6 +41,11 @@ namespace mrVSLAM
     {
         loop_closer_running.store(false); 
         new_kf_update.notify_one(); 
+        if(local_mapping->confirmPause()) 
+        {
+            local_mapping->confirmPause(); 
+            local_mapping->updateMap(); 
+        }
         loop_closer_thread.join(); 
         fmt::print(fg(fmt::color::indian_red), "loop closer thread closed \n"); 
     }
@@ -282,7 +287,7 @@ namespace mrVSLAM
 
         fmt::print("loop closer : number of points after map checking = {} \n", loop_candidate_3d_points.size()); 
         
-        if(loop_candidate_3d_points.size() < 30){
+        if(loop_candidate_3d_points.size() < 60){
             return false; 
         }
 
@@ -308,7 +313,16 @@ namespace mrVSLAM
 
         cv::cv2eigen(R, new_R); 
         cv::cv2eigen(translation_vec, new_t);
-        
+        if(std::isnan(new_R.coeff(0,0)) || std::isnan(new_R.coeff(1,1)) || std::isnan(new_R.coeff(2,2))) {
+            fmt::print(fg(fmt::color::red), "loop closer : wrong R matrix \n");
+            return false;
+        }
+
+        if(std::isnan(new_t(0)) || std::isnan(new_t(1)) || std::isnan(new_t(2))) {
+            fmt::print(fg(fmt::color::red), "loop closer : wrong R matrix \n");
+            return false;
+        }
+
         Sophus::SE3d pnp_pose; 
         try {
             pnp_pose = Sophus::SE3d(new_R, new_t); 
@@ -320,9 +334,15 @@ namespace mrVSLAM
         std::cout << "pose before correction : \n" << current_keyframe->getPose().matrix3x4() << "\n"; 
         std::cout << "pnp pose : \n" << pnp_pose.matrix3x4() << "\n"; 
 
-        int inliers = optimizePose(pnp_pose); // push corrected pose to further optimization 
+        int inliers = 0; 
+        try{
+           inliers = optimizePose(pnp_pose); // push corrected pose to further optimization 
+        } catch (...) {
+            fmt::print(fg(fmt::color::red), "loop closer : failed during PnP pose optimization \n");
+        }
+        
 
-        if(inliers < 20) {
+        if(inliers < 40) {
             fmt::print(fg(fmt::color::red), "number of inliers: {} is to small \n", inliers); 
             return false; 
         }
@@ -338,6 +358,8 @@ namespace mrVSLAM
         current_keyframe->used_in_loop_closing = true; 
         loop_keyframe_candidate->used_in_loop_closing = true; 
 
+        
+        fmt::print("setting up relative pose to loop kf \n"); 
         current_keyframe->setRelativePoseToLoopKf(corrected_kf_pose * loop_keyframe_candidate->getPose().inverse() ); 
         last_corected_keyframe = loop_keyframe_candidate; 
 

@@ -47,15 +47,20 @@ namespace mrVSLAM
 
         /**
          * @brief Set the Slam Parameters object
-         * @details if not using config file and want to set more parameters use this function 
-         * @param num_of_tracked_points number of detected points by detector/extractor 
+         * 
          * @param type_of_detector 
+         * @param num_of_tracked_points 
+         * @param min_tracking_points 
          * @param resize 
          * @param show_cam_img 
-         * @param vocab_path path to BoW vocabulary, needed only for loop closing  
+         * @param vocab_path 
          */
-        void setSlamParameters(DetectorType type_of_detector = DetectorType::GFTT, unsigned int num_of_tracked_points = 150, float resize = 1.0f, 
-                               bool show_cam_img = true, std::string vocab_path = "./dictionaries/orbvoc.dbow3"); 
+        void setSlamParameters(DetectorType type_of_detector = DetectorType::GFTT, 
+                               unsigned int num_of_tracked_points = 150, 
+                               unsigned int min_tracking_points = 80, 
+                               float resize = 1.0f, 
+                               bool show_cam_img = true, 
+                               std::string vocab_path = "./dictionaries/orbvoc.dbow3"); 
 
         /**
          * @brief initialize SLAM, read dataset and start all the modules 
@@ -85,6 +90,8 @@ namespace mrVSLAM
         void saveTrajectoryAndMap(); 
 
     private: 
+        bool vslam_failed = false; 
+
         // constructor parameters 
         std::string dataset_path; 
         bool use_loop_closing = false; 
@@ -92,6 +99,7 @@ namespace mrVSLAM
         //rest of the parameters 
         DetectorType detector_type = DetectorType::GFTT; 
         int number_of_points = 150; 
+        int min_tracking_points = 80; 
         float img_size_opt = 1.0f; 
         bool show_cam_img = true; 
         std::string vocab_path = "./dictionaries/orbvoc.dbow3"; 

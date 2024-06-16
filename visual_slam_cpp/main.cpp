@@ -7,9 +7,10 @@ int main(int argc, char* argv[])
     bool use_loop_closer = true; 
     SLAM_TYPE slam_trackin_type = SLAM_TYPE::STEREO; 
     DetectorType detector = DetectorType::GFTT; 
-    unsigned int n_points = 150; 
-    float img_size = 1.f; 
+    unsigned int n_points = 150;
+    unsigned int n_min_tracking_points = 80;  
     bool plot_results = true; 
+    float img_size = 1.f; 
 
     fmt::print("Hello mrVSLAM \n"); 
 
@@ -24,7 +25,8 @@ int main(int argc, char* argv[])
             detector = static_cast<DetectorType>(std::stoi(argv[3]));
             use_loop_closer = std::stoi(argv[4]); 
             n_points = std::stoi(argv[5]); 
-            plot_results = std::stoi(argv[6]);
+            n_min_tracking_points = std::stoi(argv[6]); 
+            plot_results = std::stoi(argv[7]);
 
             fmt::print(fg(fmt::color::green), "kitti path = {}, usle_loop_closer = {}, n_points = {} \n", kitti_path, use_loop_closer, n_points); 
         } 
@@ -39,7 +41,7 @@ int main(int argc, char* argv[])
     auto slam = std::make_shared<mrVSLAM::SLAM>(kitti_path, slam_trackin_type, use_loop_closer); 
 
     // run SLAM 
-    slam->setSlamParameters(detector, n_points, img_size, plot_results); 
+    slam->setSlamParameters(detector, n_points, n_min_tracking_points, img_size, plot_results); 
     slam->initSLAM(); 
     slam->runSLAM(); 
     slam->outputSlamResult(plot_results); 

@@ -20,37 +20,44 @@
 
 namespace mrVSLAM
 {   
-    //! done 
-    StereoTracking::StereoTracking(const DetectorType& detector_type, const bool& use_descriptors,
-                                   const unsigned int& num_features)
+    
+    StereoTracking::StereoTracking(const DetectorType detector_type, 
+                                   const unsigned int& num_features, 
+                                   const unsigned int& min_num_tracking_points, 
+                                   const bool use_descriptors)
     {
         this->detector_type = detector_type; 
         this->use_descriptors = use_descriptors; 
         this->num_features = num_features; 
+        this->num_features_needed_for_keyframe = min_num_tracking_points; 
 
         switch(this->detector_type)
         {
             case DetectorType::GFTT: 
                 detector = cv::GFTTDetector::create(this->num_features, 0.01, 10, 3, false, 0.04); 
+                fmt::print(fg(fmt::color::red), "using gftt \n"); 
                 if(this->use_descriptors)
                     extractor = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
             case DetectorType::ORB: 
                 detector = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
+                fmt::print(fg(fmt::color::red), "using orb \n"); 
                 if(this->use_descriptors) 
                     extractor = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
             case DetectorType::SIFT: 
+                fmt::print(fg(fmt::color::red), "using sift \n"); 
                 detector = cv::SIFT::create(this->num_features, 3, 0.04, 10, 1.6, false);  
                 if(this->use_descriptors) 
                     extractor = cv::SIFT::create(this->num_features, 3, 0.04, 10, 1.6, false); 
                 break;
             case DetectorType::SUPER_POINT: 
+                // superpoint_detector = std::make_shared<SuperPoint>("../dictionaries/SuperPointNet.pt" ); 
                 break; 
         }
 
         fmt::print(fg(fmt::color::aqua), "stereo tracking initialized \n"); 
-    } // end of StereoTracking::StereoTracking
+    } 
 
     //!done 
     bool StereoTracking::addNewFrame(std::shared_ptr<Frame> frame)

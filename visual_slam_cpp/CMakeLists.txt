@@ -7,12 +7,12 @@ set(CMAKE_CUDA_STANDARD 17)
 # set(CMAKE_PREFIX_PATH "~/dev/libs/libtorch")
 
 set(CMAKE_CXX_FLAGS "-std=c++20 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE  " ${CMAKE_CXX_FLAGS} -std=c++20 -O3 -fopenmp -lpthread ")
+set(CMAKE_CXX_FLAGS_RELEASE  " ${CMAKE_CXX_FLAGS} -std=c++20 -O3 -fopenmp -lpthread ") #${TORCH_CXX_FLAGS}
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-set(CMAKE_PREFIX_PATH "~/dev/libs/netcdf-cxx4/build/netCDFCxxConfig.cmake")
+set(CMAKE_PREFIX_PATH = "~/dev/libs/netcdf-cxx4/build/netCDFCxxConfig.cmake;~/dev/libs/libtorch")
 
 # set( DBoW3_INCLUDE_DIRS "/usr/local/include" )
 # set( DBoW3_LIBS "/usr/local/lib/libDBoW3.so" )
@@ -43,7 +43,7 @@ set(THIRD_PARTY_LIBS
         ${Pangolin_LIBRARIES} 
         ${DBoW3_LIBS}
         netCDF::netcdf
-     # ${TORCH_LIBRARIES}
+        # ${TORCH_LIBRARIES}
         g2o_core g2o_stuff g2o_types_sba g2o_types_slam3d g2o_solver_csparse g2o_csparse_extension
         pthread
         Eigen3::Eigen 

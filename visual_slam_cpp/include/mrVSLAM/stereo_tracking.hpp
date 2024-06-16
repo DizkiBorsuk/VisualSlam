@@ -11,6 +11,7 @@
 
 #pragma once 
 #include "mrVSLAM/common_includes.hpp" 
+// #include "mrVSLAM/super_point_inference.hpp"
 
 namespace mrVSLAM
 {
@@ -31,8 +32,10 @@ namespace mrVSLAM
          * @param use_descriptors 
          * @param num_features 
          */
-        StereoTracking(const DetectorType& detector_type, const bool& use_descriptors,
-                       const unsigned int& num_features); 
+        StereoTracking(const DetectorType detector_type, 
+                       const unsigned int& num_features = 150, 
+                       const unsigned int& min_num_tracking_points = 80, 
+                       const bool use_descriptors = false); 
 
         /**
          * @brief Set the Tracking object
@@ -94,6 +97,7 @@ namespace mrVSLAM
 
         cv::Ptr<cv::FeatureDetector> detector;  // feature detector in opencv
         cv::Ptr<cv::DescriptorExtractor>  extractor; 
+        // std::shared_ptr<SuperPoint> superpoint_detector = nullptr; 
 
         TrackingStatus tracking_status = TrackingStatus::INITING; 
         DetectorType detector_type = DetectorType::GFTT; 
@@ -101,9 +105,9 @@ namespace mrVSLAM
         unsigned int tracking_inliers = 0; 
 
         unsigned int num_features = 150; 
+        unsigned int num_features_needed_for_keyframe = 80;
         static constexpr int num_features_init = 50; 
         static constexpr int num_features_tracking_bad_ = 20; 
-        static constexpr int num_features_needed_for_keyframe = 80;
 
         Sophus::SE3d relative_motion; ///< transformation between two consecutive frames. 
     }; 

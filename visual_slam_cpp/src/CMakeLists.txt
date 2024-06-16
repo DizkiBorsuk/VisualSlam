@@ -9,6 +9,7 @@ add_library(mrVSLAM SHARED
                 visualizer.cpp
                 slam.cpp
                 read_dataset.cpp 
+                # super_point_inference.cpp
         )
 
 target_link_libraries(mrVSLAM PUBLIC ${THIRD_PARTY_LIBS})

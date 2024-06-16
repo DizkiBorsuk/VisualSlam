@@ -42,7 +42,7 @@
 #include <fmt/color.h>
 
 enum class TrackingStatus { INITING, TRACKING, LOST };
-enum class DetectorType {GFTT, ORB, SIFT, SUPER_POINT}; 
+enum class DetectorType {GFTT = 0, ORB, SIFT, SUPER_POINT}; 
 enum class SLAM_TYPE{STEREO = 0, MONO = 1}; 
 
 namespace mrVSLAM
@@ -52,6 +52,7 @@ namespace mrVSLAM
      */
     struct ResultStruct
     {
+        bool finished = false; 
         unsigned int sequence; 
         SLAM_TYPE tracking_type; 
         DetectorType detector; 
