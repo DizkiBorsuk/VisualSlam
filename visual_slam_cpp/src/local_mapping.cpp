@@ -40,6 +40,7 @@ namespace mrVSLAM
     {
         localMappingRunning.store(false); 
         map_update.notify_one();
+        fmt::print("local mapping, after unlcoking in stop \n"); 
         local_mapping_thread.join();
         fmt::print(fg(fmt::color::indian_red), "local mapping thread closed \n"); 
     }
@@ -58,6 +59,7 @@ namespace mrVSLAM
     void LocalMapping::resume()
     {
         pauseRequest.store(false); 
+        threadPaused.store(false); 
         fmt::print(fg(fmt::color::yellow), "local mapping thread restarted \n"); 
     }
 
@@ -70,10 +72,12 @@ namespace mrVSLAM
             while(pauseRequest.load())
             {
                 threadPaused.store(true); 
-                std::this_thread::sleep_for(1000us); 
+                std::this_thread::sleep_for(100us); 
             }
 
             threadPaused.store(false); 
+
+            auto beginT = std::chrono::steady_clock::now();
 
             std::unique_lock<std::mutex> lock(local_mapping_mutex);
             map_update.wait(lock); 
@@ -82,6 +86,10 @@ namespace mrVSLAM
             Map::LandmarksType active_landmarks = map->getActiveMappoints();
 
             localBundleAndjustment(active_kfs, active_landmarks); 
+
+            auto endT = std::chrono::steady_clock::now();
+            auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+            fmt::print("Local mapping: loop time = {} \n", elapsedT.count()); 
         }
     }
     

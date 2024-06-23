@@ -20,11 +20,12 @@
 
 namespace mrVSLAM
 {
-    LoopCloser::LoopCloser(std::string vocab_path, bool create_new_descriptors)
+    LoopCloser::LoopCloser(std::string vocab_path, bool create_new_descriptors, double score_treshold)
     {
         this->vocabulary = DBoW3::Vocabulary(vocab_path); 
         this->bow_database = DBoW3::Database(vocabulary); 
         this->create_descriptors = create_new_descriptors; 
+        this->score_treshold = score_treshold; 
 
         if(create_new_descriptors){
             this->sift_detector = cv::SIFT::create(500, 3, 0.04, 10, 1.6, false); 
@@ -64,6 +65,7 @@ namespace mrVSLAM
             std::unique_lock<std::mutex> lock(loop_closer_mutex);
             new_kf_update.wait(lock); 
             
+            auto beginT = std::chrono::steady_clock::now();
             // get all descriptors for current keyframe as one cv::Mat 
             cv::Mat descriptors; 
             for(auto &feature : current_keyframe->features_on_left_img) {
@@ -87,8 +89,8 @@ namespace mrVSLAM
 
                 for (size_t s = 0; s < similarity.size(); s++)
                 {
-                    if(similarity.at(s).Score > 0.055 && similarity.at(s).Score < 0.95) {
-                        fmt::print(fg(fmt::color::blue), "similarity at index {} for kf {} = {} \n", s,similarity.at(s).Id, similarity.at(s).Score); 
+                    if(similarity.at(s).Score > this->score_treshold && similarity.at(s).Score < 0.95) {
+                        // fmt::print(fg(fmt::color::blue), "similarity at index {} for kf {} = {} \n", s,similarity.at(s).Id, similarity.at(s).Score); 
                         fmt::print(fg(fmt::color::blue), "kf with id {} set as loop candidate for current kf, id = {} \n", similarity.at(s).Id, current_keyframe->kf_id); 
                         loop_candidate_ids.emplace_back(similarity.at(s).Id); 
                     }
@@ -99,7 +101,7 @@ namespace mrVSLAM
                 continue; 
             }
 
-            //TODO maybe change it 
+            // //TODO maybe change it 
             if(loop_candidate_ids.size() > 4) {
                 fmt::print(fg(fmt::color::green_yellow), "(too) many loop candidates \n"); 
                 continue;
@@ -115,7 +117,7 @@ namespace mrVSLAM
                 continue;
             }
 
-            // if all checks are passed then match features of both 
+            // // if all checks are passed then match features of both 
             if(loop_keyframe_candidate->used_in_loop_closing) {
                 fmt::print(fg(fmt::color::green_yellow), "kf was already used in loop closing \n"); 
                 continue; 
@@ -131,11 +133,21 @@ namespace mrVSLAM
                 continue;
             }
 
+            auto endT = std::chrono::steady_clock::now();
+            auto elapsedT = std::chrono::duration_cast<std::chrono::milliseconds>(endT - beginT);
+            fmt::print("Loop closer: looking for loop = {} \n", elapsedT.count()); 
+
             fmt::print(fg(fmt::color::royal_blue), "kf {} is loop close candidate \n", best_loop_candidate_id); 
             
+            auto beginT2 = std::chrono::steady_clock::now();
+
             if(matchKeyframesAndCorrectPose()) {
-                optimizeLoop();
+                // optimizeLoop();
                 map->addMatchedKeyframes(loop_keyframe_candidate, current_keyframe); 
+
+                auto endT2 = std::chrono::steady_clock::now();
+                auto elapsedT2 = std::chrono::duration_cast<std::chrono::milliseconds>(endT2 - beginT2);
+                fmt::print("Loop closer: loop correction time = {} \n", elapsedT2.count()); 
             }
 
         }

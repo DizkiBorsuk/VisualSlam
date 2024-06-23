@@ -76,6 +76,7 @@ namespace mrVSLAM
 
     private: 
         bool use_descriptors = false; 
+        bool need_for_reference_frame = true; 
 
         std::shared_ptr<Map> map = nullptr; 
         std::shared_ptr<LocalMapping> local_mapping = nullptr; 

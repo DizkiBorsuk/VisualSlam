@@ -31,7 +31,7 @@ namespace mrVSLAM
          * @brief Construct a new Loop Closer object
          * @param vocab_path - path to Bag of words vocabulary 
          */
-        LoopCloser(std::string vocab_path, bool create_new_descriptors); 
+        LoopCloser(std::string vocab_path, bool create_new_descriptors, double score_treshold); 
         
         /**
          * @brief Set the Loop Closer object
@@ -81,6 +81,7 @@ namespace mrVSLAM
     private:
         bool create_descriptors = false; 
         int loop_closing_counter = 0; 
+        double score_treshold = 0.6; 
 
         Sophus::SE3d corrected_kf_pose; 
 

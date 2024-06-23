@@ -54,6 +54,7 @@ namespace mrVSLAM
 
             if(monoInitialization()){
                 this->tracking_status = TrackingStatus::TRACKING; 
+                return false; 
             }
             break;
         case TrackingStatus::TRACKING:
@@ -63,7 +64,7 @@ namespace mrVSLAM
             return false; 
             break;
         }
-        
+        visualizer->addNewFrame(current_frame); 
         prev_frame = current_frame; 
         return true;  
     }
@@ -76,31 +77,41 @@ namespace mrVSLAM
     
     bool MonoTracking::monoInitialization()
     {
-        //set first frame as a reference frame and detect features 
-        if(!reference_kf){
+
+        //* set first frame as a reference frame and detect features 
+        if(need_for_reference_frame) {
+            fmt::print("Mono initialization; setting reference frame");
+            need_for_reference_frame = false; 
             this->reference_kf = current_frame; 
 
-                    //detect features 
             if(this->use_descriptors)
                 extractFeatures(); 
             else 
                 detectFeatures(); 
             
+            current_frame->setFrameToKeyframe(); 
             //if there is only one frame than can't do anything more 
             return false; 
         }
 
-
+        //get detected points from reference frame and 
         std::vector<cv::Point2f> kps_reference, kps_current; 
-
         for(auto& ref_features : reference_kf->features_on_left_img){
+            
             kps_reference.emplace_back(ref_features->positionOnImg.pt); 
+            kps_current.emplace_back(ref_features->positionOnImg.pt);
         }
 
-        for(auto& prev_features : prev_frame->features_on_left_img){
-            kps_current.emplace_back(prev_features->positionOnImg.pt); 
-        }
+        // if(prev_frame == nullptr) {fmt::print("chuj\n"); }  
+        // //get detected points from prev frame to set initial guesses for flow in current frame 
+        // for(auto& prev_features : prev_frame->features_on_left_img){
+        //     if(prev_features != nullptr) {
+        //         kps_current.emplace_back(prev_features->positionOnImg.pt); 
+        //     }
+        // }
 
+
+        //* get position of point by optical flow and create new features 
         std::vector<uchar> status;
         cv::Mat error;
         cv::calcOpticalFlowPyrLK( reference_kf->left_img, current_frame->left_img, kps_reference,
@@ -112,7 +123,7 @@ namespace mrVSLAM
         {
             if (status[i]) {
                 cv::KeyPoint kp(kps_current[i], 7);
-                auto new_feature = std::make_shared<Feature>(current_frame, kp, false); // false = is on right img 
+                auto new_feature = std::make_shared<Feature>(current_frame,kp, true); // false = is on right img 
                 current_frame->features_on_left_img.emplace_back(new_feature);
                 num_good_pts++;
             } else {
@@ -120,33 +131,52 @@ namespace mrVSLAM
             }
         }
 
+        fmt::print("mono tracking initialization: number of found points with optical flow = {} \n", num_good_pts); 
+
+        if(num_good_pts < 50) {
+            need_for_reference_frame = true; 
+            fmt::print("mono tracking initialization: not enought points to triangulate \n", num_good_pts); 
+            return false; 
+        }
+
+        //* estimate movement by essential Matrix 
+        std::vector<cv::Point2f> current_good_points, reference_good_points; 
+        // assert(current_frame->features_on_left_img.size() == reference_kf->features_on_left_img.size()); 
+
+        for(size_t i = 0; i < current_frame->features_on_left_img.size(); i++)
+        {
+            if(current_frame->features_on_left_img[i])
+            {
+                current_good_points.emplace_back(current_frame->features_on_left_img[i]->positionOnImg.pt); 
+                reference_good_points.emplace_back(reference_kf->features_on_left_img[i]->positionOnImg.pt); 
+            }
+        }
+
+        fmt::print("dupa 2 \n");
+        cv::Mat K, R, t, inliers, triangulated_points; 
+        cv::eigen2cv(camera_left->getK(), K); 
+        auto essentialMatrix = cv::findEssentialMat( reference_good_points, current_good_points, K, cv::RANSAC, 0.99, 1.0, 100, inliers); 
+        cv::recoverPose(essentialMatrix, reference_good_points, current_good_points, K, R, t, inliers); 
+
+        t = t / sqrt(t.at<double>(1, 0) * t.at<double>(1, 0) + t.at<double>(2, 0) * t.at<double>(2, 0) +
+                 t.at<double>(0, 0) * t.at<double>(0, 0));
+
+        Eigen::Matrix3d temp_R; 
+        Eigen::Vector3d temp_t; 
+        cv::cv2eigen(R, temp_R); 
+        cv::cv2eigen(t, temp_t);
+        fmt::print("calculated new pose from essentail matrix \n"); 
+
+        Sophus::SE3d temp_pose(temp_R, temp_t); 
+        current_frame->setPose(temp_pose); 
+
+        std::cout << "POSE = \n" << temp_pose.matrix3x4() << "\n"; 
 
         if(std::abs(int(reference_kf->id) - int(current_frame->id)) > 5) 
         {
-            std::vector<cv::Point2f> current_good_points, reference_good_points; 
-            assert(current_frame->features_on_left_img.size() == reference_kf->features_on_left_img.size()); 
-            for(size_t i = 0; i < current_frame->features_on_left_img.size(); i++)
-            {
-                if(current_frame->features_on_left_img[i])
-                {
-                    current_good_points.emplace_back(current_frame->features_on_left_img[i]->positionOnImg.pt); 
-                    reference_good_points.emplace_back(reference_kf->features_on_left_img[i]->positionOnImg.pt); 
-                }
-            }
+ 
 
-            cv::Mat K, R, t; 
-            cv::eigen2cv(camera_left->getK(), K); 
-            auto essentialMatrix = cv::findEssentialMat( reference_good_points, current_good_points, K, cv::RANSAC, 0.99, 1.0, 100); 
-            cv::recoverPose(essentialMatrix, reference_good_points, current_good_points, K, R, t, cv::noArray()); 
 
-            Eigen::Matrix3d temp_R; 
-            Eigen::Vector3d temp_t; 
-            cv::cv2eigen(R, temp_R); 
-            cv::cv2eigen(t, temp_t);
-
-            Sophus::SE3d temp_pose(temp_R, temp_t); 
-
-            current_frame->setPose(temp_pose); 
 
             // createInitialMap(); 
             return true; 

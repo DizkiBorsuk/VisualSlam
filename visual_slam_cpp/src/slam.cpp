@@ -59,10 +59,23 @@ namespace mrVSLAM
         // create camera objects
         left_camera = std::make_shared<Camera>(dataset->P0, img_size_opt);
         right_camera = std::make_shared<Camera>(dataset->P1, img_size_opt);
+
+        double similarity_score = 0; 
+        switch (detector_type)
+        {
+        case DetectorType::ORB:
+            similarity_score = 0.02; 
+            break;
+        case DetectorType::GFTT:
+             similarity_score = 0.06; 
+             break; 
+        default:
+            break;
+        }
         
         // create and set loop closer object if used  
         if(use_loop_closing) {
-            loop_closer = std::make_shared<LoopCloser>(vocab_path, true); 
+            loop_closer = std::make_shared<LoopCloser>(vocab_path, true, similarity_score); 
             loop_closer->setLoopCloser(map, local_mapping, left_camera, right_camera); 
         }
 
@@ -240,7 +253,7 @@ namespace mrVSLAM
         outputFile << "Detector type, "     << to_underlying(results.detector) << "\n"; 
         outputFile << "Loop closing?, "     << use_loop_closing << "\n"; 
         outputFile << "Number of detected features, " << results.num_of_features << "\n";  
-        outputFile << "Number of detected loop closings, " << map->getAllMatchedKeyframes().size(); 
+        outputFile << "Number of detected loop closings, " << map->getAllMatchedKeyframes().size() << "\n"; 
         outputFile << "Number of generated keyframes," << map->getNumberOfKeyframes() << "\n";  
         outputFile << "total mean error:,"      << results.mean_error << "\n";  
         outputFile << "total mean error %:,"    << results.percent_error << "\n"; 
@@ -249,7 +262,7 @@ namespace mrVSLAM
         outputFile << "mean error z:,"          << results.mean_error_z << "\n";
         outputFile << "max error x:,"           << results.max_error_x << "\n";  
         outputFile << "max error y:,"           << results.max_error_y << "\n"; 
-        outputFile << "max error y:,"           << results.max_error_z << "\n"; 
+        outputFile << "max error z:,"           << results.max_error_z << "\n"; 
         outputFile << "mean loop time:, "       << results.mean_time << "\n"; 
         outputFile << "max loop time:, "        << results.max_time << "\n";
         outputFile << "min loop time:, "        << results.min_time << "\n"; 
@@ -316,12 +329,13 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double,3,4>> no_kf_poses; 
         for(auto& frame : this->all_frames)
         {
-            if(!frame->is_keyframe) {
+            if(frame->is_keyframe == false) {
                 no_kf_poses.emplace_back(frame->getPose().inverse().matrix3x4()); 
             }
         }
 
         float output_no_kf_poses[no_kf_poses.size()][matrix_height][matrix_width]; 
+        
         for(size_t i = 0; i < no_kf_poses.size(); i++) {
             for (size_t i_r = 0; i_r < matrix_height; i_r++) {
                 for (size_t i_c = 0; i_c < matrix_width; i_c++) {
@@ -347,11 +361,11 @@ namespace mrVSLAM
         }
 
         //* reasign matched kf keyframes id's
-        float out_matche_kf_ids [num_of_loop_closes][2];
+        float out_matched_kf_ids [num_of_loop_closes][2];
         auto mathched_kfs = map->getAllMatchedKeyframes(); 
         for(int i = 0; i < num_of_loop_closes; i++) {
-            out_matche_kf_ids[i][0] = mathched_kfs.at(i).first->kf_id; 
-            out_matche_kf_ids[i][1] = mathched_kfs.at(i).second->kf_id; 
+            out_matched_kf_ids[i][0] = mathched_kfs.at(i).first->kf_id; 
+            out_matched_kf_ids[i][1] = mathched_kfs.at(i).second->kf_id; 
         } 
 
         //create dimmensions 
@@ -374,7 +388,7 @@ namespace mrVSLAM
         auto loop_times_var     = mapFile.addVar("loop_times", netCDF::ncFloat, {loop_times_dim}); 
         netCDF::NcVar loop_closing_var; 
         if(this->use_loop_closing) {
-            loop_closing_var = mapFile.addVar("loop_times", netCDF::ncFloat, {num_of_loop_closes, pair_dim});
+            loop_closing_var = mapFile.addVar("matched_kf", netCDF::ncFloat, {num_of_loop_closes, pair_dim});
         }
         
         //assign inputs to variables 
@@ -388,7 +402,7 @@ namespace mrVSLAM
             loop_times_var.putVar(output_loop_times); 
             
             if(this->use_loop_closing) {
-                loop_closing_var.putVar(out_matche_kf_ids);
+                loop_closing_var.putVar(out_matched_kf_ids);
             }
         
         }

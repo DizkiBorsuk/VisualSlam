@@ -4,8 +4,8 @@
 int main(int argc, char* argv[]) 
 {
     std::string kitti_path = "/home/maciek/dev/projects_cpp/VisualSlam/KITTY_dataset/sequences/06"; 
-    bool use_loop_closer = true; 
-    SLAM_TYPE slam_trackin_type = SLAM_TYPE::STEREO; 
+    bool use_loop_closer = false; 
+    SLAM_TYPE slam_trackin_type = SLAM_TYPE::MONO; 
     DetectorType detector = DetectorType::GFTT; 
     unsigned int n_points = 150;
     unsigned int n_min_tracking_points = 80;  
