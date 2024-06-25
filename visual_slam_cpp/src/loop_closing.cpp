@@ -142,7 +142,7 @@ namespace mrVSLAM
             auto beginT2 = std::chrono::steady_clock::now();
 
             if(matchKeyframesAndCorrectPose()) {
-                // optimizeLoop();
+                optimizeLoop();
                 map->addMatchedKeyframes(loop_keyframe_candidate, current_keyframe); 
 
                 auto endT2 = std::chrono::steady_clock::now();
