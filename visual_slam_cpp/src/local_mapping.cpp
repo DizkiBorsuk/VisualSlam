@@ -213,7 +213,14 @@ namespace mrVSLAM
             if (ef.first->chi2() > chi2_th) {
                 ef.second->is_outlier = true;
                 // remove the observation
-                ef.second->map_point.lock()->removeObservation(ef.second);
+                auto mp = ef.second->map_point.lock(); 
+                mp->removeObservation(ef.second);
+                mp->removeActiveObservation(ef.second);
+
+                if(mp->getObservations().empty()) {
+                    mp->is_outlier=true; 
+                    map->addOutlierPoint(mp->id); 
+                }
             } else {
                 ef.second->is_outlier = false;
             }
@@ -231,12 +238,8 @@ namespace mrVSLAM
             landmarks.at(v.first)->setPosition(v.second->estimate());
         }
 
+        map->removeOutliers(); 
 
-        //TODO add removing mappoints outliers 
-        /*
-        
-        
-        */
     }
 
 } //! end of namespace

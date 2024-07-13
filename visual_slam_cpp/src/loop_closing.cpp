@@ -87,8 +87,7 @@ namespace mrVSLAM
             {
                 bow_database.query(current_bow_vector, similarity, 7); 
 
-                for (size_t s = 0; s < similarity.size(); s++)
-                {
+                for (size_t s = 0; s < similarity.size(); s++) {
                     if(similarity.at(s).Score > this->score_treshold && similarity.at(s).Score < 0.95) {
                         // fmt::print(fg(fmt::color::blue), "similarity at index {} for kf {} = {} \n", s,similarity.at(s).Id, similarity.at(s).Score); 
                         fmt::print(fg(fmt::color::blue), "kf with id {} set as loop candidate for current kf, id = {} \n", similarity.at(s).Id, current_keyframe->kf_id); 
@@ -112,7 +111,7 @@ namespace mrVSLAM
 
             loop_keyframe_candidate = map->getKyeframeById(best_loop_candidate_id); 
 
-            if(currnet_kf_id - best_loop_candidate_id < 40) {
+            if(std::abs(currnet_kf_id - best_loop_candidate_id) < 40) {
                 fmt::print(fg(fmt::color::green_yellow), "kf too close to be considered as loop candidate \n"); 
                 continue;
             }
@@ -150,7 +149,7 @@ namespace mrVSLAM
                 fmt::print("Loop closer: loop correction time = {} \n", elapsedT2.count()); 
             }
 
-        }
+        } // end of while loop 
     }
 
     bool LoopCloser::matchKeyframesAndCorrectPose()
@@ -503,7 +502,7 @@ namespace mrVSLAM
             }
 
             auto active_mappoints = map->getActiveMappoints(); 
-            unsigned int shifted_points = 0; 
+            // unsigned int shifted_points = 0; 
             for(auto& mappoint_set : active_mappoints) {
                     auto mappoint = mappoint_set.second;
 
@@ -640,7 +639,7 @@ namespace mrVSLAM
                 auto feat = mp->getObservations().front().lock();
                 auto observe_kf = feat->keyframe.lock();
                 if(kf_verticies.find(observe_kf->kf_id) == kf_verticies.end()){ //TODO change to !contains 
-                    // NOTICE: this is for the case that one mappoint is inserted into map in frontend thread
+                    // NOTICE: this is for the case that one mappoint is inserted into map in trcking thread
                     // but the KF which first observes it hasn't been inserted into map in backend thread
                     continue;
                 }

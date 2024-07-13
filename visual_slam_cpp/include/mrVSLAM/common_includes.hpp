@@ -1,13 +1,13 @@
 /**
  * @file common_includes.hpp
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-04-06
  * @copyright Copyright (c) 2024
- * 
+ *
  */
-#pragma once 
+#pragma once
 
 #include <atomic>
 #include <condition_variable>
@@ -28,7 +28,7 @@
 #include <sstream>
 #include <type_traits>
 #include <exception>
-		
+
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Dense"
 #include "sophus/se3.hpp"
@@ -41,39 +41,45 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
+enum class DatasetVersion { KITTI = 0, EUROC, TUM };
 enum class TrackingStatus { INITING, TRACKING, LOST };
-enum class DetectorType {GFTT = 0, ORB, SIFT, SUPER_POINT}; 
-enum class SLAM_TYPE{STEREO = 0, MONO = 1}; 
+enum class DetectorType {GFTT = 0, ORB, SIFT, SUPER_POINT};
+enum class SLAM_TYPE{STEREO = 0, MONO = 1};
 
 namespace mrVSLAM
-{   
+{
     /**
-     * @brief struct for storing algorithm results 
+     * @brief struct for storing algorithm results
      */
     struct ResultStruct
     {
-        bool finished = false; 
-        unsigned int sequence; 
-        SLAM_TYPE tracking_type; 
-        DetectorType detector; 
-        unsigned int num_of_features; 
+        bool finished = false;
+        unsigned int sequence;
+        SLAM_TYPE tracking_type;
+        DetectorType detector;
+        unsigned int num_of_features;
 
-        float mean_error; 
-        float percent_error; 
-        float mean_error_x; 
-        float mean_error_y; 
-        float mean_error_z; 
+        float mean_error;
+        float mean_kf_error;
+        float percent_error;
+        float percent_kf_error;
+        float mean_error_x;
+        float mean_error_y;
+        float mean_error_z;
+        float mean_kf_error_x;
+        float mean_kf_error_y;
+        float mean_kf_error_z;
         float max_error_x;
-        float max_error_y; 
-        float max_error_z; 
+        float max_error_y;
+        float max_error_z;
         float min_error_x;
-        float min_error_y; 
-        float min_error_z; 
+        float min_error_y;
+        float min_error_z;
 
         double mean_time;
-        double min_time;  
-        double max_time; 
+        double min_time;
+        double max_time;
     };
 }
 
-using namespace std::chrono_literals; // for using ms 
+using namespace std::chrono_literals; // for using ms

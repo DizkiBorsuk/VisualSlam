@@ -115,6 +115,24 @@ namespace mrVSLAM
         }
 
         void removeMapPoint(std::shared_ptr<MapPoint> mappoint); 
+
+        void addOutlierPoint(unsigned int mappoint_id)
+        {
+            std::unique_lock<std::mutex> lock(outliers_mutex);
+            outlier_mappoints_list.emplace_back(mappoint_id); 
+        }
+        void removeOutliers()
+        {
+            std::unique_lock<std::mutex> lock(map_mutex);
+
+            for(auto iter = outlier_mappoints_list.begin(); iter != outlier_mappoints_list.end(); iter++)
+            {
+                allMappointsDictionary.erase(*iter); 
+                activeMappointsDictionary.erase(*iter);
+            }
+            outlier_mappoints_list.clear();
+        }
+
     private: 
         /**
          * @brief remove old (older than 10) keyframe and associated with it mappoints 

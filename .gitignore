@@ -1,12 +1,12 @@
 /visual_slam_py/g2o/
 
 /visual_slam_cpp/build
-/visual_slam_cpp/docs/html/ 
+/visual_slam_cpp/docs/html/
 /visual_slam_cpp/docs/latex
-/scripts/__pycache__/ 
-*.pyc 
+/scripts/__pycache__/
+*.pyc
 *.log
-build* 
+build*
 *.vscode
 *.json
 *.pyc
@@ -15,6 +15,10 @@ build*
 *.csv
 *.jpg
 
+NewTsukubaStereoDataset/*
+EuRoC_MAV_dataset/*
+TUM_dataset/*
+.cache
 
 results.csv
 
