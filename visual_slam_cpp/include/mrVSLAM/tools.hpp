@@ -43,6 +43,34 @@ namespace mrVSLAM
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
         out_point_pos = (svd.matrixV().col(3) / svd.matrixV()(3, 3)).head<3>();
 
+        
+        std::cout << "computed point pos = " << out_point_pos << "\n"; 
+
+        if ((svd.singularValues()[3] / svd.singularValues()[2] < 1e-2) && out_point_pos[2] > 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    inline bool triangulate(const Eigen::Matrix<double,3,4> left_P, const Eigen::Matrix<double,3,4> right_P, 
+                            const std::vector<Eigen::Vector3d> &points, Eigen::Vector3d &out_point_pos)
+    {
+        Eigen::MatrixXd A(4, 4); // A has to be Xmatrix to do svd
+
+        A.block<1,4>(0,0) = points[0][0] * left_P.row(2) - left_P.row(0);
+        A.block<1,4>(1,0) = points[0][1] * left_P.row(2) - left_P.row(1);
+
+        A.block<1,4>(2,0) = points[1][0] * right_P.row(2) - right_P.row(0);
+        A.block<1,4>(3,0) = points[1][1] * right_P.row(2) - right_P.row(1);
+
+        auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+        out_point_pos = (svd.matrixV().col(3) / svd.matrixV()(3, 3)).head<3>();
+
+        
+        std::cout << "computed point pos = " << out_point_pos << "\n"; 
+
         if ((svd.singularValues()[3] / svd.singularValues()[2] < 1e-2) && out_point_pos[2] > 0)
         {
             return true;

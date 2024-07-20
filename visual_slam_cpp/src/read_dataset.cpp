@@ -21,13 +21,6 @@ namespace mrVSLAM
         gt_poses_path = dataset_path + "/gt_poses.txt";
     }
 
-    /**
-     * @brief Calib.txt contains camera calibration data -> Projection matricies (3x4),
-     *  projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters.
-     *  Kitti dataset stores projection matricies in flat shape, that is as a array with 12 elemets,
-     *  each row is diffrent matrix
-     *
-     */
     void KITTI_Dataset::readCalibData()
     {
         std::ifstream calib_file;
@@ -42,17 +35,14 @@ namespace mrVSLAM
         std::string row_entries;
         std::vector<double> calib_data_vec;
 
-        while(std::getline(calib_file, string_row))
-        {
+        while(std::getline(calib_file, string_row)) {
             std::stringstream row_data_stream(string_row); // get from file a whole line as one string
             while(std::getline(row_data_stream, row_entries, ' ')) //separate strings from line based on spaces
             {
-                try
-                {
+                try {
                     calib_data_vec.push_back(std::stod(row_entries)); // convert data to doubles
                 }
-                catch(...)
-                {
+                catch(...) {
                     continue; //first in every line is Pn: so conversion to double will fail, I know it's a bit junky way to solve it
                 }
             }
@@ -68,22 +58,16 @@ namespace mrVSLAM
         P2.resize(3,4);
         P3 = calib_data_matrix.row(3);
         P3.resize(3,4);
- }
+    }
 
-    /**
-     * @brief files with ground truth poses contain poses of car thru sequence, poses are represented as 3x4 Transformation matrix
-     *   Kitti dataset stores translation matricies in flat shape, that is as a array with 12 elemets, each row is diffrent matrix
-     *   Output of function is vector of translation matricies
-     *
-     */
+
     void KITTI_Dataset::readGTposes()
     {
         std::ifstream gt_poses_file;
         gt_poses_file.open(gt_poses_path.c_str()); //open gtround truth poses file
         //gt_poses_file.open(file_path);
 
-        if(gt_poses_file.fail())
-        {
+        if(gt_poses_file.fail()) {
             std::cerr << "Failed to open ground truth poses file \n";
         }
 
@@ -93,8 +77,7 @@ namespace mrVSLAM
         std::vector<double> pose_vec;
         int number_of_gtposes = 0;
 
-        while(std::getline(gt_poses_file, string_row)) //
-        {
+        while(std::getline(gt_poses_file, string_row)) {
             std::stringstream row_data_stream(string_row); // get from file a whole line as one string
             while(std::getline(row_data_stream, row_entries, ' ')) //separate strings from line based on spaces
             {
@@ -130,8 +113,7 @@ namespace mrVSLAM
         return this->P1;
     }
 
-    void KITTI_Dataset::showPmatricies()
-    {
+    void KITTI_Dataset::showPmatricies() {
         std::cout << "---------------- \n";
         std::cout << "Left grayscale camera projection matrix = \n" << P0 << "\n";
         std::cout << "\n";
@@ -139,111 +121,135 @@ namespace mrVSLAM
         std::cout << "---------------- \n";
     }
 
-    int KITTI_Dataset::getCurrentSequence()
-    {
-        // std::size_t index = std::string:find();
+    int KITTI_Dataset::getCurrentSequence() {
         std::string str_sequence;
         int seq = -1;
 
-        try
-        {
+        try {
             str_sequence = path_to_dataset.back();
             seq = std::stoi(str_sequence);
         }
-        catch(std::exception& e)
-        {
+        catch(std::exception& e) {
             fmt::print(fg(fmt::color::red), "probably smth went wrong in reading which sequence, error = {}", e.what());
         }
         fmt::print("return sequence is = {} \n", seq);
         return seq;
     }
 
-
-    EuRoC_Dataset::EuRoC_Dataset(const std::string dataset_path)
+    std::vector<double> KITTI_Dataset::returnLeftCamDistCoeffs()
     {
+        std::vector<double> empty_coeffs;
+        return empty_coeffs;
+    }
+
+    std::vector<double> KITTI_Dataset::returnRightCamDistCoeffs()
+    {
+        std::vector<double> empty_coeffs;
+        return empty_coeffs;
+    }
+
+    cv::Size KITTI_Dataset::returnDatasetImgSize()
+    {
+        return dataset_img_size; 
+    }
+
+// --------------------------------------------------------------- //
+
+
+    EuRoC_Dataset::EuRoC_Dataset(const std::string dataset_path) {
         this->path_to_dataset = dataset_path;
-        this->left_camera_calibration_path = dataset_path + "/cam_0/sensor.yaml";
-        this->right_camera_calibration_path = dataset_path + "/cam_1/sensor.yaml";
+        this->left_camera_calibration_path = dataset_path + "/cam0/sensor.yaml";
+        this->right_camera_calibration_path = dataset_path + "/cam1/sensor.yaml";
         this->gt_poses_path = dataset_path + "/state_groundtruth_estimate0/data.csv";
+        std::cout << "left cam path = " << left_camera_calibration_path << "\n";
+        std::cout << "right cam path = " << right_camera_calibration_path << "\n";
     }
 
     void EuRoC_Dataset::readCalibData()
     {
-        std::ifstream left_camera_calib_file;
-        std::ifstream right_camera_calib_file;
-        left_camera_calib_file.open(this->left_camera_calibration_path);
-        right_camera_calib_file.open(this->right_camera_calibration_path);
+        std::cout << "left cam path = " << left_camera_calibration_path << "\n";
+        std::cout << "right cam path = " << right_camera_calibration_path << "\n";
 
-        if(left_camera_calib_file.fail() || right_camera_calib_file.fail()){
-            fmt::print(fg(fmt::color::red), "EuRoC_Dataset: Failed to open one of calib file \n") ;
-            return;
-        }
-        // yaml_parser_t yaml_parser;
-        std::string string_row;
-        std::string row_entries;
+        YamlParser left_cam_parser(this->left_camera_calibration_path);
+        YamlParser right_cam_parser(this->right_camera_calibration_path);
 
-        while(std::getline(left_camera_calib_file, string_row))
-        {
-            std::stringstream row_data_stream(string_row); // get from file a whole line as one string
-            while(std::getline(row_data_stream, row_entries, ' '))
-            {
-                if(row_entries == "data")
-                {
-                    fmt::print("dupa");
-                }
-            }
+        int n_rows = 0, n_cols = 0;
+        std::vector<double> left_cam_pose, right_cam_pose; //extrinsics
+        left_cam_parser.getNestedYamlParam("T_BS","rows", n_rows);
+        left_cam_parser.getNestedYamlParam("T_BS","cols", n_cols);
+        left_cam_parser.getNestedYamlParam("T_BS","data", left_cam_pose);
 
-        }
+        right_cam_parser.getNestedYamlParam("T_BS","rows", n_rows);
+        right_cam_parser.getNestedYamlParam("T_BS","cols", n_cols);
+        right_cam_parser.getNestedYamlParam("T_BS","data", right_cam_pose);
 
-        Eigen::Matrix<double, 4, 4> left_intrinsic_matrix, right_intrinsic_matrix;
-        Eigen::Matrix<double, 4, 4> left_extrinsic_matrix, right_extrinsic_matrix;
+        std::vector<double> left_cam_intrinsics, right_cam_intrinsics;
+        left_cam_parser.getYamlParam("intrinsics", left_cam_intrinsics);
+        right_cam_parser.getYamlParam("intrinsics", right_cam_intrinsics);
 
+        left_cam_parser.getYamlParam("distortion_coefficients", this->left_cam_dist_coeffs);
+        right_cam_parser.getYamlParam("distortion_coefficients", this->right_cam_dist_coeffs);
+
+        Eigen::Map<Eigen::Matrix<double,4,4, Eigen::RowMajor>> left_extrinsic_matrix(left_cam_pose.data());
+        Eigen::Map<Eigen::Matrix<double,4,4, Eigen::RowMajor>> right_extrinsic_matrix(right_cam_pose.data());
+
+        std::cout << "left_extrinsic_matrix = " << left_extrinsic_matrix << "\n";
+
+        Eigen::Matrix<double, 3, 4> left_intrinsic_matrix, right_intrinsic_matrix;
+
+        left_intrinsic_matrix << left_cam_intrinsics.at(0), 0, left_cam_intrinsics.at(2), 0,
+                                 0, left_cam_intrinsics.at(1), left_cam_intrinsics.at(3), 0,
+                                 0, 0, 1, 0;
+        std::cout << "left_intrinsic_matrix = " << left_intrinsic_matrix << "\n";
+
+
+        right_intrinsic_matrix << right_cam_intrinsics.at(0), 0, right_cam_intrinsics.at(2), 0,
+                                  0, right_cam_intrinsics.at(1), right_cam_intrinsics.at(3), 0,
+                                  0, 0, 1, 0;
+
+        P0 = left_intrinsic_matrix * left_extrinsic_matrix;
+        P1 = right_intrinsic_matrix * right_extrinsic_matrix;
     }
 
     void EuRoC_Dataset::readGTposes()
     {
         std::ifstream gt_poses_file;
-        gt_poses_file.open(gt_poses_path.c_str()); //open gtround truth poses file
+        gt_poses_file.open(this->gt_poses_path);
 
         if(gt_poses_file.fail()) {
-            std::cerr << "Failed to open ground truth poses file \n";
+            fmt::print(fg(fmt::color::red), "Failed to open ground truth poses file \n");
+            return;
         }
 
-        std::string string_row;
-        std::string row_entries;
-        std::vector<double> pos_vec;
+        std::string line;
+        std::getline(gt_poses_file, line); // skip first, header line
 
-        int row_counter = 0;
-        while(std::getline(gt_poses_file, string_row)) //
-        {
-            int column_counter = 0;
-            std::stringstream row_data_stream(string_row); // get from file a whole line as one string
+        while(std::getline(gt_poses_file, line)) {
+            std::vector<double> gt_data_raw;
 
-            if(row_counter > 0) {
-                while(std::getline(row_data_stream, row_entries, ',')) {//separate strings from line based on spaces
-                    if(column_counter > 0 && column_counter < 4 ) {
-                        pos_vec.emplace_back(std::stod(row_entries));
-                    }
-                    column_counter++;
+            for(int cols = 0; cols < 8; cols++)
+            {
+                int idx = line.find_first_of(',');
+                if(cols != 0 ) {
+                    gt_data_raw.emplace_back(std::stod(line.substr(0, idx)));
                 }
+                line = line.substr(idx + 1);
             }
-            row_counter++;
-        }
 
-        for(size_t i = 0; i < pos_vec.size()-3; i+=3) // loop thru all elements, jumping every row in file
-        {
-            double x = 0, y = 0, z = 0;
-            x = pos_vec[i];
-            y = pos_vec[i+1];
-            z = pos_vec[i+2];
-            Eigen::Matrix<double,3,4, Eigen::RowMajor> pose_matrix;
-            pose_matrix << 1, 0, 0, x,
-                           0, 1, 0, y,
-                           0, 0, 1, z;
+            Eigen::Vector3d t;
+            t << gt_data_raw.at(0), gt_data_raw.at(1), gt_data_raw.at(2);
+            Eigen::Quaternion<double> rot_quat (gt_data_raw.at(3), // w
+                                                gt_data_raw.at(4), // x
+                                                gt_data_raw.at(5), // y
+                                                gt_data_raw.at(5));// z
+            Eigen::Matrix<double,3,3> rotation_matrix = rot_quat.normalized().toRotationMatrix();
 
-            ground_truth_poses.push_back(pose_matrix);
-        }
-        fmt::print("Number of poses in sequence: {} \n",ground_truth_poses.size());
+            Eigen::Matrix<double,3, 4, Eigen::RowMajor> pose_matrix;
+            pose_matrix.block<3,3>(0,0) = rotation_matrix;
+            pose_matrix.col(3) = t;
+
+            this->ground_truth_poses.emplace_back(pose_matrix);
+        } // end of while loop
     }
 
     std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> EuRoC_Dataset::retrunGTposes() {
@@ -270,6 +276,21 @@ namespace mrVSLAM
     int EuRoC_Dataset::getCurrentSequence()
     {
         return 0;
+    }
+
+    std::vector<double> EuRoC_Dataset::returnLeftCamDistCoeffs()
+    {
+        return this->left_cam_dist_coeffs;
+    }
+
+    std::vector<double> EuRoC_Dataset::returnRightCamDistCoeffs()
+    {
+        return this->right_cam_dist_coeffs;
+    }
+
+    cv::Size EuRoC_Dataset::returnDatasetImgSize()
+    {
+        return dataset_img_size; 
     }
 
 

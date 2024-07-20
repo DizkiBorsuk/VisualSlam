@@ -35,18 +35,15 @@ namespace mrVSLAM
         {
             case DetectorType::GFTT: 
                 detector = cv::GFTTDetector::create(this->num_features, 0.01, 10, 3, false, 0.04); 
-                fmt::print(fg(fmt::color::red), "using gftt \n"); 
                 if(this->use_descriptors)
                     extractor = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE);
                 break; 
             case DetectorType::ORB: 
                 detector = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31, 20); // WTA_K can be change to 3 and 4 but then BRUTEFORCE_HAMMING myst be changed to BRUTEFORCE_HAMMINGLUT
-                fmt::print(fg(fmt::color::red), "using orb \n"); 
                 if(this->use_descriptors) 
                     extractor = cv::ORB::create(this->num_features, 1.200000048F, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE); 
                 break; 
             case DetectorType::SIFT: 
-                fmt::print(fg(fmt::color::red), "using sift \n"); 
                 detector = cv::SIFT::create(this->num_features, 3, 0.04, 10, 1.6, false);  
                 if(this->use_descriptors) 
                     extractor = cv::SIFT::create(this->num_features, 3, 0.04, 10, 1.6, false); 
@@ -140,6 +137,9 @@ namespace mrVSLAM
     bool StereoTracking::createInitialMap()
     {
         unsigned int created_landmarks = 0; 
+        
+        std::cout << "left camera pose = " << camera_left->getPose().matrix() << "\n"; 
+        std::cout << "right camera pose = " << camera_right->getPose().matrix() << "\n"; 
 
         for(size_t i_ft = 0; i_ft < current_frame->features_on_left_img.size(); i_ft++)
         {
@@ -151,6 +151,7 @@ namespace mrVSLAM
                                                      camera_right->pixel2camera(convertToVec(current_frame->features_on_right_img.at(i_ft)->positionOnImg.pt))
                                                     }; 
             Eigen::Vector3d point_world = Eigen::Vector3d::Zero(); 
+
 
             if(triangulate(camera_left->getPose(), camera_right->getPose(), cam_points, point_world))  
             {
@@ -164,6 +165,7 @@ namespace mrVSLAM
                 created_landmarks++; 
             }
         }
+        fmt::print("createInitialMap: triangulated {} points \n", created_landmarks); 
 
         if(created_landmarks>this->num_features_init) {
             fmt::print(fg(fmt::color::blue), "Map initialized with {} mappoints \n", created_landmarks);
@@ -361,7 +363,6 @@ namespace mrVSLAM
     }
 
 
-    //?
     /**
      * @brief 
      * @details 1. create new keyframe object 

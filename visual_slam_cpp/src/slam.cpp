@@ -9,6 +9,7 @@
  *
  */
 #include "mrVSLAM/slam.hpp"
+#include "mrVSLAM/common_includes.hpp"
 #include "mrVSLAM/read_dataset.hpp"
 #include "mrVSLAM/tools.hpp"
 #include "mrVSLAM/frame.hpp"
@@ -26,11 +27,12 @@ namespace mrVSLAM
 
     }
 
-    SLAM::SLAM(std::string path_to_dataset, SLAM_TYPE type_of_algorithm, bool loop_closer)
+    SLAM::SLAM(std::string path_to_dataset,DatasetVersion dataset_to_run, SLAM_TYPE type_of_algorithm, bool loop_closer)
     {
         tracking_type = type_of_algorithm;
         use_loop_closing = loop_closer;
         dataset_path = path_to_dataset;
+        dataset_type = dataset_to_run;
         fmt::print("SLAM object created \n");
         fmt::print("###----------------------### \n");
     }
@@ -53,26 +55,39 @@ namespace mrVSLAM
         switch (dataset_type) {
             case DatasetVersion::KITTI:
                 dataset = std::make_unique<KITTI_Dataset>(dataset_path);
+                img_distorted = false; 
                 break;
             case DatasetVersion::EUROC:
                 dataset = std::make_unique<EuRoC_Dataset>(dataset_path);
+                img_distorted = true; 
                 break;
             case DatasetVersion::TUM:
                 // dataset = std::make_unique<KITTI_Dataset>(dataset_path);
+                img_distorted = true; 
                 break;
-
         }
 
         dataset->readCalibData();
+        auto left_cam_dist_coeffs = dataset->returnLeftCamDistCoeffs();
+        auto right_cam_dist_coeffs = dataset->returnLeftCamDistCoeffs();
+        auto left_cam_matrix = dataset->returnP0();
+        auto right_cam_matrix = dataset->returnP1();
+        auto img_size = dataset->returnDatasetImgSize(); 
+
+        dataset->showPmatricies();
+
+        // create camera objects
+        left_camera = std::make_shared<Camera>(left_cam_matrix, left_cam_dist_coeffs,img_size, img_size_opt);
+        right_camera = std::make_shared<Camera>(right_cam_matrix, right_cam_dist_coeffs,img_size, img_size_opt);
+
+        if(img_distorted == true) {
+            stereo_set = std::make_unique<StereoCameraSet>(left_camera, right_camera);
+        } 
 
         // create map, local mapping and visualizer objects
         local_mapping = std::make_shared<LocalMapping>();
         map = std::make_shared<Map>();
         visualizer = std::make_shared<Visualizer>(false, this->show_cam_img);
-
-        // create camera objects
-        left_camera = std::make_shared<Camera>(dataset->returnP0(), img_size_opt);
-        right_camera = std::make_shared<Camera>(dataset->returnP1(), img_size_opt);
 
         double similarity_score = 0;
         switch (detector_type)
@@ -115,16 +130,64 @@ namespace mrVSLAM
     void SLAM::runSLAM()
     {
         fmt::print(fg(fmt::color::green), "start of slam execution \n");
+
+        std::filesystem::path left_img_path;  
+        std::filesystem::path right_img_path; 
+        
+        switch (dataset_type) {
+            case DatasetVersion::KITTI:
+                left_img_path = (dataset_path + "/image_0"); 
+                right_img_path = (dataset_path + "/image_1"); 
+                break;
+            case DatasetVersion::EUROC:
+                left_img_path = dataset_path + "/cam0/data"; 
+                right_img_path = dataset_path + "/cam1/data"; 
+                break;
+            case DatasetVersion::TUM:
+                break;
+        }
+
+        std::cout <<"path = "<< left_img_path.generic_string() << "\n"; 
+
+        std::set<std::filesystem::path> left_set; 
+        std::set<std::filesystem::path> right_set; 
+
+        for(auto &entry : std::filesystem::directory_iterator(left_img_path)) {
+            left_set.insert(entry.path()); 
+        }
+
+        for(auto &entry : std::filesystem::directory_iterator(right_img_path)) {
+            right_set.insert(entry.path()); 
+        }
+
+        std::vector<std::pair<std::filesystem::path, std::filesystem::path>> img_files_names;
+    
+        auto it1 = left_set.begin(); 
+        auto it2 = right_set.begin(); 
+
+        for(size_t i = 0; i < left_set.size(); i++)
+        {
+            std::pair<std::filesystem::path, std::filesystem::path> path_pair {*it1, *it2}; 
+            img_files_names.emplace_back(path_pair);
+            it1++; 
+            it2++;  
+        }
         // main thread loop
-        while(true)
+
+        size_t video_offset = 0; 
+        for(size_t im = video_offset; im < img_files_names.size(); im++)
         {
             try
             {
-                //? maybe i should do everything in loop
-                if(createNewFrameAndTrack() == false) {
+                if(createNewFrameAndTrack(img_files_names.at(im).first.generic_string(), img_files_names.at(im).second.generic_string()) == false) {
                     this->vslam_failed = true;
                     break;
                 }
+            }
+            catch(std::exception& e)
+            {
+                fmt::print(fg(fmt::color::red), "cached critical error, {} \n, ending slam \n", e.what());
+                break;
             }
             catch(...)
             {
@@ -143,29 +206,35 @@ namespace mrVSLAM
         fmt::print(fg(fmt::color::green), "end of slam algorithm execution \n");
     }
 
-    bool SLAM::createNewFrameAndTrack()
+    bool SLAM::createNewFrameAndTrack(const std::string left_img_path, const std::string right_img_path)
     {
         static unsigned int current_image_index = 0;
         bool status = true;
 
-        boost::format fmt("%s/image_%d/%06d.png");
-        cv::Mat image_left, image_right, img_left_resized, img_right_resized;
+        cv::Mat image_left, image_right, corrected_img_left, corrected_img_right;
 
         //
         auto beginT = std::chrono::steady_clock::now();
+
         // read imgs
-        image_left = cv::imread((fmt % dataset_path % 0 % current_image_index).str(), cv::IMREAD_UNCHANGED);
-        image_right = cv::imread((fmt % dataset_path % 1 % current_image_index).str(), cv::IMREAD_UNCHANGED);
+        image_left = cv::imread(left_img_path, cv::IMREAD_UNCHANGED);
+        image_right = cv::imread(right_img_path, cv::IMREAD_UNCHANGED);
+
+        std::cout << "img path = " << left_img_path << "\n"; 
+        std::cout << "img path = " << right_img_path << "\n"; 
+
 
         if(image_left.data == nullptr || image_right.data == nullptr)
         {
             throw std::runtime_error("img data is missing!! \n");
         }
 
-        cv::resize(image_left, img_left_resized, cv::Size(), img_size_opt, img_size_opt, cv::INTER_NEAREST);
-        cv::resize(image_right, img_right_resized, cv::Size(), img_size_opt, img_size_opt, cv::INTER_NEAREST);
+        if(img_distorted && stereo_set)
+        {
+            stereo_set->rectifyStereoImgs(image_left, image_right); 
+        }
 
-        auto new_frame = std::make_shared<Frame> (current_image_index, img_left_resized, img_right_resized);
+        auto new_frame = std::make_shared<Frame> (current_image_index, image_left, image_right);
 
         if(new_frame == nullptr) {
             throw std::runtime_error("frame object wasn't created \n");
@@ -195,7 +264,7 @@ namespace mrVSLAM
         return status;
     }
 
-    void SLAM:: outputSlamResult(const bool plot)
+    void SLAM::outputSlamResult(const bool plot)
     {
         if(this->vslam_failed){
             fmt::print("###----------------------### \n");

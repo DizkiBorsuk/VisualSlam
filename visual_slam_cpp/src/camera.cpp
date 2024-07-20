@@ -12,9 +12,17 @@
 
 namespace mrVSLAM
 {
-    void Camera::imgRectification(cv::Mat &img)
+    void Camera::imgRectification(cv::Mat &img, cv::Mat &corrected_img)
     {
-        //cv::undistort(); 
+        if(this->dist_coeffs.empty())  {
+            fmt::print(fg(fmt::color::red), "no distortion correction needed"); 
+            return; 
+        }
+        cv::Mat cam_matrix; 
+        eigen2cv(this->K, cam_matrix); 
+        cv::undistort(img, corrected_img, cam_matrix, this->dist_coeffs, cv::noArray()); 
+
+        fmt::print("img undistorted \n");
     }
 
     Eigen::Vector3d Camera::world2camera(const Eigen::Vector3d &p_w, const Sophus::SE3d &T_cw) {

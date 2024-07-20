@@ -18,14 +18,27 @@ namespace mrVSLAM
     {
     public:
 
-        YamlParser(const std::string filepath) {
-            openFile(filepath, &fs_);
+        YamlParser(const std::string filepath) 
+        {
+            
+            filepath_ = filepath; 
+            
+            if(filepath.empty()) {
+                fmt::print("Empty filepath!");
+            }
+
+            try {
+                fs_ = cv::FileStorage(filepath,cv::FileStorage::READ); 
+            } catch (cv::Exception& e) {
+                fmt::print("Cannot open file: {}, OpenCV error code: {}", filepath, e.msg);
+            }
+
         }
         ~YamlParser() { closeFile(&fs_); }
 
         template <class T>
-        void getYamlParam(const std::string& id, T* output) const {
-            if(!id.empty()) {
+        void getYamlParam(const std::string& id, T& output) const {
+            if(id.empty()) {
                 fmt::print("sring empty \n");
                 return;
             }
@@ -42,7 +55,8 @@ namespace mrVSLAM
         template <class T>
         void getNestedYamlParam(const std::string& id,
                                 const std::string& id_2,
-                                T* output) const {
+                                T& output) const 
+        {
 
             const cv::FileNode& file_handle = fs_[id];
 
@@ -69,13 +83,15 @@ namespace mrVSLAM
         }
 
     private:
-        void openFile(const std::string& filepath, cv::FileStorage* fs) const {
-            if(!filepath.empty()){
+
+        void openFile(const std::string& filepath, cv::FileStorage* fs) const 
+        {
+            if(filepath.empty()){
                 fmt::print("Empty filepath!");
                 return;
             }
             try {
-                (fs)->open(filepath, cv::FileStorage::READ);
+                (fs)->open(filepath,cv::FileStorage::READ);
             } catch (cv::Exception& e) {
                 fmt::print("Cannot open file: {}, OpenCV error code: {}", filepath, e.msg);
             }

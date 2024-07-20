@@ -27,6 +27,9 @@ namespace mrVSLAM
         virtual void readGTposes() = 0;
         virtual void showPmatricies()= 0;
         virtual int getCurrentSequence() = 0;
+        virtual std::vector<double> returnLeftCamDistCoeffs() = 0;
+        virtual std::vector<double> returnRightCamDistCoeffs() = 0; 
+        virtual cv::Size returnDatasetImgSize() = 0; 
 
         virtual std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> retrunGTposes() = 0;
         virtual Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP0() = 0;
@@ -49,6 +52,12 @@ namespace mrVSLAM
         KITTI_Dataset(const std::string dataset_path);
         ~KITTI_Dataset() override = default;
 
+        /**
+         * @brief Calib.txt contains camera calibration data -> Projection matricies (3x4),
+         *  projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters.
+         *  Kitti dataset stores projection matricies in flat shape, that is as a array with 12 elemets,
+         *  each row is diffrent matrix
+         */
         void readCalibData() override; //get camera projection matrixies from calibration file
         void showPmatricies() override;
         void readGTposes() override; //get set of ground truth poses
@@ -57,11 +66,16 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> retrunGTposes() override;
         Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP0() override;
         Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP1() override;
+        cv::Size returnDatasetImgSize() override; 
+
+        std::vector<double> returnLeftCamDistCoeffs() override;
+        std::vector<double> returnRightCamDistCoeffs() override;
 
     private:
         std::string path_to_dataset;
         std::string camera_calibration_path;
         std::string gt_poses_path;
+        cv::Size dataset_img_size = cv::Size(1241, 376); 
     };
 
 
@@ -86,13 +100,21 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> retrunGTposes() override;
         Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP0() override;
         Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP1() override;
+        cv::Size returnDatasetImgSize() override; 
 
+        std::vector<double> returnLeftCamDistCoeffs() override;
+        std::vector<double> returnRightCamDistCoeffs() override;
 
     private:
         std::string path_to_dataset;
         std::string left_camera_calibration_path;
         std::string right_camera_calibration_path;
         std::string gt_poses_path;
+
+        std::vector<double> left_cam_dist_coeffs; 
+        std::vector<double> right_cam_dist_coeffs;
+
+        cv::Size dataset_img_size = cv::Size(752, 480); 
     };
 
 } //! end of namespace

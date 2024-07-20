@@ -39,11 +39,12 @@ namespace mrVSLAM
         /**
          * @brief Construct a new SLAM object
          * @details construct Visual SLAM algorithm object by passing basic parameters
+         * @param dataset_to_run
          * @param path_to_dataset
          * @param type_of_algorithm
          * @param loop_closer
          */
-        SLAM(std::string path_to_dataset, SLAM_TYPE type_of_algorithm, bool loop_closer = false);
+        SLAM(std::string path_to_dataset,DatasetVersion dataset_to_run, SLAM_TYPE type_of_algorithm, bool loop_closer = false);
 
         /**
          * @brief Set the Slam Parameters object
@@ -87,7 +88,8 @@ namespace mrVSLAM
          * @return true
          * @return false
          */
-        bool createNewFrameAndTrack();
+        bool createNewFrameAndTrack(const std::string left_img_path, const std::string right_img_path);
+
         void saveResultsToCSV(const ResultStruct &results);
         void saveTrajectoryToNetCDF(std::vector<Eigen::Matrix<double, 3,4>>& trajectory,
                                     std::vector<Eigen::Matrix<double, 3,4>>& kf_trajectory,
@@ -96,6 +98,7 @@ namespace mrVSLAM
 
     private:
         bool vslam_failed = false;
+        bool img_distorted = false; 
 
         // constructor parameters
         std::string dataset_path;
@@ -120,6 +123,7 @@ namespace mrVSLAM
         std::shared_ptr<MonoTracking> mono_tracking = nullptr;
         std::shared_ptr<Visualizer> visualizer = nullptr;
         std::unique_ptr<Dataset> dataset = nullptr;
+        std::unique_ptr<StereoCameraSet> stereo_set = nullptr; 
 
         // result data
         std::vector<float> loop_times;

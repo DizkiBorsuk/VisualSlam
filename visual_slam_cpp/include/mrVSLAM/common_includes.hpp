@@ -28,6 +28,10 @@
 #include <sstream>
 #include <type_traits>
 #include <exception>
+#include <filesystem>
+#include <iterator>  // back_inserter
+#include <numeric>  // transform
+
 
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Dense"
