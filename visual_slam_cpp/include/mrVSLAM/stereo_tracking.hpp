@@ -58,6 +58,10 @@ namespace mrVSLAM
             loop_closer = lpc_ptr; 
         }
 
+        void setParams(const double triangulation_depth) {
+            max_triangulation_depth = triangulation_depth; 
+        }
+
         /**
          * @brief adds new frame object to stereo tracking 
          * 
@@ -104,6 +108,7 @@ namespace mrVSLAM
 
         unsigned int tracking_inliers = 0; 
 
+        double max_triangulation_depth = 150.0; 
         unsigned int num_features = 150; 
         unsigned int num_features_needed_for_keyframe = 80;
         static constexpr int num_features_init = 50; 

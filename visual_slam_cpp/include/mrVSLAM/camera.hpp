@@ -74,6 +74,8 @@ namespace mrVSLAM
             pose_inv = pose.inverse();
 
             this->dist_coeffs = distortion_coeffs;
+
+            std::cout << "original K = " << K << "\n"; 
         }
 
         /**
@@ -105,6 +107,7 @@ namespace mrVSLAM
 
         Sophus::SE3d getPose() const {return pose; } // parameters getters
         Eigen::Matrix3d getK() const {return K; }
+        Eigen::Matrix<double, 3, 4> getPmatrix() const {return P_matrix; } 
 
         cv::Mat getK_cv() { 
             cv::Mat K_cv;
@@ -112,10 +115,7 @@ namespace mrVSLAM
             return  K_cv; 
         }
 
-        void insertNewProjectionMatrix(const Eigen::Matrix<double, 3, 4>& new_P_matrix)
-        {
-            this->P_matrix = new_P_matrix; 
-        }
+        void insertNewProjectionMatrix(const Eigen::Matrix<double, 3, 4>& new_P_matrix); 
 
         // coordinate transform: world, camera, pixel
         Eigen::Vector3d world2camera(const Eigen::Vector3d &p_w, const Sophus::SE3d &T_cw);
@@ -164,12 +164,21 @@ namespace mrVSLAM
             cv::initUndistortRectifyMap(right_K,right_dist_coeffs, R2, new_right_P, img_size, CV_16SC2, map21, map22); 
 
             Eigen::Matrix<double,3,4> new_left_projection_matrix, new_right_projection_matrix; 
+            cv::cv2eigen(new_left_P, new_left_projection_matrix); 
+            cv::cv2eigen(new_right_P, new_right_projection_matrix);
+
+            std::cout << "R1 = \n" << R1 << "\n";  
+            std::cout << "new P1 = \n" << new_left_P << "\n"; 
+            std::cout << "new P2 = \n" << new_right_P << "\n";  
+
+            left_camera->insertNewProjectionMatrix(new_left_projection_matrix); 
+            right_camera->insertNewProjectionMatrix(new_right_projection_matrix); 
 
         }
 
         void rectifyStereoImgs(cv::Mat& left_img, cv::Mat& right_img)
         {
-
+            // std::cout << "Map11 = " << map11 << "\n"; 
             cv::remap(left_img, left_img, map11, map12, cv::INTER_LINEAR); 
             cv::remap(right_img, right_img, map21, map22, cv::INTER_LINEAR); 
         }

@@ -50,7 +50,7 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses; //poses are reprensented as a 3x4 transformation matrix:  3x3 - rotation matrix + 3x1 translation vector
 
         KITTI_Dataset(const std::string dataset_path);
-        ~KITTI_Dataset() override = default;
+        ~KITTI_Dataset() = default;
 
         /**
          * @brief Calib.txt contains camera calibration data -> Projection matricies (3x4),
@@ -91,7 +91,7 @@ namespace mrVSLAM
         std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses;
 
         EuRoC_Dataset(const std::string dataset_path);
-        ~EuRoC_Dataset() override = default;
+        ~EuRoC_Dataset() = default;
 
         void readCalibData() override; //get camera projection matrixies from calibration file
         void showPmatricies() override;
@@ -116,5 +116,81 @@ namespace mrVSLAM
 
         cv::Size dataset_img_size = cv::Size(752, 480); 
     };
+
+    class TartanAir_Dataset : public Dataset
+    {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P0; //Projection matrix of left grayscale camera
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1; //Projection matrix of right grayscale camera
+
+        std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses; //poses are reprensented as a 3x4 transformation matrix:  3x3 - rotation matrix + 3x1 translation vector
+
+        TartanAir_Dataset(const std::string dataset_path);
+        ~TartanAir_Dataset() = default;
+
+        /**
+         * @brief Calib.txt contains camera calibration data -> Projection matricies (3x4),
+         *  projection matrix contains intrinsic (focal lengths, camera center) and extrinsic parameters.
+         *  Kitti dataset stores projection matricies in flat shape, that is as a array with 12 elemets,
+         *  each row is diffrent matrix
+         */
+        void readCalibData() override; //get camera projection matrixies from calibration file
+        void showPmatricies() override;
+        void readGTposes() override; //get set of ground truth poses
+        int getCurrentSequence() override;
+
+        std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> retrunGTposes() override;
+        Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP0() override;
+        Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP1() override;
+        cv::Size returnDatasetImgSize() override; 
+
+        std::vector<double> returnLeftCamDistCoeffs() override;
+        std::vector<double> returnRightCamDistCoeffs() override;
+
+    private:
+        std::string path_to_dataset;
+        std::string gt_poses_path;
+        cv::Size dataset_img_size = cv::Size(640, 480); 
+    };
+
+    // class TUM_VIE_Dataset : public Dataset
+    // {
+    // public:
+    //     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P0; //Projection matrix of left grayscale camera
+    //     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> P1; //Projection matrix of right grayscale camera
+    //     std::vector<double> left_distortion_coeffs, right_distortion_coeffs;
+
+    //     std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> ground_truth_poses;
+
+    //     TUM_VIE_Dataset(const std::string dataset_path);
+    //     ~TUM_VIE_Dataset() = default;
+
+    //     void readCalibData() override; //get camera projection matrixies from calibration file
+    //     void showPmatricies() override;
+    //     void readGTposes() override; //get set of ground truth poses
+    //     int getCurrentSequence() override;
+    //     std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> retrunGTposes() override;
+    //     Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP0() override;
+    //     Eigen::Matrix<double, -1, -1, Eigen::RowMajor> returnP1() override;
+    //     cv::Size returnDatasetImgSize() override; 
+
+    //     std::vector<double> returnLeftCamDistCoeffs() override;
+    //     std::vector<double> returnRightCamDistCoeffs() override;
+
+    // private:
+    //     std::string path_to_dataset;
+    //     std::string camera_calibration_path;
+    //     std::string gt_poses_path;
+    //     std::string gt_poses_path;
+
+    //     std::vector<double> left_cam_dist_coeffs; 
+    //     std::vector<double> right_cam_dist_coeffs;
+
+    //     cv::Size dataset_img_size = cv::Size(1024, 1024);    
+    // }; 
 
 } //! end of namespace

@@ -67,9 +67,8 @@ namespace mrVSLAM
 
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
         out_point_pos = (svd.matrixV().col(3) / svd.matrixV()(3, 3)).head<3>();
-
         
-        std::cout << "computed point pos = " << out_point_pos << "\n"; 
+        // std::cout << "computed point pos = " << out_point_pos << "\n"; 
 
         if ((svd.singularValues()[3] / svd.singularValues()[2] < 1e-2) && out_point_pos[2] > 0)
         {
@@ -323,6 +322,65 @@ namespace mrVSLAM
         matplot::plot(x, y, "b")->line_width(2);
         matplot::xlabel("x [m]");
         matplot::ylabel("y [m]");
+        matplot::show();
+    }
+
+    inline void plotMovementInXYZ(std::vector<Eigen::Matrix<double, 3,4>> &poses, float resize_opt=1.f)
+    {
+        std::vector<double> x, y, z;
+
+        for(std::size_t i = 0; i < poses.size(); i++)
+        {
+            x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);
+            y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+            z.emplace_back(poses.at(i).coeff(1,3)*resize_opt);
+        }
+
+        auto fig = matplot::figure();
+        fig->width(fig->width()*1.3);
+        fig->height(fig->height()*1.3);
+        fig->color("white");
+
+        matplot::plot(x, "b")->line_width(2);
+        matplot::hold(true);
+        matplot::plot(y, "r")->line_width(2);
+        matplot::plot(z, "k")->line_width(2);
+        matplot::legend({"Ruch w osi X", "ruch w osi Y", "ruch w osi Z"}); 
+        matplot::show();
+    }
+
+    inline void plotMovementInXYZ(std::vector<Eigen::Matrix<double, 3,4>> &poses,
+                                  std::vector<Eigen::Matrix<double, 3,4, Eigen::RowMajor>> &gt_poses, 
+                                  float resize_opt=1.f ) 
+    {
+        std::vector<double> x, y, z, gt_x, gt_y, gt_z;
+
+        for(std::size_t i = 0; i < poses.size(); i++)
+        {
+            x.emplace_back(poses.at(i).coeff(0,3)*resize_opt);
+            y.emplace_back(poses.at(i).coeff(2,3)*resize_opt);
+            z.emplace_back(poses.at(i).coeff(1,3)*resize_opt);
+
+            gt_x.emplace_back(gt_poses.at(i).coeff(0,3)*resize_opt);
+            gt_z.emplace_back(gt_poses.at(i).coeff(1,3)*resize_opt);
+            gt_y.emplace_back(gt_poses.at(i).coeff(2,3)*resize_opt);
+        }
+
+        auto fig = matplot::figure();
+        fig->width(fig->width()*1.3);
+        fig->height(fig->height()*1.3);
+        fig->color("white");
+
+        matplot::plot(x, "b")->line_width(2);
+        matplot::hold(true);
+        matplot::plot(y, "r")->line_width(2);
+        matplot::plot(z, "k")->line_width(2);
+
+        matplot::plot(gt_x, "g--")->line_width(2);
+        matplot::plot(gt_y, "m--")->line_width(2);
+        matplot::plot(gt_z, "c--")->line_width(2);
+
+        matplot::legend({"Ruch w osi X", "ruch w osi Y", "ruch w osi Z", "Ruch w osi X gt", "ruch w osi Y gt", "ruch w osi Z gt"}); 
         matplot::show();
     }
 

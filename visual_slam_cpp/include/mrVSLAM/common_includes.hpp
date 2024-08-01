@@ -45,7 +45,7 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-enum class DatasetVersion { KITTI = 0, EUROC, TUM };
+enum class DatasetVersion { KITTI = 0, EUROC, TARTAN };
 enum class TrackingStatus { INITING, TRACKING, LOST };
 enum class DetectorType {GFTT = 0, ORB, SIFT, SUPER_POINT};
 enum class SLAM_TYPE{STEREO = 0, MONO = 1};
